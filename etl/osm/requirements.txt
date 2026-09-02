@@ -1,0 +1,4 @@
+overpy>=0.7
+osm2geojson>=0.2
+psycopg2-binary>=2.9
+python-dotenv>=1.0
