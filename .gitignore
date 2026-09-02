@@ -1,0 +1,27 @@
+# --- Entorno / secretos ---
+.env
+.env.local
+*.env
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+
+# --- Datos y caché de ETL ---
+etl/**/data/*
+!etl/**/data/.gitkeep
+*.log
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

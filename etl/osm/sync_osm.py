@@ -1,0 +1,159 @@
+"""
+ETL — Integrante 3 — OpenStreetMap / Overpass API (conectividad e infraestructura)
+
+Flujo:
+  1. Consultar Overpass QL por cantón para POIs relevantes (centros de
+     acopio, escuelas, vías principales).
+  2. Convertir el resultado a GeoJSON con osm2geojson.
+  3. Cargar/actualizar en `infraestructura_osm` con `valido_hasta = now() + 7 días`.
+
+La caché es obligatoria: antes de consultar Overpass, el backend (o este
+script) debe revisar si ya hay filas vigentes (`valido_hasta > now()`) para
+el cantón, dado el límite de uso de las instancias públicas de Overpass.
+
+Uso:
+    python sync_osm.py --canton "San José" --bbox 9.9,-84.1,9.95,-84.05
+"""
+import argparse
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
+
+import osm2geojson
+import overpy
+from dotenv import load_dotenv
+
+from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
+
+load_dotenv()
+
+OVERPASS_API_URL = os.environ.get("OVERPASS_API_URL", "https://overpass-api.de/api/interpreter")
+OSM_CACHE_DIAS = int(os.environ.get("OSM_CACHE_DIAS", "7"))
+
+CATEGORIAS_OSM = {
+    "amenity=recycling": "centro_acopio",
+    "amenity=school": "escuela",
+    "highway=primary": "via_principal",
+    "highway=secondary": "via_principal",
+}
+
+
+def construir_query(bbox: str) -> str:
+    return f"""
+    [out:json][timeout:25];
+    (
+      node["amenity"="recycling"]({bbox});
+      node["amenity"="school"]({bbox});
+      way["highway"~"primary|secondary"]({bbox});
+    );
+    out center tags;
+    """
+
+
+def hay_cache_vigente(conn, canton_id: int) -> bool:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT 1 FROM infraestructura_osm
+            WHERE canton_id = %s AND valido_hasta > now()
+            LIMIT 1
+            """,
+            (canton_id,),
+        )
+        return cur.fetchone() is not None
+
+
+def categorizar(tags: dict) -> str | None:
+    for clave_valor, categoria in CATEGORIAS_OSM.items():
+        clave, valor = clave_valor.split("=")
+        if tags.get(clave) == valor:
+            return categoria
+    return None
+
+
+def sincronizar_canton(nombre_canton: str, bbox: str, forzar: bool = False) -> int:
+    with get_connection() as conn:
+        canton_id = get_canton_id_por_nombre(conn, nombre_canton)
+        if canton_id is None:
+            raise ValueError(f"Cantón '{nombre_canton}' no existe en la tabla cantones")
+
+        if not forzar and hay_cache_vigente(conn, canton_id):
+            print(f"Caché vigente para '{nombre_canton}' (<{OSM_CACHE_DIAS} días) — no se consulta Overpass")
+            return 0
+
+        api = overpy.Overpass(url=OVERPASS_API_URL)
+        resultado = api.query(construir_query(bbox))
+
+        insertados = 0
+        with conn.cursor() as cur:
+            for nodo in resultado.nodes:
+                categoria = categorizar(nodo.tags)
+                if not categoria:
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO infraestructura_osm
+                        (fuente_id, canton_id, osm_id, osm_tipo, categoria, nombre, geom)
+                    VALUES (
+                        (SELECT fuente_id FROM fuentes WHERE codigo = 'OSM'),
+                        %s, %s, 'node', %s, %s,
+                        ST_SetSRID(ST_MakePoint(%s, %s), 4326)
+                    )
+                    ON CONFLICT (osm_id, osm_tipo) DO UPDATE
+                        SET fecha_consulta = now(),
+                            valido_hasta = now() + interval '{dias} days'
+                    """.format(dias=OSM_CACHE_DIAS),
+                    (canton_id, nodo.id, categoria, nodo.tags.get("name"), float(nodo.lon), float(nodo.lat)),
+                )
+                insertados += 1
+
+            for way in resultado.ways:
+                categoria = categorizar(way.tags)
+                if not categoria or not way.center_lon:
+                    continue
+                cur.execute(
+                    """
+                    INSERT INTO infraestructura_osm
+                        (fuente_id, canton_id, osm_id, osm_tipo, categoria, nombre, geom)
+                    VALUES (
+                        (SELECT fuente_id FROM fuentes WHERE codigo = 'OSM'),
+                        %s, %s, 'way', %s, %s,
+                        ST_SetSRID(ST_MakePoint(%s, %s), 4326)
+                    )
+                    ON CONFLICT (osm_id, osm_tipo) DO UPDATE
+                        SET fecha_consulta = now(),
+                            valido_hasta = now() + interval '{dias} days'
+                    """.format(dias=OSM_CACHE_DIAS),
+                    (canton_id, way.id, categoria, way.tags.get("name"), float(way.center_lon), float(way.center_lat)),
+                )
+                insertados += 1
+
+        registrar_sincronizacion(
+            conn,
+            fuente_codigo="OSM",
+            estado="exito" if insertados else "parcial",
+            registros_procesados=insertados,
+            mensaje=f"Cantón: {nombre_canton}, bbox: {bbox}",
+        )
+        return insertados
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="ETL OSM/Overpass (POIs → PostGIS, con caché)")
+    parser.add_argument("--canton", required=True, help="Nombre del cantón (debe existir en tabla cantones)")
+    parser.add_argument("--bbox", required=True, help="minlat,minlon,maxlat,maxlon")
+    parser.add_argument("--forzar", action="store_true", help="Ignora la caché de 7 días")
+    args = parser.parse_args()
+
+    try:
+        total = sincronizar_canton(args.canton, args.bbox, forzar=args.forzar)
+        print(f"OK: {total} POIs cargados/actualizados para '{args.canton}'")
+    except Exception as exc:
+        with get_connection() as conn:
+            registrar_sincronizacion(conn, fuente_codigo="OSM", estado="error", mensaje=str(exc))
+        raise
+
+
+if __name__ == "__main__":
+    main()
