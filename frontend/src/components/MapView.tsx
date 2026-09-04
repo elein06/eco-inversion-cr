@@ -1,6 +1,6 @@
 import { GeoJSON, MapContainer, TileLayer } from "react-leaflet";
 import type { IndiceViabilidad, Zona } from "../api";
-
+import CapasAmbientales from "../SNIT/components/CapasAmbientales";
 interface MapViewProps {
   zonas: Zona[];
   indicesPorCanton: Map<number, IndiceViabilidad>;
@@ -48,6 +48,7 @@ export default function MapView({
           />
         );
       })}
+      <CapasAmbientales cantonSeleccionado={cantonSeleccionado} />
     </MapContainer>
   );
 }
