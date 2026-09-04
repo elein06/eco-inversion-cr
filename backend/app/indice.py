@@ -32,29 +32,30 @@ def _normalizar_min_max(valores: dict[int, float]) -> dict[int, float]:
 
 
 def _factor_ambiental(cur: Cursor) -> dict[int, float]:
-    """% del área del cantón que NO se superpone con áreas protegidas / corredores biológicos."""
-    cur.execute(
-        """
-        SELECT
-            c.canton_id,
-            CASE
-                WHEN ST_Area(c.geom) = 0 THEN 100
-                ELSE 100 * (
-                    1 - COALESCE(
-                        ST_Area(ST_Intersection(c.geom, ST_Union(s.geom))) / ST_Area(c.geom),
-                        0
-                    )
-                )
-            END AS porcentaje_libre
-        FROM cantones c
-        LEFT JOIN capas_snit s
-            ON s.tipo_capa IN ('area_protegida', 'corredor_biologico')
-            AND ST_Intersects(c.geom, s.geom)
-        GROUP BY c.canton_id, c.geom
-        """
-    )
-    return {fila["canton_id"]: round(float(fila["porcentaje_libre"]), 2) for fila in cur.fetchall()}
+    """
+    Factor Ambiental (SNIT) — responsable: Integrante 1.
 
+    Lee la vista materializada v_factor_ambiental, que calcula el ETL del SNIT
+    en `etl/snit/factor_ambiental.py`. No recalcula nada aquí: ese cruce
+    espacial tarda unos 5 minutos y dejaría la API colgada en cada llamada.
+
+    El puntaje combina las tres capas del SNIT con pesos internos propios
+    (50% áreas protegidas, 30% corredores biológicos, 20% hidrografía) y una
+    banda para las áreas protegidas: un cantón sin nada protegido no ofrece
+    entorno natural, y uno casi enteramente protegido no deja terreno donde
+    instalarse legalmente. El detalle está en docs/snit.md.
+
+    Si la vista aún no existe —porque nadie ha corrido el ETL del SNIT en esta
+    base— devuelve un dict vacío y `calcular_y_guardar_indices` asigna 0.0.
+    """
+    cur.execute("SELECT to_regclass('v_factor_ambiental') IS NOT NULL AS existe")
+    if not cur.fetchone()["existe"]:
+        return {}
+
+    cur.execute("SELECT canton_id, factor_ambiental FROM v_factor_ambiental")
+    return {
+        fila["canton_id"]: float(fila["factor_ambiental"]) for fila in cur.fetchall()
+    }
 
 def _factor_inversion(cur: Cursor) -> dict[int, float]:
     """Monto total normalizado de contratos ambientales SICOP por cantón."""
