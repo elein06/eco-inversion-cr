@@ -55,10 +55,12 @@ export default function App() {
             indicesPorCanton={indicesPorCanton}
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
+           mostrarCapasSnit={criterioOrden === "factor_ambiental"}
           />
           <PanelBusquedaCanton
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
+                 activo={criterioOrden === "factor_ambiental"}
           />
         </main>
       </div>

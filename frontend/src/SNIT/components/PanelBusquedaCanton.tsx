@@ -11,6 +11,8 @@ import { ESTILOS } from "../estilos";
 interface PanelProps {
   cantonSeleccionado: number | null;
   onSeleccionarCanton: (cantonId: number | null) => void;
+  /** Solo se muestra cuando el usuario está viendo  SNIT. */
+  activo: boolean;
 }
 
 const PANEL: React.CSSProperties = {
@@ -31,6 +33,7 @@ const PANEL: React.CSSProperties = {
 export default function PanelBusquedaCanton({
   cantonSeleccionado,
   onSeleccionarCanton,
+  activo,
 }: PanelProps) {
   const [todos, setTodos] = useState<FactorAmbiental[]>([]);
   const [areas, setAreas] = useState<CapaSnit[]>([]);
@@ -87,7 +90,7 @@ export default function PanelBusquedaCanton({
   }, [detalle]);
 
   // Sin cantón seleccionado el panel no existe: no estorba el mapa.
-  if (!detalle) return null;
+  if (!detalle || !activo) return null;
 
   return (
     <div style={PANEL}>
