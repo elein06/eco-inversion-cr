@@ -1,6 +1,6 @@
 # Fuente OSINT: OpenStreetMap / Overpass API
 
-**Responsable:** Integrante 3
+**Responsable:** Karina
 **Factor del índice:** Factor de Conectividad (25%)
 
 ## Qué aporta
