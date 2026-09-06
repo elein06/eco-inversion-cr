@@ -41,10 +41,28 @@ git pull origin main
 
 ### 2. Variables de entorno (una sola vez)
 
+Son **dos** archivos, y no son redundantes:
+
 ```powershell
 cd C:\ruta\a\eco-inversion-cr
 copy .env.example .env
+
+cd frontend
+copy .env.example .env
+cd ..
 ```
+
+| archivo | lo lee | para qué |
+|---|---|---|
+| `.env` (raíz) | backend y los 4 ETL | `DATABASE_URL`, endpoints de las fuentes |
+| `frontend\.env` | solo Vite | `VITE_API_BASE_URL` |
+
+Vite lee el `.env` **de su propia carpeta**, nunca el de la raíz del repo, y solo
+expone las variables con prefijo `VITE_`. Por eso la línea `VITE_API_BASE_URL`
+que aparece en el `.env.example` de la raíz no la lee nadie: está de referencia.
+Si solo creás el de la raíz, el frontend cae al valor por defecto
+(`http://localhost:8000`) — que suele funcionar, pero deja de hacerlo apenas
+alguien cambie `BACKEND_PORT`.
 
 Si el puerto 5432 ya lo ocupa un Postgres instalado en tu máquina, abrí el
 `.env` y cambiá `POSTGRES_PORT` (por ejemplo a `5433`). **Importante:** si lo
@@ -215,6 +233,21 @@ Devuelve `{"cantones_actualizados":84}`.
 **Hay que repetir esto cada vez que se cargan datos nuevos de cualquier fuente
 — el índice no se recalcula solo.**
 
+### 11. Levantar el frontend (opcional)
+
+```powershell
+cd ..\frontend
+npm install
+npm run dev
+```
+
+Abrir http://localhost:5173. El mapa colorea los cantones según `indice_total`,
+que ya incluye el Factor de Inversión.
+
+Si el mapa muestra datos de prueba (mock) en vez de reales, es que el frontend
+no está alcanzando la API: revisá que `uvicorn` siga corriendo y que
+`frontend\.env` exista (paso 2).
+
 ---
 
 ## Cómo confirmar que los datos de SICOP están ahí
@@ -268,6 +301,7 @@ alcance (solo gobiernos locales) está en **`docs/sicop.md`**.
 | El índice no cambia después de cargar datos | `/indice-viabilidad/recalcular` no se llamó | Paso 10 |
 | Los montos se ven bajos | La vista solo suma contratos en colones | Es a propósito: los que quedaron en dólares sin tipo de cambio no se pueden sumar sin mentir. La vista los cuenta aparte en `contratos_otra_moneda` |
 | El backend apunta a la base equivocada | `DATABASE_URL` y `POSTGRES_PORT` quedaron desalineados en el `.env` | Paso 2. El backend resuelve el `.env` desde la raíz del repo, no desde `backend\` |
+| El frontend ignora `VITE_API_BASE_URL` | Se creó solo el `.env` de la raíz | Vite lee el de `frontend\`. Paso 2, los **dos** archivos |
 | `error during connect ... dockerDesktopLinuxEngine` | Docker Desktop instalado pero cerrado | Abrirlo y esperar a que el engine arranque |
 
 ---
