@@ -3,6 +3,7 @@ import { obtenerIndices, obtenerZonas, type IndiceViabilidad, type Zona } from "
 import MapView from "./components/MapView";
 import Sidebar from "./components/Sidebar";
 import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";
+import PanelInversionCanton from "./SICOP/components/PanelInversionCanton";
 type CriterioOrden = "indice_total" | "factor_ambiental" | "factor_inversion" | "factor_conectividad" | "factor_seguridad";
 
 export default function App() {
@@ -60,7 +61,15 @@ export default function App() {
           <PanelBusquedaCanton
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
-                 activo={criterioOrden === "factor_ambiental"}
+            activo={criterioOrden === "factor_ambiental"}
+          />
+          {/* Equivalente de SICOP: mismo lugar en el mapa, mismo criterio de
+              activación que el panel del SNIT. Solo uno puede estar activo,
+              porque `criterioOrden` es uno solo. */}
+          <PanelInversionCanton
+            cantonSeleccionado={cantonSeleccionado}
+            onSeleccionarCanton={setCantonSeleccionado}
+            activo={criterioOrden === "factor_inversion"}
           />
         </main>
       </div>

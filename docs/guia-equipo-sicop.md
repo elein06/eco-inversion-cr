@@ -74,15 +74,17 @@ POSTGRES_PORT=5433
 DATABASE_URL=postgresql://eco_inversion:changeme@127.0.0.1:5433/eco_inversion_cr
 ```
 
-### 3. Levantar la base de datos
+### 3. Levantar la base de datos y el backend
 
 ```powershell
-docker compose up -d db
+docker compose up -d 
 docker ps
 ```
 
-Tiene que aparecer `eco-inversion-db` con estado `(healthy)`. Si dice
+Tienen que aparecer con estado `(healthy)`. Si dice
 `(health: starting)`, esperá unos segundos y volvé a correr `docker ps`.
+
+Confirmá en http://localhost:8000/docs que el backend responde.
 
 ### 4. Cargar la tabla `cantones` (una sola vez, la necesitan las 4 fuentes)
 
@@ -210,15 +212,7 @@ el backend deja el `factor_inversion` de todos los cantones en 0.
 
 Al final imprime el ranking de cantones por factor de inversión.
 
-### 9. Levantar el backend
 
-```powershell
-cd ..\..\backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-Confirmá en http://localhost:8000/docs que responde.
 
 ### 10. Calcular el índice
 
@@ -236,7 +230,7 @@ Devuelve `{"cantones_actualizados":84}`.
 ### 11. Levantar el frontend (opcional)
 
 ```powershell
-cd ..\frontend
+cd frontend
 npm install
 npm run dev
 ```
