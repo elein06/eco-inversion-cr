@@ -57,18 +57,33 @@ def _factor_ambiental(cur: Cursor) -> dict[int, float]:
         fila["canton_id"]: float(fila["factor_ambiental"]) for fila in cur.fetchall()
     }
 
+
 def _factor_inversion(cur: Cursor) -> dict[int, float]:
-    """Monto total normalizado de contratos ambientales SICOP por cantón."""
-    cur.execute(
-        """
-        SELECT canton_id, SUM(monto) AS monto_total
-        FROM contratos_ambientales
-        WHERE canton_id IS NOT NULL
-        GROUP BY canton_id
-        """
-    )
-    montos = {fila["canton_id"]: float(fila["monto_total"]) for fila in cur.fetchall()}
-    return _normalizar_min_max(montos)
+    """
+    Factor de Inversión Municipal (SICOP) — responsable: Integrante 2.
+
+    Lee la vista `v_factor_inversion`, que crea el ETL de SICOP en
+    `etl/sicop/factor_inversion.py`. No recalcula nada aquí: el puntaje combina
+    monto por habitante, cantidad de contratos y diversidad de categorías con
+    pesos internos propios (50/30/20), y los dos primeros se normalizan con
+    PERCENT_RANK porque el gasto municipal tiene cola muy larga. El detalle
+    está en docs/sicop.md.
+
+    Solo se suman los contratos en colones: uno que quedó en dólares porque
+    SICOP no trajo tipo de cambio no se puede sumar sin mentir sobre el monto.
+
+    Si la vista aún no existe —porque nadie ha corrido `sync_sicop.py
+    --calcular-factor` en esta base— devuelve un dict vacío y
+    `calcular_y_guardar_indices` asigna 0.0.
+    """
+    cur.execute("SELECT to_regclass('v_factor_inversion') IS NOT NULL AS existe")
+    if not cur.fetchone()["existe"]:
+        return {}
+
+    cur.execute("SELECT canton_id, factor_inversion FROM v_factor_inversion")
+    return {
+        fila["canton_id"]: float(fila["factor_inversion"]) for fila in cur.fetchall()
+    }
 
 
 def _factor_conectividad(cur: Cursor) -> dict[int, float]:
