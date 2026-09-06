@@ -3,7 +3,7 @@ Carga masiva — Integrante 3 — OSM/Overpass para TODOS los cantones.
 
 En vez de adivinar un bbox a mano por cantón, calcula el bbox real de cada
 uno a partir de su geometría ya cargada en la tabla `cantones` (por
-load_cantones.py) con ST_Extent, y llama a `sincronizar_canton` de
+el ETL de SNIT -- ver etl/snit/) con ST_Extent, y llama a `sincronizar_canton` de
 sync_osm.py para cada uno, con una pausa entre consultas para respetar el
 uso justo de la instancia pública de Overpass (piden ~1 consulta/segundo,
 sin paralelismo).
@@ -58,7 +58,7 @@ def main() -> None:
 
     cantones = obtener_cantones_con_bbox(args.limite)
     if not cantones:
-        print("No hay cantones en la tabla `cantones`. Corré load_cantones.py primero.")
+        print("No hay cantones en la tabla `cantones`. Corré etl/snit/sync_snit.py --todas primero.")
         return
 
     print(f"Cargando OSM/Overpass para {len(cantones)} cantones (pausa {args.pausa}s entre consultas)...\n")
