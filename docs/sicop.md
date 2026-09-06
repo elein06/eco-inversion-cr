@@ -319,6 +319,20 @@ Decisiones detrás de esos números, todas del equipo y ninguna oficial:
 - **Por habitante, no absoluto**, para no premiar a los cantones grandes solo
   por ser grandes. Si `cantones.poblacion` está vacía, se cae al monto
   absoluto y la vista lo dice en su columna `base_monto`.
+
+  > **Estado actual (2026-09-05):** `cantones.poblacion` está en NULL en los 84
+  > cantones, así que `base_monto` sale `monto_absoluto` en todos y **el
+  > sub-puntaje de monto NO está normalizado por habitante**. El factor que se
+  > calcula hoy sí premia a los cantones grandes: es exactamente el sesgo que
+  > la decisión de arriba quería evitar. Hay que decirlo en la exposición
+  > mientras siga así.
+  >
+  > La misma columna vacía afecta al Factor de Seguridad del OIJ, que sin
+  > población usa el conteo bruto de delitos en vez de la tasa por 10 000
+  > habitantes (`backend/app/indice.py`). Se arregla de una para las dos
+  > fuentes cargando la población con
+  > [`etl/common/load_poblacion.py`](../etl/common/load_poblacion.py), que pide
+  > un CSV del INEC; ver el encabezado de ese archivo.
 - **Percentil y no min-max**, porque el gasto municipal tiene cola muy larga:
   un solo contrato de alcantarillado de miles de millones aplastaría la escala
   de los otros 83 cantones.
