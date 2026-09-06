@@ -242,6 +242,47 @@ Si el mapa muestra datos de prueba (mock) en vez de reales, es que el frontend
 no está alcanzando la API: revisá que `uvicorn` siga corriendo y que
 `frontend\.env` exista (paso 2).
 
+### 12. Qué mostrar en la exposición (dónde se ve SICOP)
+
+El selector **"Ordenar por"** de la barra lateral no solo reordena: cambia lo
+que la pantalla enseña. Son cinco opciones y cada una es la fuente de un
+integrante.
+
+| Ordenar por | Qué cambia |
+|---|---|
+| Índice total | Lista por `indice_total`. Sin paneles de fuente. |
+| Factor ambiental (SNIT) | Enciende las capas del SNIT sobre el mapa y el panel de áreas protegidas y corredores del cantón que se seleccione. |
+| **Factor de inversión (SICOP)** | **Enciende el panel del Factor de Inversión del cantón que se seleccione.** |
+| Conectividad (OSM) / Seguridad (OIJ) | Solo reordenan; sus paneles todavía no existen. |
+
+En la lista, el número **negro** es el del criterio por el que se está
+ordenando, y el **gris chiquito** al lado es el `indice_total`. Si los dos
+fueran el mismo número, la lista se vería desordenada al ordenar por un factor.
+
+**Al hacer clic en un cantón con SICOP seleccionado**, el panel de la derecha
+muestra, en este orden:
+
+1. Factor de Inversión, cantidad de contratos y monto total en colones.
+2. Los tres sub-puntajes con su peso: monto (50%), cantidad (30%),
+   diversidad (20%).
+3. Una línea que aclara **cómo leerlos**: monto y cantidad son percentiles
+   contra los otros 83 cantones, diversidad es cuántas de las 6 categorías
+   aparecen, y si el monto se normalizó por habitante o quedó en absoluto
+   (`base_monto`) — sin esa línea, `sub_monto` no significa lo mismo entre dos
+   cantones.
+4. Aviso naranja si hay contratos en otra moneda, que no se suman al monto.
+5. Los contratos que alimentan el factor, agrupados por categoría, con
+   institución, fecha y monto.
+6. El pie con la fuente, los pesos y la nota de que solo cuenta gobiernos
+   locales.
+
+Un cantón **sin contratos** no queda mudo: dice que el 0 es ausencia de
+inversión, no dato faltante. Esa distinción es la que hay que poder defender.
+
+La barra lateral (el panel `.detalle` de abajo) sigue mostrando los cuatro
+factores del cantón en cualquier criterio de orden; el panel de SICOP es lo que
+explica **de dónde sale** el número de inversión.
+
 ---
 
 ## Cómo confirmar que los datos de SICOP están ahí
@@ -296,6 +337,8 @@ alcance (solo gobiernos locales) está en **`docs/sicop.md`**.
 | Los montos se ven bajos | La vista solo suma contratos en colones | Es a propósito: los que quedaron en dólares sin tipo de cambio no se pueden sumar sin mentir. La vista los cuenta aparte en `contratos_otra_moneda` |
 | El backend apunta a la base equivocada | `DATABASE_URL` y `POSTGRES_PORT` quedaron desalineados en el `.env` | Paso 2. El backend resuelve el `.env` desde la raíz del repo, no desde `backend\` |
 | El frontend ignora `VITE_API_BASE_URL` | Se creó solo el `.env` de la raíz | Vite lee el de `frontend\`. Paso 2, los **dos** archivos |
+| El panel de SICOP dice que falta la vista `v_factor_inversion` | Se cargó sin `--calcular-factor` | El propio mensaje trae el comando: `python sync_sicop.py --calcular-factor`. El panel muestra el 503 con el texto de la API en vez de quedarse en blanco |
+| Las descripciones se parten a la mitad de una palabra | Datos cargados antes del arreglo de espacios duros (U+00A0) que manda SICOP | Recargar: `python sync_sicop.py --cargar --calcular-factor`. El ETL ya normaliza el texto en `normalizacion.py` |
 | `error during connect ... dockerDesktopLinuxEngine` | Docker Desktop instalado pero cerrado | Abrirlo y esperar a que el engine arranque |
 
 ---

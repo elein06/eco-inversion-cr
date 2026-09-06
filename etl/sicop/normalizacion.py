@@ -413,6 +413,24 @@ def _cedula(serie):
     return serie.astype(str).str.replace(r"\D", "", regex=True).str.strip()
 
 
+def _texto_limpio(serie):
+    """
+    Deja el texto con espacios normales.
+
+    SICOP manda las descripciones con espacio duro (U+00A0) en vez de espacio
+    común. En la terminal se ve igual, pero el navegador no puede cortar la
+    línea en un espacio duro: las descripciones largas terminan partidas a la
+    mitad de una palabra en el panel del mapa. También colapsa los saltos de
+    línea y los espacios repetidos que traen algunos carteles.
+    """
+    return (
+        serie.astype(str)
+        .str.replace("\u00a0", " ", regex=False)
+        .str.replace(r"\s+", " ", regex=True)
+        .str.strip()
+    )
+
+
 def construir_dataset(tablas, solo_municipalidades=True):
     """
     Une contratos + líneas + carteles + instituciones, clasifica y devuelve el
@@ -515,7 +533,7 @@ def construir_dataset(tablas, solo_municipalidades=True):
         {
             "NRO_SICOP": carteles[col_c_sicop].astype(str).str.strip(),
             "cedula": _cedula(carteles[col_c_ced]),
-            "descripcion_objeto": carteles[col_c_desc].astype(str).str.strip(),
+            "descripcion_objeto": _texto_limpio(carteles[col_c_desc]),
         }
     ).drop_duplicates(subset=["NRO_SICOP"])
 
@@ -533,7 +551,7 @@ def construir_dataset(tablas, solo_municipalidades=True):
     resumen_inst = pd.DataFrame(
         {
             "cedula": _cedula(instituciones[col_i_ced]),
-            "institucion": instituciones[col_i_nom].astype(str).str.strip(),
+            "institucion": _texto_limpio(instituciones[col_i_nom]),
             "provincia": (
                 instituciones[col_i_prov].astype(str).str.strip()
                 if col_i_prov

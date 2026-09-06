@@ -214,11 +214,11 @@ function TablaContratos({ filas }: { filas: ContratoAmbiental[] }) {
             <h4 style={{ margin: "0 0 0.3rem", color }}>
               {etiqueta} ({contratosCategoria.length})
             </h4>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
               <tbody>
                 {contratosCategoria.map((contrato) => (
                   <tr key={contrato.contrato_id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                    <td style={{ padding: "0.25rem 0" }}>
+                    <td style={{ padding: "0.25rem 0", overflowWrap: "break-word" }}>
                       {contrato.descripcion_objeto ?? "Sin descripción"}
                       <div style={{ color: GRIS, fontSize: "0.72rem" }}>
                         {contrato.institucion}
@@ -227,6 +227,7 @@ function TablaContratos({ filas }: { filas: ContratoAmbiental[] }) {
                     </td>
                     <td
                       style={{
+                        width: "7.5rem",
                         padding: "0.25rem 0 0.25rem 0.4rem",
                         color: GRIS,
                         textAlign: "right",
