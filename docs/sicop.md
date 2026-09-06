@@ -327,12 +327,16 @@ Decisiones detrás de esos números, todas del equipo y ninguna oficial:
   > la decisión de arriba quería evitar. Hay que decirlo en la exposición
   > mientras siga así.
   >
-  > La misma columna vacía afecta al Factor de Seguridad del OIJ, que sin
+  > La misma columna vacía afecta al **Factor de Seguridad del OIJ**, que sin
   > población usa el conteo bruto de delitos en vez de la tasa por 10 000
-  > habitantes (`backend/app/indice.py`). Se arregla de una para las dos
-  > fuentes cargando la población con
-  > [`etl/common/load_poblacion.py`](../etl/common/load_poblacion.py), que pide
-  > un CSV del INEC; ver el encabezado de ese archivo.
+  > habitantes (ver `_factor_seguridad` en `backend/app/indice.py`). Es decir:
+  > una sola columna vacía sesga dos de los cuatro factores, y en los dos el
+  > sesgo es por tamaño del cantón.
+  >
+  > Llenarla **no le corresponde a esta fuente**: `cantones` es la tabla
+  > compartida y el equipo acordó que solo la carga quien la tiene asignada
+  > (ver `docs/cantones.md` y la nota de orden en el README). Queda anotado acá
+  > como hallazgo, para que lo resuelva quien corresponda.
 - **Percentil y no min-max**, porque el gasto municipal tiene cola muy larga:
   un solo contrato de alcantarillado de miles de millones aplastaría la escala
   de los otros 83 cantones.
