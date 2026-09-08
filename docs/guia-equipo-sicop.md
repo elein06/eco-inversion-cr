@@ -77,12 +77,21 @@ DATABASE_URL=postgresql://eco_inversion:changeme@127.0.0.1:5433/eco_inversion_cr
 ### 3. Levantar la base de datos y el backend
 
 ```powershell
-docker compose up -d 
+docker compose up -d
 docker ps
 ```
 
-Tienen que aparecer con estado `(healthy)`. Si dice
-`(health: starting)`, esperá unos segundos y volvé a correr `docker ps`.
+Levanta los dos contenedores: `eco-inversion-db` y `eco-inversion-backend`.
+El healthcheck lo tiene **solo la base**, así que en `docker ps` el estado
+esperado es distinto para cada uno:
+
+| contenedor | estado esperado |
+|---|---|
+| `eco-inversion-db` | `Up ... (healthy)` |
+| `eco-inversion-backend` | `Up ...`, sin `(healthy)` — no significa que esté mal |
+
+Si la base dice `(health: starting)`, esperá unos segundos y volvé a correr
+`docker ps`. El backend no arranca hasta que la base esté `healthy`.
 
 Confirmá en http://localhost:8000/docs que el backend responde.
 
@@ -96,14 +105,21 @@ RuntimeError: La tabla `cantones` está vacía. El ETL del SNIT (Integrante 1)
 es el que la llena y va primero
 ```
 
+La carga la hace el **ETL del SNIT** (Integrante 1), que es el único que debe
+tocar esa tabla: trae los límites oficiales del IGN, y los `canton_id` contra
+los que SICOP resuelve cada contrato salen de esos códigos.
+
 ```powershell
-cd etl\common
-pip install psycopg2-binary python-dotenv
-python load_cantones.py --geojson ..\..\db\cantones_cr.geojson
+cd etl\snit
+pip install -r requirements.txt
+python sync_snit.py --todas --calcular-factor
 cd ..\..
 ```
 
-Tienen que quedar 84 cantones.
+Tienen que quedar 84 cantones. Tarda varios minutos: además de los cantones
+descarga las capas ambientales y calcula el Factor Ambiental (detalle en
+[`docs/snit.md`](snit.md)). Si solo se necesita la tabla `cantones` para
+seguir con SICOP, alcanza con `python sync_snit.py --capa cantones`.
 
 ### 5. Instalar las dependencias de SICOP
 
@@ -212,9 +228,7 @@ el backend deja el `factor_inversion` de todos los cantones en 0.
 
 Al final imprime el ranking de cantones por factor de inversión.
 
-
-
-### 10. Calcular el índice
+### 9. Calcular el índice
 
 En otra terminal:
 
@@ -227,7 +241,7 @@ Devuelve `{"cantones_actualizados":84}`.
 **Hay que repetir esto cada vez que se cargan datos nuevos de cualquier fuente
 — el índice no se recalcula solo.**
 
-### 11. Levantar el frontend (opcional)
+### 10. Levantar el frontend (opcional)
 
 ```powershell
 cd frontend
@@ -242,7 +256,7 @@ Si el mapa muestra datos de prueba (mock) en vez de reales, es que el frontend
 no está alcanzando la API: revisá que `uvicorn` siga corriendo y que
 `frontend\.env` exista (paso 2).
 
-### 12. Qué mostrar en la exposición (dónde se ve SICOP)
+### 11. Qué mostrar en la exposición (dónde se ve SICOP)
 
 El selector **"Ordenar por"** de la barra lateral no solo reordena: cambia lo
 que la pantalla enseña. Son cinco opciones y cada una es la fuente de un
@@ -333,7 +347,7 @@ alcance (solo gobiernos locales) está en **`docs/sicop.md`**.
 | `Ninguna solicitud pendiente aceptó ese código` | Código incompleto o con mayúsculas cambiadas | Son 6-7 caracteres y distinguen mayúsculas. Copiar y pegar del correo, sin espacios |
 | HTTP 500 al descargar | El reporte se confirmó pero todavía se está construyendo | Repetir `--descargar --report-id N`; el reporte no se pierde |
 | `factor_inversion` en 0 para todos los cantones | Se cargó sin `--calcular-factor`, la vista no existe | `python sync_sicop.py --calcular-factor` y después `/recalcular` |
-| El índice no cambia después de cargar datos | `/indice-viabilidad/recalcular` no se llamó | Paso 10 |
+| El índice no cambia después de cargar datos | `/indice-viabilidad/recalcular` no se llamó | Paso 9 |
 | Los montos se ven bajos | La vista solo suma contratos en colones | Es a propósito: los que quedaron en dólares sin tipo de cambio no se pueden sumar sin mentir. La vista los cuenta aparte en `contratos_otra_moneda` |
 | El backend apunta a la base equivocada | `DATABASE_URL` y `POSTGRES_PORT` quedaron desalineados en el `.env` | Paso 2. El backend resuelve el `.env` desde la raíz del repo, no desde `backend\` |
 | El frontend ignora `VITE_API_BASE_URL` | Se creó solo el `.env` de la raíz | Vite lee el de `frontend\`. Paso 2, los **dos** archivos |

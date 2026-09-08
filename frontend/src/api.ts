@@ -118,7 +118,7 @@ async function obtenerJsonConDetalle<T>(ruta: string): Promise<T> {
   return respuesta.json() as Promise<T>;
 }
 
-/** Capas de un cantón buscado por nombre (sin tildes ni mayúsculas). */
+/** Capas de un cantón buscado por nombre (la API ignora tildes y mayúsculas). */
 export async function obtenerCapasPorCanton(
   tipo: TipoCapa,
   canton: string,

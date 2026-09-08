@@ -31,11 +31,33 @@ Frontend (React + Leaflet)  →  Backend propio (FastAPI)  →  PostgreSQL + Pos
 
 El frontend **nunca** consulta SNIT, SICOP, OSM ni el Poder Judicial directamente — solo habla con la API propia del backend, que expone datos ya normalizados:
 
-- `GET /zonas` — cantones con geometría (GeoJSON)
+**Datos base, uno por fuente:**
+
+- `GET /zonas` — cantones con geometría (GeoJSON), la capa base del mapa;
+  `GET /zonas/{canton_id}` para uno solo
 - `GET /contratos-ambientales` — contratos SICOP clasificados
 - `GET /infraestructura` — POIs de OSM (con caché de 7 días)
 - `GET /seguridad` — estadísticas OIJ agregadas por cantón
-- `GET /indice-viabilidad` / `POST /indice-viabilidad/recalcular` — índice calculado
+
+**Índice de viabilidad:**
+
+- `GET /indice-viabilidad` — índice calculado, con los pesos usados
+- `POST /indice-viabilidad/recalcular` — recalcula los 84 cantones
+
+**Desglose por factor** (lo que alimenta los paneles laterales del frontend:
+no solo el puntaje, sino de dónde sale):
+
+- `GET /ambiental/factor` — Factor Ambiental por cantón con sus tres
+  sub-puntajes; `GET /ambiental/factor/{canton_id}` para uno solo
+- `GET /ambiental/capas` — geometrías de las capas del SNIT para dibujarlas
+  sobre el mapa; `GET /ambiental/capas/resumen` — cuántas hay por tipo y
+  cuándo se sincronizaron (procedencia)
+- `GET /inversion/factor` — Factor de Inversión Municipal por cantón con sus
+  sub-puntajes; `GET /inversion/factor/{canton_id}` para uno solo
+- `GET /inversion/resumen` — contratos y montos por categoría (procedencia)
+
+La lista completa —con parámetros, esquemas y un botón para probar cada
+llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
 
 ## Estructura del repositorio
 
@@ -66,39 +88,11 @@ Esto levanta Postgres+PostGIS y carga automáticamente `db/schema.sql` (extensi�
 
 Si el puerto 5432 ya lo ocupa un Postgres instalado en la máquina, cambiar `POSTGRES_PORT` en el `.env`: solo afecta al puerto del host, porque dentro de Docker el contenedor sigue en 5432 y el backend de compose le habla por el nombre `db`.
 
-Después hay que cargar la tabla `cantones`, que es el eje territorial contra el que se cruzan las cuatro fuentes:
+La tabla `cantones` queda vacía: es el eje territorial contra el que se cruzan
+las cuatro fuentes, y la llena el **ETL del SNIT** con los límites oficiales del
+IGN (ver el paso 3). Ningún otro integrante debe cargar esa tabla, porque los
+`canton_id` de las otras tres fuentes dependen de esos códigos.
 
-```bash
-cd etl/common && pip install psycopg2-binary python-dotenv
-python load_cantones.py --geojson ../../db/cantones_cr.geojson
-```
-
-### 1-bis. Alternativa: un PostgreSQL ya instalado en la máquina
-
-Se puede usar en lugar de Docker, siempre que tenga **PostGIS** (no viene con
-el instalador de PostgreSQL: se agrega desde Stack Builder, en *Spatial
-Extensions*). Sin PostGIS, `db/schema.sql` falla en su primera línea.
-
-```bash
-# 1. Crear rol, base y extensiones (pide la contraseña del superusuario postgres)
-psql -U postgres -d postgres -f db/setup_local.sql
-
-# 2. Cargar el esquema CON EL ROL DE LA APLICACIÓN, no como postgres,
-#    para que las tablas queden con el dueño correcto
-psql -U eco_inversion -d eco_inversion_cr -f db/schema.sql
-```
-
-Si el paso 2 ya se corrió como `postgres`, las tablas quedan con ese dueño y
-los ETL fallan con `permission denied for table cantones`. Se arregla sin
-rehacer la base:
-
-```bash
-psql -U postgres -d eco_inversion_cr -f db/grant_local.sql
-```
-
-`db/setup_local.sql` deja el rol `eco_inversion` con la contraseña de ejemplo
-`changeme`, que es la que trae `.env.example`. Si se cambia, hay que cambiarla
-también en `DATABASE_URL`.
 
 ### 2. Backend (FastAPI)
 
