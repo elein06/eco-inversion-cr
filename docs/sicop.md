@@ -334,9 +334,9 @@ Decisiones detrás de esos números, todas del equipo y ninguna oficial:
   > sesgo es por tamaño del cantón.
   >
   > Llenarla **no le corresponde a esta fuente**: `cantones` es la tabla
-  > compartida y el equipo acordó que solo la carga quien la tiene asignada
-  > (ver `docs/cantones.md` y la nota de orden en el README). Queda anotado acá
-  > como hallazgo, para que lo resuelva quien corresponda.
+  > compartida y la carga el ETL del SNIT, que es el único que debe tocarla
+  > (ver [`docs/snit.md`](snit.md) y la nota de orden en el README). Queda
+  > anotado acá como hallazgo, para que lo resuelva quien corresponda.
 - **Percentil y no min-max**, porque el gasto municipal tiene cola muy larga:
   un solo contrato de alcantarillado de miles de millones aplastaría la escala
   de los otros 83 cantones.
