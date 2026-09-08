@@ -38,7 +38,6 @@ from db import get_connection  # noqa: E402
 # sincronización del SNIT, que corre una vez o semanalmente.
 
 SQL_FACTOR_AMBIENTAL = """
-DROP VIEW IF EXISTS v_factor_ambiental CASCADE;
 DROP MATERIALIZED VIEW IF EXISTS v_factor_ambiental CASCADE;
 
 CREATE MATERIALIZED VIEW v_factor_ambiental AS
