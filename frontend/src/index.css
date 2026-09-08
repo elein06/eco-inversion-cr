@@ -157,3 +157,16 @@ html, body, #root {
   flex: 1;
   min-width: 0;
 }
+
+.valores-canton {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* Índice total cuando la lista se ordena por otro factor: se muestra, pero no
+   compite con el número por el que realmente está ordenada. */
+.valor-secundario {
+  color: #9ca3af;
+  font-size: 11px;
+}
