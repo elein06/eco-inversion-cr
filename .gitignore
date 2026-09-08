@@ -20,6 +20,7 @@ dist/
 etl/**/data/*
 !etl/**/data/.gitkeep
 *.log
+etl/oij/reportes/*.csv
 
 # --- Editor / OS ---
 .vscode/
