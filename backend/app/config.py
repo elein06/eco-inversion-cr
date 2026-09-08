@@ -1,4 +1,13 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# El .env vive en la raíz del repositorio y lo comparten backend y ETL, pero
+# uvicorn se levanta desde backend/. Con una ruta relativa, pydantic-settings
+# buscaría backend/.env, no lo encontraría y se iría a los valores por defecto
+# de abajo —apuntando a una base equivocada sin avisar—. Por eso la ruta se
+# calcula desde este archivo: backend/app/config.py -> ../../.env
+RAIZ_REPO = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -15,7 +24,13 @@ class Settings(BaseSettings):
     peso_conectividad: float = 0.25
     peso_seguridad: float = 0.25
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Dentro de docker-compose no hay .env montado y las variables llegan por
+    # `environment:`; pydantic-settings las lee igual y el archivo ausente no
+    # es un error. Un backend/.env, si existe, gana sobre el de la raíz.
+    model_config = SettingsConfigDict(
+        env_file=(RAIZ_REPO / ".env", RAIZ_REPO / "backend" / ".env"),
+        extra="ignore",
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:

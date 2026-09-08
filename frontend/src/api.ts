@@ -118,7 +118,7 @@ async function obtenerJsonConDetalle<T>(ruta: string): Promise<T> {
   return respuesta.json() as Promise<T>;
 }
 
-/** Capas de un cantón buscado por nombre (sin tildes ni mayúsculas). */
+/** Capas de un cantón buscado por nombre (la API ignora tildes y mayúsculas). */
 export async function obtenerCapasPorCanton(
   tipo: TipoCapa,
   canton: string,
@@ -132,4 +132,54 @@ export async function obtenerCapasPorCanton(
 export async function obtenerFactorPorCanton(canton: string): Promise<FactorAmbiental[]> {
   const parametros = new URLSearchParams({ canton });
   return obtenerJsonConDetalle<FactorAmbiental[]>(`/ambiental/factor?${parametros}`);
+}
+
+/* ------------------------------------------------------------------ */
+/* SICOP — Integrante 2                                               */
+/* ------------------------------------------------------------------ */
+
+/** Cómo se normalizó el monto antes de rankearlo (columna `base_monto`). */
+export type BaseMonto = "monto_por_habitante" | "monto_absoluto";
+
+export interface FactorInversion {
+  canton_id: number;
+  codigo_ine: string;
+  nombre: string;
+  provincia: string;
+  contratos: number;
+  contratos_otra_moneda: number;
+  monto_total: number;
+  categorias: number;
+  base_monto: BaseMonto;
+  sub_monto: number;
+  sub_cantidad: number;
+  sub_diversidad: number;
+  factor_inversion: number;
+}
+
+export interface ContratoAmbiental {
+  contrato_id: number;
+  canton_id: number | null;
+  institucion: string;
+  municipalidad: string | null;
+  monto: number;
+  moneda: string;
+  fecha_contrato: string | null;
+  descripcion_objeto: string | null;
+  categoria_detectada: string;
+}
+
+/**
+ * Desglose del Factor de Inversión de los 84 cantones (vista
+ * v_factor_inversion). Usa `obtenerJsonConDetalle` a propósito: si el ETL
+ * todavía no corrió `--calcular-factor`, la API responde 503 con el comando
+ * que falta, y ese texto es más útil que un "Error 503" pelado.
+ */
+export async function obtenerFactorInversion(): Promise<FactorInversion[]> {
+  return obtenerJsonConDetalle<FactorInversion[]>("/inversion/factor");
+}
+
+/** Contratos ambientales de un cantón (los que alimentan su factor). */
+export async function obtenerContratosPorCanton(cantonId: number): Promise<ContratoAmbiental[]> {
+  return obtenerJsonConDetalle<ContratoAmbiental[]>(`/contratos-ambientales?canton_id=${cantonId}`);
 }

@@ -9,7 +9,7 @@ Trabajo de Investigación 2 — Seguridad Informática.
 | Fuente | Aporta | Factor del índice | Responsable | Detalle |
 |---|---|---|---|---|
 | **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Integrante 1 | [docs/snit.md](docs/snit.md) |
-| **SICOP** (datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Integrante 2 | [docs/sicop.md](docs/sicop.md) |
+| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Integrante 2 | [docs/sicop.md](docs/sicop.md) |
 | **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Integrante 3 | [docs/osm.md](docs/osm.md) |
 | **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Integrante 4 | [docs/oij.md](docs/oij.md) |
 
@@ -31,17 +31,39 @@ Frontend (React + Leaflet)  →  Backend propio (FastAPI)  →  PostgreSQL + Pos
 
 El frontend **nunca** consulta SNIT, SICOP, OSM ni el Poder Judicial directamente — solo habla con la API propia del backend, que expone datos ya normalizados:
 
-- `GET /zonas` — cantones con geometría (GeoJSON)
+**Datos base, uno por fuente:**
+
+- `GET /zonas` — cantones con geometría (GeoJSON), la capa base del mapa;
+  `GET /zonas/{canton_id}` para uno solo
 - `GET /contratos-ambientales` — contratos SICOP clasificados
 - `GET /infraestructura` — POIs de OSM (con caché de 7 días)
 - `GET /seguridad` — estadísticas OIJ agregadas por cantón
-- `GET /indice-viabilidad` / `POST /indice-viabilidad/recalcular` — índice calculado
+
+**Índice de viabilidad:**
+
+- `GET /indice-viabilidad` — índice calculado, con los pesos usados
+- `POST /indice-viabilidad/recalcular` — recalcula los 84 cantones
+
+**Desglose por factor** (lo que alimenta los paneles laterales del frontend:
+no solo el puntaje, sino de dónde sale):
+
+- `GET /ambiental/factor` — Factor Ambiental por cantón con sus tres
+  sub-puntajes; `GET /ambiental/factor/{canton_id}` para uno solo
+- `GET /ambiental/capas` — geometrías de las capas del SNIT para dibujarlas
+  sobre el mapa; `GET /ambiental/capas/resumen` — cuántas hay por tipo y
+  cuándo se sincronizaron (procedencia)
+- `GET /inversion/factor` — Factor de Inversión Municipal por cantón con sus
+  sub-puntajes; `GET /inversion/factor/{canton_id}` para uno solo
+- `GET /inversion/resumen` — contratos y montos por categoría (procedencia)
+
+La lista completa —con parámetros, esquemas y un botón para probar cada
+llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
 
 ## Estructura del repositorio
 
 ```
 /etl/snit          → ETL de Integrante 1 (WFS → GeoJSON → PostGIS)
-/etl/sicop         → ETL de Integrante 2 (descarga + clasificación + carga)
+/etl/sicop         → ETL de Integrante 2 (API SICOP → clasificación → PostgreSQL)
 /etl/osm           → ETL de Integrante 3 (Overpass → GeoJSON → caché)
 /etl/oij           → ETL de Integrante 4 (CKAN → estadísticas → carga)
 /etl/common        → conexión a BD y registro de sincronizaciones, compartido
@@ -62,13 +84,15 @@ cp .env.example .env
 docker compose up -d db
 ```
 
-Esto levanta Postgres+PostGIS en `localhost:5432` y carga automáticamente `db/schema.sql` (extensión PostGIS, tablas, datos semilla de `fuentes`).
+Esto levanta Postgres+PostGIS y carga automáticamente `db/schema.sql` (extensión PostGIS, tablas, datos semilla de `fuentes`).
 
-Sin Docker, se puede usar cualquier Postgres con PostGIS instalado y correr:
+Si el puerto 5432 ya lo ocupa un Postgres instalado en la máquina, cambiar `POSTGRES_PORT` en el `.env`: solo afecta al puerto del host, porque dentro de Docker el contenedor sigue en 5432 y el backend de compose le habla por el nombre `db`.
 
-```bash
-psql "$DATABASE_URL" -f db/schema.sql
-```
+La tabla `cantones` queda vacía: es el eje territorial contra el que se cruzan
+las cuatro fuentes, y la llena el **ETL del SNIT** con los límites oficiales del
+IGN (ver el paso 3). Ningún otro integrante debe cargar esa tabla, porque los
+`canton_id` de las otras tres fuentes dependen de esos códigos.
+
 
 ### 2. Backend (FastAPI)
 
@@ -82,6 +106,18 @@ uvicorn app.main:app --reload --port 8000
 
 API disponible en `http://localhost:8000`, documentación interactiva en `http://localhost:8000/docs`.
 
+También se puede levantar dentro de Docker, que es lo más parecido a como va a
+correr en la demo:
+
+```bash
+docker compose up -d --build backend
+```
+
+En ese caso el backend no usa `DATABASE_URL` del `.env`: `docker-compose.yml`
+le pasa una propia que apunta al contenedor `db` por nombre de servicio. Para
+desarrollar conviene el `uvicorn --reload` de arriba, porque recarga al
+guardar; el contenedor hay que reconstruirlo.
+
 ### 3. ETL por fuente
 
 Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo `DATABASE_URL`. Ejemplos:
@@ -93,10 +129,17 @@ Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo
 ```bash
 # 1. SNIT — carga cantones + las 3 capas ambientales y calcula el Factor Ambiental
 cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --todas --calcular-factor
-cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --archivo reportes/contratos.xlsx
+cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --solicitar --todos --correo yo@ejemplo.com
+#    SICOP manda un codigo por correo; se confirma y el script baja, clasifica y carga:
+#    python sync_sicop.py --confirmar --codigo <codigo del correo>
+#    python sync_sicop.py --cargar --calcular-factor
 cd etl/osm     && pip install -r requirements.txt && python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06
 cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
 ```
+
+Guías paso a paso para levantar cada fuente desde cero, pensadas para el resto
+del equipo: [docs/guia-equipo-sicop.md](docs/guia-equipo-sicop.md) ·
+[docs/guia-equipo-osm.md](docs/guia-equipo-osm.md).
 
 Cada script trae su propia ayuda con todas las opciones disponibles:
 

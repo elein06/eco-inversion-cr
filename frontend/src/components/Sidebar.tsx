@@ -41,6 +41,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const ordenados = [...indices].sort((a, b) => b[criterioOrden] - a[criterioOrden]);
   const seleccionado = indices.find((i) => i.canton_id === cantonSeleccionado);
+  const ordenandoPorFactor = criterioOrden !== "indice_total";
 
   return (
     <aside className="sidebar">
@@ -66,7 +67,21 @@ export default function Sidebar({
             onClick={() => onSeleccionarCanton(indice.canton_id)}
           >
             <span>{indice.nombre_canton}</span>
-            <strong>{indice.indice_total.toFixed(1)}</strong>
+            {/*
+              El número que se muestra es el del criterio por el que se está
+              ordenando. Si siempre fuera `indice_total`, ordenar por un factor
+              dejaría la lista viéndose desordenada, porque el orden vendría de
+              un valor que no está a la vista. Cuando el criterio no es el
+              índice total, este se sigue mostrando al lado, en gris.
+            */}
+            <span className="valores-canton">
+              <strong>{indice[criterioOrden].toFixed(1)}</strong>
+              {ordenandoPorFactor && (
+                <span className="valor-secundario" title="Índice total">
+                  {indice.indice_total.toFixed(1)}
+                </span>
+              )}
+            </span>
           </li>
         ))}
       </ul>
