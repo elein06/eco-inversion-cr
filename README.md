@@ -66,7 +66,7 @@ Esto levanta Postgres+PostGIS y carga automáticamente `db/schema.sql` (extensi�
 
 Si el puerto 5432 ya lo ocupa un Postgres instalado en la máquina, cambiar `POSTGRES_PORT` en el `.env`: solo afecta al puerto del host, porque dentro de Docker el contenedor sigue en 5432 y el backend de compose le habla por el nombre `db`.
 
-Después hay que cargar la tabla `cantones`, que es el eje territorial contra el que se cruzan las cuatro fuentes:
+Si la tabla `cantones` todavía no está cargada (por ejemplo, antes de correr el ETL del SNIT), hay que cargarla porque es el eje territorial contra el que se cruzan las cuatro fuentes:
 
 ```bash
 cd etl/common && pip install psycopg2-binary python-dotenv
