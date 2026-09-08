@@ -6,45 +6,62 @@
 
 ## Qué aporta
 
-Estadísticas policiales agregadas por cantón y año, usadas como proxy (inverso) de seguridad para el índice de viabilidad.
+Incidentes policiales por cantón, tipo de delito, año, agregados por el propio ETL del proyecto (el recurso original es a nivel de incidente, ver abajo), usados como proxy (inverso) de seguridad para el índice de viabilidad.
 
-## Endpoint / forma de consumo
+## Endpoint / forma de consumo (verificada)
 
-Portal de Datos Abiertos del Poder Judicial, construido sobre **CKAN**. No requiere token.
+Portal de Datos Abiertos del Poder Judicial, construido sobre **CKAN**, dataset `estadisticas-policiales`. No requiere token.
 
-- Dataset: `estadisticas-policiales`
-
+- Página del dataset: `https://datosabiertospj.poder-judicial.go.cr/dataset/estadisticas-policiales`
+- Descarga directa por año, ej.:
   ```
-  {OIJ_CKAN_BASE_URL}/dataset/estadisticas-policiales
+  https://pjcrdatosabiertos.blob.core.windows.net/datosabiertos/PJCROD_POLICIALES_V1/PJCROD_POLICIALES_V1-2025.csv
   ```
+- También hay XLSX, XML y RDF por año, y un `--resource-id` de CKAN por recurso — no se confirmó si el datastore de CKAN está activo para este dataset, así que **la vía verificada y recomendada es la descarga directa del CSV**, no la API `datastore_search`.
 
-- Recursos disponibles: CSV, XLS/XLSX, XML, RDF — se descarga el recurso directamente.
-- Alternativa vía API (si el recurso está en el datastore de CKAN):
+## Hallazgos del formato real (importante — difiere de lo que se asumió al planear el proyecto)
 
-  ```
-  GET {OIJ_CKAN_BASE_URL}/api/3/action/datastore_search?resource_id=<id_recurso>&limit=1000
-  ```
+Al inspeccionar el CSV real se encontró que **no es un archivo pre-agregado** como se pensó originalmente ("Cantón, Delito, Cantidad, Año"), sino un registro por incidente, sin encabezado, con 11 columnas posicionales:
 
-## Formato de respuesta (ejemplo API CKAN)
+| # | Columna | Ejemplo |
+|---|---|---|
+| 0 | tipo_delito | ASALTO, HOMICIDIO, ROBO, HURTO, ROBO DE VEHICULO, TACHA DE VEHICULO |
+| 1 | subtipo_delito / modalidad | CANDADO CHINO, ARREBATO |
+| 2 | fecha_hecho (YYYY-MM-DD) | 2025-01-01 |
+| 3 | tipo_víctima | PERSONA, VIVIENDA, VEHÍCULO |
+| 4 | clasificación de víctima | TURISTA/EXTRANJERO [PERSONA] |
+| 5 | grupo etario | Mayor de edad, Desconocido |
+| 6 | (columna reservada, vacía) | — |
+| 7 | nacionalidad | COSTA RICA, NICARAGUA |
+| 8 | provincia | SAN JOSE |
+| 9 | cantón | CURRIDABAT |
+| 10 | distrito | TIRRASES |
 
-```json
-{
-  "success": true,
-  "result": {
-    "records": [
-      { "Canton": "San José", "Delito": "Robo", "Cantidad": 1200, "Anio": 2024 }
-    ]
-  }
-}
+Además, el archivo viene en **codificación latin-1 / cp1252, no UTF-8** (nombres con tilde o ñ se corrompen si se lee como UTF-8 — ej. "CAÑAS" → "CA�AS").
+
+Por esto, `etl/oij/sync_oij.py` no solo limpia el archivo: **agrupa y cuenta** filas por cantón + tipo_delito + año antes de insertar en `estadisticas_seguridad`. Esa agregación es la transformación real que exige el enunciado del curso (no basta con copiar el archivo tal cual).
+
+## Normalización y carga (flujo actual del script)
+
+1. Leer el CSV sin encabezado, columnas posicionales, probando encodings `latin-1` → `cp1252` → `utf-8` en ese orden.
+2. Limpiar espacios y pasar a mayúsculas cantón/provincia/tipo_delito; extraer el año de `fecha_hecho`.
+3. Descartar filas sin cantón, delito o fecha válida.
+4. Agrupar por (cantón, tipo_delito, año) y contar incidentes → columna `cantidad`.
+5. Buscar `canton_id` en la tabla `cantones` por nombre (insensible a tildes/mayúsculas). Los cantones sin match se reportan al final y se omiten — no se pierde la corrida completa por un nombre no reconocido.
+6. `INSERT ... ON CONFLICT (canton_id, tipo_delito, anio) DO UPDATE` en `estadisticas_seguridad`, para poder re-ejecutar el script sin duplicar.
+7. Registrar la corrida en `sincronizaciones` (`fuente_id` = OIJ), incluso si falla.
+
+## Bloqueo detectado: `cantones` está vacía
+
+Ningún script del repositorio puebla todavía la tabla `cantones` (el ETL de SNIT solo carga `capas_snit`, no las 84 filas de `cantones` con su geometría). Como `estadisticas_seguridad.canton_id` depende de esa tabla, **ninguna fuente puede cargar datos reales hasta que exista ese seed** — no es un problema exclusivo de OIJ, hay que resolverlo en equipo. Mientras tanto, `db/seed_cantones_TEMP_dev.sql` deja 6 cantones con geometría de relleno (no son los límites reales) solo para poder probar el flujo local; debe eliminarse cuando Integrante 1 cargue los límites reales desde SNIT.
+
+Para pruebas locales sin depender de la descarga real: `etl/oij/reportes/muestra_prueba.csv` trae un CSV sintético con el mismo formato posicional (incluye un cantón fuera del seed, "CAÑAS", para comprobar que el aviso de "cantón sin match" funciona).
+
+```bash
+psql "$DATABASE_URL" -f db/seed_cantones_TEMP_dev.sql
+cd etl/oij
+python sync_oij.py --archivo reportes/muestra_prueba.csv --anio 2025
 ```
-
-## Normalización y carga
-
-1. Descargar el recurso (CSV/XLSX) o consultar `datastore_search`.
-2. Limpiar con `pandas`: normalizar nombre de cantón contra `cantones.nombre`, tipo de delito, año.
-3. Calcular una tasa normalizada por cantón (ej. delitos por 10,000 habitantes usando `cantones.poblacion`, o un score relativo entre cantones si no se quiere depender de datos de población).
-4. Insertar en `estadisticas_seguridad` (ver [db/schema.sql](../db/schema.sql)): `canton_id`, `tipo_delito`, `cantidad`, `anio`.
-5. Registrar la corrida en `sincronizaciones` (`fuente_id` = OIJ).
 
 ## Advertencia ética (obligatoria en el sistema)
 
@@ -52,4 +69,4 @@ Estas son **estadísticas agregadas por cantón**, nunca a nivel de persona. El 
 
 ## Frecuencia de sincronización
 
-Trimestral — estos datasets no se actualizan con mucha frecuencia. El equipo debe fijar desde el inicio un año o rango de años de referencia (`OIJ_ANIO_REFERENCIA`) para mantener consistencia en todo el sistema, ya que los recursos del OIJ pueden tener periodicidad distinta entre sí.
+Trimestral. El archivo se publica por año completo y se actualiza mensualmente según el portal, así que conviene fijar en equipo un año de referencia (`OIJ_ANIO_REFERENCIA`) y no mezclar años parciales en el índice.
