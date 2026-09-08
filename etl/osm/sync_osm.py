@@ -20,8 +20,11 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
 
+import time
+
 import osm2geojson
 import overpy
+import requests
 from dotenv import load_dotenv
 
 from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
@@ -49,6 +52,69 @@ def construir_query(bbox: str) -> str:
     );
     out center tags;
     """
+
+
+# Instancia principal + un espejo de respaldo, por si la pública oficial
+# está saturada (429 Too Many Requests / 504 Gateway Timeout son comunes
+# cuando se consulta un cantón detrás de otro en una corrida masiva).
+_INSTANCIAS_OVERPASS = [
+    OVERPASS_API_URL,
+    "https://overpass.kumi.systems/api/interpreter",
+]
+
+_HEADERS_OVERPASS = {
+    "User-Agent": (
+        "eco-inversion-cr-osm-etl/1.0 "
+        "(proyecto universitario; contacto: kaaarmkpop@gmail.com)"
+    )
+}
+
+
+def consultar_overpass(query: str, intentos_por_instancia: int = 3) -> dict:
+    """
+    Hace la petición a Overpass con `requests` y un User-Agent descriptivo,
+    en vez de usar overpy.Overpass.query() directamente: ese método llama a
+    `urllib.request.urlopen` con el User-Agent por defecto de Python
+    ("Python-urllib/x.y"), y overpass-api.de lo rechaza con 406 Not
+    Acceptable (piden un User-Agent que identifique la aplicación).
+
+    Reintenta con espera progresiva (5s, 10s, 20s...) ante 429 (demasiadas
+    consultas) y 504 (servidor saturado) — esperable en corridas masivas
+    contra la instancia pública. Si una instancia agota sus reintentos,
+    prueba con la siguiente de `_INSTANCIAS_OVERPASS` antes de rendirse.
+
+    Devuelve el JSON crudo de Overpass. overpy.Result.from_json(...) lo
+    convierte a objetos Node/Way cuando hace falta, y osm2geojson.json2geojson(...)
+    lo convierte a GeoJSON — ambos a partir del mismo JSON, sin repetir la consulta.
+    """
+    instancias = list(dict.fromkeys(_INSTANCIAS_OVERPASS))  # sin duplicar si ya coincide
+    ultimo_error: Exception | None = None
+
+    for url in instancias:
+        espera = 5.0
+        for intento in range(1, intentos_por_instancia + 1):
+            try:
+                resp = requests.post(url, data={"data": query}, headers=_HEADERS_OVERPASS, timeout=60)
+            except requests.RequestException as exc:
+                ultimo_error = exc
+            else:
+                if resp.status_code == 200:
+                    return resp.json()
+                if resp.status_code in (429, 504):
+                    ultimo_error = requests.exceptions.HTTPError(
+                        f"{resp.status_code} de Overpass ({url})"
+                    )
+                else:
+                    resp.raise_for_status()
+
+            if intento < intentos_por_instancia:
+                print(f"    ({url.split('/')[2]}, intento {intento}/{intentos_por_instancia} falló: "
+                      f"{ultimo_error} — reintentando en {espera:.0f}s)")
+                time.sleep(espera)
+                espera *= 2
+        print(f"    {url.split('/')[2]} agotó sus reintentos, probando siguiente instancia...")
+
+    raise ultimo_error  # todas las instancias fallaron
 
 
 def hay_cache_vigente(conn, canton_id: int) -> bool:
@@ -82,8 +148,8 @@ def sincronizar_canton(nombre_canton: str, bbox: str, forzar: bool = False) -> i
             print(f"Caché vigente para '{nombre_canton}' (<{OSM_CACHE_DIAS} días) — no se consulta Overpass")
             return 0
 
-        api = overpy.Overpass(url=OVERPASS_API_URL)
-        resultado = api.query(construir_query(bbox))
+        datos_crudos = consultar_overpass(construir_query(bbox))
+        resultado = overpy.Result.from_json(datos_crudos)
 
         insertados = 0
         with conn.cursor() as cur:

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { obtenerIndices, obtenerZonas, type IndiceViabilidad, type Zona } from "./api";
 import MapView from "./components/MapView";
 import Sidebar from "./components/Sidebar";
-
+import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";
 type CriterioOrden = "indice_total" | "factor_ambiental" | "factor_inversion" | "factor_conectividad" | "factor_seguridad";
 
 export default function App() {
@@ -55,6 +55,12 @@ export default function App() {
             indicesPorCanton={indicesPorCanton}
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
+           mostrarCapasSnit={criterioOrden === "factor_ambiental"}
+          />
+          <PanelBusquedaCanton
+            cantonSeleccionado={cantonSeleccionado}
+            onSeleccionarCanton={setCantonSeleccionado}
+                 activo={criterioOrden === "factor_ambiental"}
           />
         </main>
       </div>
