@@ -6,8 +6,8 @@ primer bloqueante para probar la carga real de `infraestructura_osm`.
 
 ## Fuente de los polígonos
 
-Se descarga manualmente (no hay acceso automatizado a estos dominios desde
-el entorno de Claude) uno de estos dos GeoJSON con los 81-84 cantones de
+Se descarga manualmente (no hay acceso automatizado a estos dominios desde este entorno)
+uno de estos dos GeoJSON con los 81-84 cantones de
 Costa Rica y se guarda en `db/cantones_cr.geojson`:
 
 - ArcGIS Hub (datos abiertos, campos `NOM_PROV` / `NOM_CANT_1`):
