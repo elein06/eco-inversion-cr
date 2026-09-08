@@ -1,4 +1,4 @@
 owslib>=0.29
+requests>=2.31
 psycopg2-binary>=2.9
-shapely>=2.0
 python-dotenv>=1.0

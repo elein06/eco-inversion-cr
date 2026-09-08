@@ -4,6 +4,7 @@
 -- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS unaccent;
 
 -- ------------------------------------------------------------
 -- 1. Catálogo de fuentes OSINT (trazabilidad de procedencia)

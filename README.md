@@ -86,12 +86,26 @@ API disponible en `http://localhost:8000`, documentación interactiva en `http:/
 
 Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo `DATABASE_URL`. Ejemplos:
 
+> **Orden importante:** el ETL del SNIT va primero. Es el que llena la tabla
+> `cantones`, la unidad territorial contra la que se cruzan las otras tres
+> fuentes. Nadie más debe cargar esa tabla.
+
 ```bash
-cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --listar-capas
+# 1. SNIT — carga cantones + las 3 capas ambientales y calcula el Factor Ambiental
+cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --todas --calcular-factor
 cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --archivo reportes/contratos.xlsx
 cd etl/osm     && pip install -r requirements.txt && python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06
 cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
 ```
+
+Cada script trae su propia ayuda con todas las opciones disponibles:
+
+```bash
+python sync_snit.py --help
+```
+
+Detalle de cada fuente —endpoints, formatos, tiempos esperados y decisiones
+técnicas— en su archivo de `/docs`.
 
 Después de cargar datos nuevos, recalcular el índice:
 

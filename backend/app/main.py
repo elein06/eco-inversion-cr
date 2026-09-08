@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import contratos, indice, infraestructura, seguridad, zonas
+from app.routers import ambiental, contratos, indice, infraestructura, seguridad, zonas
 
 app = FastAPI(
     title="Eco-Inversión Costa Rica API",
@@ -27,7 +27,7 @@ app.include_router(contratos.router)
 app.include_router(infraestructura.router)
 app.include_router(seguridad.router)
 app.include_router(indice.router)
-
+app.include_router(ambiental.router)
 
 @app.get("/")
 def raiz():
@@ -35,6 +35,8 @@ def raiz():
         "proyecto": "Eco-Inversión Costa Rica",
         "endpoints": [
             "/zonas",
+            "/ambiental/capas",
+            "/ambiental/factor",
             "/contratos-ambientales",
             "/infraestructura",
             "/seguridad",

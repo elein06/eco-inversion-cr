@@ -1,11 +1,12 @@
 import { GeoJSON, MapContainer, TileLayer } from "react-leaflet";
 import type { IndiceViabilidad, Zona } from "../api";
-
+import CapasAmbientales from "../SNIT/components/CapasAmbientales";
 interface MapViewProps {
   zonas: Zona[];
   indicesPorCanton: Map<number, IndiceViabilidad>;
   cantonSeleccionado: number | null;
   onSeleccionarCanton: (cantonId: number) => void;
+  mostrarCapasSnit?: boolean;
 }
 
 /** Verde (alto) → amarillo → rojo (bajo), acorde al índice_total de cada cantón. */
@@ -22,6 +23,7 @@ export default function MapView({
   indicesPorCanton,
   cantonSeleccionado,
   onSeleccionarCanton,
+  mostrarCapasSnit = false,
 }: MapViewProps) {
   return (
     <MapContainer center={[9.93, -84.08]} zoom={8} style={{ height: "100%", width: "100%" }}>
@@ -48,6 +50,7 @@ export default function MapView({
           />
         );
       })}
+      {mostrarCapasSnit && <CapasAmbientales cantonSeleccionado={cantonSeleccionado} />}
     </MapContainer>
   );
 }
