@@ -1,8 +1,10 @@
 
-import { GeoJSON, LayersControl } from "react-leaflet";
+import { useEffect } from "react";
+import { GeoJSON, LayersControl, useMap } from "react-leaflet";
 import type { TipoCapa } from "../../api";
 import { ESTILOS, ORDEN_CAPAS } from "../estilos";
 import { useCapasSnit } from "../hooks/useCapasSnit";
+import { registrarMapa } from "../mapa";
 
 interface CapasAmbientalesProps {
   /** Si hay un cantón seleccionado, las capas se filtran a esa zona. */
@@ -11,6 +13,14 @@ interface CapasAmbientalesProps {
 
 export default function CapasAmbientales({ cantonSeleccionado }: CapasAmbientalesProps) {
   const { capas, error } = useCapasSnit(cantonSeleccionado);
+
+  // Este componente sí está dentro del <MapContainer>, así que puede pedir la
+  // instancia del mapa y dejarla disponible para el panel de detalle, que vive
+  // fuera y necesita centrarlo al hacer clic en una geometría.
+  const mapa = useMap();
+  useEffect(() => {
+    registrarMapa(mapa);
+  }, [mapa]);
 
   if (error) {
     console.warn("No se pudieron cargar las capas del SNIT:", error);

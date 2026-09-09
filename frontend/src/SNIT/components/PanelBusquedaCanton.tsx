@@ -7,6 +7,7 @@ import {
   type FactorAmbiental,
 } from "../../api";
 import { ESTILOS } from "../estilos";
+import { limpiarResaltado, resaltarGeometria } from "../mapa";
 
 interface PanelProps {
   cantonSeleccionado: number | null;
@@ -57,6 +58,10 @@ export default function PanelBusquedaCanton({
   // Las capas sí se piden a la API en cada selección: filtrarlas en el
   // navegador obligaría a descargar las 6 656 geometrías del país.
   useEffect(() => {
+    // El resaltado pertenece al cantón anterior: al cambiar deja de tener
+    // sentido y hay que borrarlo.
+    limpiarResaltado();
+
     if (!detalle) {
       setAreas([]);
       setCorredores([]);
@@ -100,7 +105,10 @@ export default function PanelBusquedaCanton({
           <span style={{ fontWeight: 400, color: "#64748b" }}> · {detalle.provincia}</span>
         </h3>
         <button
-          onClick={() => onSeleccionarCanton(null)}
+          onClick={() => {
+            limpiarResaltado();
+            onSeleccionarCanton(null);
+          }}
           title="Cerrar"
           style={{ border: "none", background: "none", cursor: "pointer", fontSize: "1.1rem" }}
         >
@@ -166,7 +174,18 @@ function Tabla({
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <tbody>
             {filas.map((fila) => (
-              <tr key={fila.capa_id} style={{ borderTop: "1px solid #e2e8f0" }}>
+              <tr
+                key={fila.capa_id}
+                onClick={() =>
+                  resaltarGeometria(
+                    fila.geom,
+                    fila.nombre ?? "Sin nombre",
+                    String(fila.atributos?.[campoDetalle] ?? ""),
+                  )
+                }
+                title="Ver en el mapa"
+                style={{ borderTop: "1px solid #e2e8f0", cursor: "pointer" }}
+              >
                 <td style={{ padding: "0.25rem 0" }}>{fila.nombre ?? "Sin nombre"}</td>
                 <td style={{ padding: "0.25rem 0", color: "#64748b", textAlign: "right" }}>
                   {String(fila.atributos?.[campoDetalle] ?? "")}
