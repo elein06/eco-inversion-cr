@@ -1,6 +1,6 @@
 /**
  * Color y etiqueta por categoría ambiental. Las claves son exactamente las de
- * `PALABRAS_CLAVE_AMBIENTAL` en `etl/sicop/clasificacion.py`, que es lo que el
+ * `PALABRAS_CLAVE_AMBIENTAL` en `etl/sicop/sync_sicop.py`, que es lo que el
  * ETL guarda en `contratos_ambientales.categoria_detectada`.
  */
 export const CATEGORIAS: Record<string, { color: string; etiqueta: string }> = {

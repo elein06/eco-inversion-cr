@@ -18,19 +18,6 @@ from psycopg2.extensions import cursor as Cursor
 from app.config import settings
 
 
-def _normalizar_min_max(valores: dict[int, float]) -> dict[int, float]:
-    """Escala un dict {canton_id: valor} a 0-100. Si no hay variación, todos quedan en 50."""
-    if not valores:
-        return {}
-    minimo, maximo = min(valores.values()), max(valores.values())
-    if maximo == minimo:
-        return {canton_id: 50.0 for canton_id in valores}
-    return {
-        canton_id: round((valor - minimo) / (maximo - minimo) * 100, 2)
-        for canton_id, valor in valores.items()
-    }
-
-
 def _factor_ambiental(cur: Cursor) -> dict[int, float]:
     """
     Factor Ambiental (SNIT) — responsable: Integrante 1.
@@ -87,42 +74,54 @@ def _factor_inversion(cur: Cursor) -> dict[int, float]:
 
 
 def _factor_conectividad(cur: Cursor) -> dict[int, float]:
-    """Densidad normalizada de infraestructura clave (OSM) por cantón."""
-    cur.execute(
-        """
-        SELECT canton_id, COUNT(*) AS total_pois
-        FROM infraestructura_osm
-        WHERE canton_id IS NOT NULL AND valido_hasta > now()
-        GROUP BY canton_id
-        """
-    )
-    conteos = {fila["canton_id"]: float(fila["total_pois"]) for fila in cur.fetchall()}
-    return _normalizar_min_max(conteos)
+    """
+    Factor de Conectividad (OSM) — responsable: Integrante 3.
+
+    Lee la vista `v_factor_conectividad`, que crea el ETL de OSM en
+    `etl/osm/factor_conectividad.py`. No recalcula nada aquí: la
+    normalización min-max ya vive en la vista, sobre los 84 cantones (con y
+    sin POIs), no solo sobre los que tienen datos — ver el porqué en ese
+    archivo. El detalle está en docs/osm.md.
+
+    Si la vista aún no existe —porque nadie ha corrido `sync_osm.py
+    --calcular-factor` en esta base— devuelve un dict vacío y
+    `calcular_y_guardar_indices` asigna 0.0.
+    """
+    cur.execute("SELECT to_regclass('v_factor_conectividad') IS NOT NULL AS existe")
+    if not cur.fetchone()["existe"]:
+        return {}
+
+    cur.execute("SELECT canton_id, factor_conectividad FROM v_factor_conectividad")
+    return {
+        fila["canton_id"]: float(fila["factor_conectividad"]) for fila in cur.fetchall()
+    }
 
 
 def _factor_seguridad(cur: Cursor) -> dict[int, float]:
-    """Inverso de la tasa de incidencia delictiva (OIJ), normalizada por cantón."""
-    cur.execute(
-        """
-        SELECT
-            c.canton_id,
-            COALESCE(SUM(e.cantidad), 0) AS total_delitos,
-            c.poblacion
-        FROM cantones c
-        LEFT JOIN estadisticas_seguridad e ON e.canton_id = c.canton_id
-        GROUP BY c.canton_id, c.poblacion
-        """
-    )
-    tasas: dict[int, float] = {}
-    for fila in cur.fetchall():
-        if fila["poblacion"]:
-            tasas[fila["canton_id"]] = fila["total_delitos"] / fila["poblacion"] * 10_000
-        else:
-            tasas[fila["canton_id"]] = float(fila["total_delitos"])
+    """
+    Factor de Seguridad (OIJ) — responsable: Integrante 4.
 
-    normalizado = _normalizar_min_max(tasas)
-    # Invertir: a menor tasa de criminalidad, mayor puntaje de seguridad.
-    return {canton_id: round(100 - score, 2) for canton_id, score in normalizado.items()}
+    Lee la vista `v_factor_seguridad`, que crea el ETL del OIJ en
+    `etl/oij/factor_seguridad.py`. No recalcula nada aquí: es el inverso de
+    la tasa de incidencia delictiva (por 10 000 habitantes), normalizada
+    min-max contra los 84 cantones (con y sin datos) — igual arquitectura
+    que ambiental, inversión y conectividad. El detalle está en docs/oij.md.
+
+    Si la vista aún no existe —porque nadie ha corrido `sync_oij.py
+    --calcular-factor` en esta base— devuelve un dict vacío y
+    `calcular_y_guardar_indices` asigna 0.0. Antes de este cambio, este
+    factor SIEMPRE devolvía algo (50 para todos, por falta de variación) aun
+    sin haber corrido el ETL del OIJ ni una sola vez — ver el aviso de
+    cambio de comportamiento en `etl/oij/factor_seguridad.py`.
+    """
+    cur.execute("SELECT to_regclass('v_factor_seguridad') IS NOT NULL AS existe")
+    if not cur.fetchone()["existe"]:
+        return {}
+
+    cur.execute("SELECT canton_id, factor_seguridad FROM v_factor_seguridad")
+    return {
+        fila["canton_id"]: float(fila["factor_seguridad"]) for fila in cur.fetchall()
+    }
 
 
 def calcular_y_guardar_indices(cur: Cursor) -> int:

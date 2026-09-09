@@ -2,15 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import (
-    ambiental,
-    contratos,
-    indice,
-    infraestructura,
-    inversion,
-    seguridad,
-    zonas,
-)
+from app.routers import ambiental, contratos, indice, infraestructura, inversion, seguridad, zonas
 
 app = FastAPI(
     title="Eco-Inversión Costa Rica API",

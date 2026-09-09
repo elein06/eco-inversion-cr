@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { obtenerIndices, obtenerZonas, type IndiceViabilidad, type Zona } from "./api";
 import MapView from "./components/MapView";
 import Sidebar from "./components/Sidebar";
-import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";
+import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";;
 import PanelInversionCanton from "./SICOP/components/PanelInversionCanton";
+import PanelInfraestructuraCanton from "./OSM/components/PanelInfraestructuraCanton";
+import PanelSeguridadCanton from "./OIJ/components/PanelSeguridadCanton";
 type CriterioOrden = "indice_total" | "factor_ambiental" | "factor_inversion" | "factor_conectividad" | "factor_seguridad";
 
 export default function App() {
@@ -56,7 +58,8 @@ export default function App() {
             indicesPorCanton={indicesPorCanton}
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
-           mostrarCapasSnit={criterioOrden === "factor_ambiental"}
+            mostrarCapasSnit={criterioOrden === "factor_ambiental"}
+            mostrarInfraestructuraOsm={criterioOrden === "factor_conectividad"}
           />
           <PanelBusquedaCanton
             cantonSeleccionado={cantonSeleccionado}
@@ -70,6 +73,25 @@ export default function App() {
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
             activo={criterioOrden === "factor_inversion"}
+          />
+          {/* Equivalente de OSM (Integrante 3): mismo lugar, mismo criterio
+              de activación y mismo patrón de datos que SNIT y SICOP — pide
+              el desglose de los 84 cantones una vez a /infraestructura/factor
+              y los POIs del cantón abierto por separado. */}
+          <PanelInfraestructuraCanton
+            cantonSeleccionado={cantonSeleccionado}
+            onSeleccionarCanton={setCantonSeleccionado}
+            activo={criterioOrden === "factor_conectividad"}
+          />
+          {/* Equivalente de OIJ (Integrante 4): mismo lugar, mismo patrón de
+              datos que los otros tres. Sin capa propia en el mapa —a
+              diferencia de SNIT (polígonos) y OSM (POIs con coordenadas),
+              las estadísticas del OIJ son agregados por cantón, sin
+              geometría propia que dibujar. */}
+          <PanelSeguridadCanton
+            cantonSeleccionado={cantonSeleccionado}
+            onSeleccionarCanton={setCantonSeleccionado}
+            activo={criterioOrden === "factor_seguridad"}
           />
         </main>
       </div>

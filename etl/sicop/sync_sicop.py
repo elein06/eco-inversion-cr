@@ -1,31 +1,20 @@
 """
 ETL — Integrante 2 — SICOP (inversión municipal ambiental)
 
-Aporta el Factor de Inversión Municipal (25%) del Índice de Viabilidad, a
-partir de los contratos públicos que el Módulo de Descarga de Datos (Datos
-Abiertos) de SICOP publica sin token.
-
-Este archivo es solo la puerta de entrada: interpreta los argumentos y
-coordina los demás módulos de la carpeta.
-
-    reportes.py         qué reportes existen, sus códigos y sus filtros
-    descarga_sicop.py   hablar con la API de SICOP (solicitar/esperar/bajar)
-    confirmacion.py     el código por correo que SICOP exige antes de construir
-    clasificacion.py    el criterio de "contrato ambiental", por palabras clave
-    normalizacion.py    unir las cuatro tablas y armar las filas finales
-    carga_postgres.py   escribir en `contratos_ambientales`
-    factor_inversion.py calcular el puntaje por cantón
+Flujo:
+  1. Leer un reporte descargado manualmente del módulo de datos abiertos de
+     SICOP (Excel/CSV/JSON) — SICOP no ofrece una API REST limpia.
+  2. Clasificar cada contrato como "ambiental" con un filtro de palabras
+     clave por regex sobre la descripción del objeto contractual, agrupadas
+     en 6 categorías (ver PALABRAS_CLAVE_AMBIENTAL) — no machine learning.
+  3. Cargar los contratos ambientales en `contratos_ambientales`.
+  4. Con --calcular-factor: crear/recrear v_factor_inversion, que convierte
+     esos contratos en el Factor de Inversión Municipal del índice.
 
 Uso:
-    python sync_sicop.py --listar-reportes
-    python sync_sicop.py --criterio
-    python sync_sicop.py --solicitar --todos --desde 2026-06-01 --hasta 2026-09-01 \
-                         --correo yo@ejemplo.com
-    python sync_sicop.py --confirmar --codigo Lw45ef      # ubica solo el reporte
-    python sync_sicop.py --pendientes
-    python sync_sicop.py --descargar --report-id 36713 --reporte contratos
-    python sync_sicop.py --cargar --dry-run
-    python sync_sicop.py --cargar --calcular-factor
+    python sync_sicop.py --archivo reportes/contratos_2025.xlsx
+    python sync_sicop.py --archivo reportes/contratos_2025.xlsx --calcular-factor
+    python sync_sicop.py --calcular-factor                         # solo recrea la vista
 """
 import argparse
 import glob
@@ -41,159 +30,32 @@ if hasattr(sys.stdout, "reconfigure"):
 # paquete instalable, así que se agrega su carpeta al path.
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
 
-from carga_postgres import cargar_contratos  # noqa: E402
-from clasificacion import resumen_criterio  # noqa: E402
-from confirmacion import (  # noqa: E402
-    adivinar_reporte,
-    confirmar_codigo,
-    leer_solicitud,
-    listar_pendientes,
-    solicitar_codigo,
-)
-from db import get_connection, registrar_sincronizacion  # noqa: E402
-from descarga_sicop import DIR_DATOS, descargar, esperar, solicitar  # noqa: E402
+import pandas as pd
+from dotenv import load_dotenv
+
+from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
 from factor_inversion import calcular_factor_inversion  # noqa: E402
-from normalizacion import cargar_tablas, construir_dataset  # noqa: E402
-from reportes import FORMATOS, REPORTES, REPORTES_DEL_PROYECTO, URL_MODULO  # noqa: E402
 
+load_dotenv()
 
-def listar_reportes():
-    print("\nReportes del Módulo de Descarga de Datos de SICOP")
-    print("  {}".format(URL_MODULO))
-    print(
-        "\n{:<16} {:<14} {:<32} {:<7} {}".format(
-            "nombre", "código", "sección", "fechas", "usa"
-        )
-    )
-    for nombre, cfg in REPORTES.items():
-        print(
-            "{:<16} {:<14} {:<32} {:<7} {}".format(
-                nombre,
-                cfg["codigo"],
-                cfg["seccion"][:32],
-                "sí" if cfg["usa_fechas"] else "no",
-                "SÍ" if cfg["usa"] else "-",
-            )
-        )
-    print("\nDetalle de cada uno:")
-    for nombre, cfg in REPORTES.items():
-        print("\n  {} ({})".format(nombre, cfg["codigo"]))
-        print("    {}".format(cfg["descripcion"]))
-
-
-def solicitar_reportes(nombres, formato, desde, hasta, correo=None):
-    """
-    Encola cada reporte y, si se pasó --correo, pide de una vez el código de
-    confirmación que SICOP necesita para empezar a construirlo.
-
-    Sin confirmar, un reporte se queda en 'msg_not_builded_report' de forma
-    indefinida: se comprobó dejando uno encolado 45 minutos. Por eso, sin
-    --correo, este comando solo encola y avisa qué falta.
-    """
-    rutas = []
-    pendientes = []
-    for nombre in nombres:
-        cfg = REPORTES[nombre]
-        print("\n>>> {} — {} ({})".format(nombre, cfg["seccion"], cfg["codigo"]))
-
-        if correo is None:
-            datos = solicitar(
-                nombre,
-                formato=formato,
-                desde=desde if cfg["usa_fechas"] else None,
-                hasta=hasta if cfg["usa_fechas"] else None,
-            )
-            report_id = datos["reportId"]
-            print(
-                "  encolado -> reportId={} status={}".format(
-                    report_id, datos.get("status")
-                )
-            )
-            pendientes.append((nombre, report_id, None))
-            continue
-
-        # Con correo: encolar, pedir el código y esperar a que llegue.
-        datos = solicitar(
-            nombre,
-            formato=formato,
-            desde=desde if cfg["usa_fechas"] else None,
-            hasta=hasta if cfg["usa_fechas"] else None,
-        )
-        report_id = datos["reportId"]
-        confirm_id = solicitar_codigo(
-            report_id, cfg["codigo"], correo, solicitud=datos.get("_solicitud")
-        )
-        print(
-            "  encolado -> reportId={}; código enviado a {} "
-            "(confirmId {})".format(report_id, correo, confirm_id)
-        )
-        pendientes.append((nombre, report_id, confirm_id))
-
-    print(
-        "\nEncolados: {}".format(
-            ", ".join("{} ({})".format(n, r) for n, r, _ in pendientes)
-        )
-    )
-    print(
-        "\nFalta confirmar el código que SICOP envió por correo. Llega uno por\n"
-        "reporte y NO dice a cuál pertenece, así que conviene no pasar\n"
-        "--report-id y dejar que el script lo ubique — una vez por cada código:"
-    )
-    for _ in pendientes:
-        print("  python sync_sicop.py --confirmar --codigo <código del correo>")
-    if correo is None:
-        print(
-            "\n(o vuelva a correr con --correo <su correo> para que el script "
-            "pida el código solo)"
-        )
-    return rutas
-
-
-def _nombre_por_codigo(code_report):
-    """SV_CONT_0014 -> 'contratos'."""
-    for nombre, cfg in REPORTES.items():
-        if cfg["codigo"] == code_report:
-            return nombre
-    return code_report
-
-
-def mostrar_pendientes():
-    """
-    Muestra qué reportId corresponde a qué reporte, para no tener que adivinar
-    cuál de los correos de SICOP va con cuál.
-    """
-    solicitudes = listar_pendientes()
-    if not solicitudes:
-        print(
-            "\nNo hay solicitudes registradas. Pida una con:\n"
-            "  python sync_sicop.py --solicitar --todos --correo <su correo>"
-        )
-        return
-
-    print("\nSolicitudes de descarga registradas")
-    print("{:<10} {:<16} {:<14} {:<22} {}".format(
-        "reportId", "reporte", "código", "solicitado (UTC)", "estado"))
-    for s in solicitudes:
-        print("{:<10} {:<16} {:<14} {:<22} {}".format(
-            s.get("reportId", "?"),
-            _nombre_por_codigo(s.get("codeReport", "")),
-            s.get("codeReport", ""),
-            (s.get("fecha") or "")[:19],
-            "descargado" if s.get("descargado") else "falta confirmar",
-        ))
-    print(
-        "\nEl correo de SICOP NO dice a qué reporte pertenece cada código: "
-        "llega con el asunto\n'Código verificación para reporte', sin enlace y "
-        "sin el número de reporte. Si se\npiden los tres reportes seguidos, "
-        "además los tres correos llegan con segundos\nde diferencia, así que "
-        "la hora tampoco desempata."
-    )
-    if any(not s.get("descargado") for s in solicitudes):
-        print(
-            "\nPor eso conviene confirmar sin --report-id y dejar que el "
-            "script ubique el reporte:\n"
-            "  python sync_sicop.py --confirmar --codigo <código del correo>"
-        )
+# Criterio explícito y documentado (ver docs/sicop.md) — no es machine learning.
+# Las palabras clave se agrupan en 6 categorías (no se guarda la palabra que
+# matcheó tal cual): son las mismas 6 que conoce el frontend
+# (frontend/src/SICOP/estilos.ts) y el denominador de sub_diversidad en
+# etl/sicop/factor_inversion.py. Varias palabras pueden apuntar a la misma
+# categoría (con y sin tilde, o sinónimos cercanos).
+PALABRAS_CLAVE_AMBIENTAL: dict[str, list[str]] = {
+    "residuos": ["residuos"],
+    "reciclaje": ["reciclaje"],
+    "agua": ["alcantarillado", "tratamiento de aguas"],
+    "areas_verdes": ["arborizacion", "arborización", "reforestacion", "reforestación"],
+    "infraestructura_verde": ["infraestructura verde"],
+    "gestion_ambiental": ["gestion ambiental", "gestión ambiental"],
+}
+PATRONES_POR_CATEGORIA: dict[str, re.Pattern] = {
+    categoria: re.compile("|".join(re.escape(p) for p in palabras), re.IGNORECASE)
+    for categoria, palabras in PALABRAS_CLAVE_AMBIENTAL.items()
+}
 
 
 def confirmar_y_bajar(nombre, report_id, codigo, formato, espera_max):
@@ -201,53 +63,15 @@ def confirmar_y_bajar(nombre, report_id, codigo, formato, espera_max):
     Confirma el código recibido por correo y, ya con el reporte
     construyéndose, espera y lo baja. Es el paso que cierra el ciclo.
 
-    No hace falta pasar --reporte: al pedir el código se guardó en
-    `data/<reportId>.confirm.json` a qué reporte corresponde ese número, así
-    que basta el reportId que viene en el enlace del correo (`?processId=`).
-    """
-    solicitud = leer_solicitud(report_id)
-
-    if nombre:
-        code_report = REPORTES[nombre]["codigo"]
-        # Si el guardado dice otra cosa, gana el guardado: significa que se
-        # confundió el reportId de un reporte con el nombre de otro, y mandar
-        # el processType equivocado hace que SICOP rechace el código con un
-        # error que no explica nada.
-        if solicitud and solicitud.get("codeReport") != code_report:
-            print(
-                "  aviso: el reportId {} se pidió para '{}' ({}), no para "
-                "'{}'. Se usa el guardado.".format(
-                    report_id,
-                    _nombre_por_codigo(solicitud["codeReport"]),
-                    solicitud["codeReport"],
-                    nombre,
-                )
-            )
-            code_report = solicitud["codeReport"]
-            nombre = _nombre_por_codigo(code_report)
-    elif solicitud:
-        code_report = solicitud["codeReport"]
-        nombre = _nombre_por_codigo(code_report)
-        print("  reportId {} corresponde a '{}' ({})".format(report_id, nombre, code_report))
-    else:
-        raise ValueError(
-            "No hay una solicitud guardada para el reportId {}. Pase --reporte "
-            "para indicar de cuál es, o vuelva a pedir el código con "
-            "--solicitar.".format(report_id)
-        )
-
-    confirmar_codigo(report_id, code_report, codigo)
-    print("  código aceptado; SICOP empezó a construir el reporte {}".format(report_id))
-
-    if not esperar(report_id, espera_max=espera_max):
-        print(
-            "  todavía no está listo. Retome con: python sync_sicop.py "
-            "--descargar --report-id {} --reporte {}".format(report_id, nombre)
-        )
+def clasificar(descripcion: str) -> str | None:
+    """Devuelve la categoría (una de las 6 de PALABRAS_CLAVE_AMBIENTAL) o None
+    si ninguna palabra clave aparece en la descripción del objeto contractual."""
+    if not isinstance(descripcion, str):
         return None
-    ruta = descargar(report_id, nombre, formato)
-    print("  guardado: {}".format(ruta))
-    return ruta
+    for categoria, patron in PATRONES_POR_CATEGORIA.items():
+        if patron.search(descripcion):
+            return categoria
+    return None
 
 
 def archivos_locales(rutas_o_patrones):
@@ -354,112 +178,9 @@ def cargar(rutas, solo_municipalidades, dry_run, desde, hasta):
     return insertados
 
 
-def main():
-    hoy = date.today()
-    parser = argparse.ArgumentParser(
-        description="ETL SICOP (datos abiertos -> clasificación -> PostgreSQL)"
-    )
-    parser.add_argument(
-        "--listar-reportes",
-        action="store_true",
-        help="Muestra el catálogo de reportes de SICOP y sus códigos",
-    )
-    parser.add_argument(
-        "--criterio",
-        action="store_true",
-        help="Imprime el criterio de clasificación ambiental usado",
-    )
-    parser.add_argument(
-        "--solicitar",
-        action="store_true",
-        help="Encola en SICOP los reportes (con --correo pide el código)",
-    )
-    parser.add_argument(
-        "--todos",
-        action="store_true",
-        help="Con --solicitar: pide los tres reportes que usa el proyecto",
-    )
-    parser.add_argument(
-        "--reporte",
-        action="append",
-        choices=sorted(REPORTES),
-        help="Reporte a solicitar o a descargar (repetible)",
-    )
-    parser.add_argument(
-        "--correo",
-        help=(
-            "Correo al que SICOP manda el código de confirmación. Es el único "
-            "dato personal del ETL y solo se usa en esta llamada: no se guarda "
-            "ni se versiona"
-        ),
-    )
-    parser.add_argument(
-        "--confirmar",
-        action="store_true",
-        help=(
-            "Confirma el código recibido por correo y baja el reporte. "
-            "Sin --report-id, prueba el código contra las solicitudes "
-            "pendientes"
-        ),
-    )
-    parser.add_argument(
-        "--codigo",
-        help=(
-            "Código que llegó al correo. 6-7 caracteres alfanuméricos y "
-            "distingue mayúsculas (p. ej. 'Lw45ef'), no son dígitos"
-        ),
-    )
-    parser.add_argument(
-        "--pendientes",
-        action="store_true",
-        help="Muestra qué reportId corresponde a qué reporte y cuáles faltan confirmar",
-    )
-    parser.add_argument(
-        "--descargar",
-        action="store_true",
-        help="Baja un reporte ya construido, por --report-id",
-    )
-    parser.add_argument("--report-id", type=int, help="reportId devuelto por SICOP")
-    parser.add_argument(
-        "--formato", default="csv", choices=list(FORMATOS), help="Formato del archivo"
-    )
-    parser.add_argument(
-        "--desde",
-        default=str(hoy - timedelta(days=90)),
-        help="Inicio del rango (YYYY-MM-DD). Por defecto, 90 días atrás",
-    )
-    parser.add_argument(
-        "--hasta", default=str(hoy), help="Fin del rango (YYYY-MM-DD). Por defecto, hoy"
-    )
-    parser.add_argument(
-        "--espera",
-        type=int,
-        default=None,
-        help="Segundos máximos de espera por reporte (default: SICOP_ESPERA_MAX)",
-    )
-    parser.add_argument(
-        "--cargar",
-        action="store_true",
-        help="Procesa los reportes de data/ y carga en PostgreSQL",
-    )
-    parser.add_argument(
-        "--archivo",
-        action="append",
-        help="Archivo o comodín a procesar (repetible). Default: data/*",
-    )
-    parser.add_argument(
-        "--todas-instituciones",
-        action="store_true",
-        help=(
-            "No filtrar a gobiernos locales. Cambia el significado del factor: "
-            "ver la nota de alcance en docs/sicop.md"
-        ),
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Clasifica y reporta, sin escribir en la base de datos",
-    )
+def main() -> None:
+    parser = argparse.ArgumentParser(description="ETL SICOP (reporte → clasificación → PostgreSQL)")
+    parser.add_argument("--archivo", help="Ruta al reporte descargado (xlsx/csv)")
     parser.add_argument(
         "--calcular-factor",
         action="store_true",
@@ -467,147 +188,24 @@ def main():
     )
     args = parser.parse_args()
 
-    if not any(
-        [
-            args.listar_reportes,
-            args.criterio,
-            args.solicitar,
-            args.pendientes,
-            args.confirmar,
-            args.descargar,
-            args.cargar,
-            args.calcular_factor,
-        ]
-    ):
-        parser.print_help()
+    # --calcular-factor solo (sin --archivo): recrea la vista con lo que ya
+    # esté cargado, sin procesar ningún reporte nuevo. Mismo criterio que
+    # sync_osm.py y sync_oij.py --calcular-factor sin fuente.
+    if args.calcular_factor and not args.archivo:
+        calcular_factor_inversion()
         return
 
-    if args.listar_reportes:
-        listar_reportes()
-    if args.criterio:
-        print()
-        print(resumen_criterio())
-    if args.pendientes:
-        mostrar_pendientes()
-
-    desde = date.fromisoformat(args.desde)
-    hasta = date.fromisoformat(args.hasta)
+    if not args.archivo:
+        parser.error("indique --archivo, o --calcular-factor solo")
 
     try:
-        if args.solicitar:
-            nombres = REPORTES_DEL_PROYECTO if args.todos else (args.reporte or [])
-            if not nombres:
-                parser.error("--solicitar requiere --todos o al menos un --reporte")
-            solicitar_reportes(
-                nombres, args.formato, desde, hasta, correo=args.correo
-            )
-
-        if args.confirmar:
-            if not args.codigo:
-                parser.error("--confirmar requiere --codigo")
-
-            if args.report_id:
-                # --reporte es opcional: el reporte se deduce de
-                # data/<reportId>.confirm.json, escrito al pedir el código.
-                confirmar_y_bajar(
-                    (args.reporte or [None])[0],
-                    args.report_id,
-                    args.codigo,
-                    args.formato,
-                    args.espera,
-                )
-            else:
-                # Sin --report-id: el correo de SICOP no dice a qué reporte
-                # pertenece el código, así que se prueba contra los pendientes.
-                print(
-                    "\nEl correo de SICOP no identifica el reporte. Probando "
-                    "el código contra las solicitudes pendientes..."
-                )
-                solicitud = adivinar_reporte(args.codigo)
-                if solicitud is None:
-                    parser.error(
-                        "Ninguna solicitud pendiente aceptó ese código. "
-                        "Verifique que esté completo y respetando mayúsculas "
-                        "(son 6-7 caracteres alfanuméricos, p. ej. 'Lw45ef'), "
-                        "o revise 'python sync_sicop.py --pendientes'."
-                    )
-                report_id = solicitud["reportId"]
-                nombre = _nombre_por_codigo(solicitud["codeReport"])
-                print("  código aceptado para '{}' (reportId {})".format(
-                    nombre, report_id))
-                if not esperar(report_id, espera_max=args.espera):
-                    print(
-                        "  todavía no está listo. Retome con: python "
-                        "sync_sicop.py --descargar --report-id {} --reporte "
-                        "{}".format(report_id, nombre)
-                    )
-                else:
-                    ruta = descargar(
-                        report_id,
-                        nombre,
-                        args.formato,
-                        metadatos=solicitud.get("solicitud"),
-                    )
-                    print("  guardado: {}".format(ruta))
-
-        if args.descargar:
-            if not args.report_id:
-                parser.error("--descargar requiere --report-id")
-
-            solicitud = leer_solicitud(args.report_id) or {}
-            nombre = (args.reporte or [None])[0] or (
-                _nombre_por_codigo(solicitud["codeReport"])
-                if solicitud.get("codeReport")
-                else None
-            )
-
-            # Esperar antes de bajar. Un reporte confirmado pero todavía en
-            # construcción responde al endpoint de descarga con HTTP 500, un
-            # error genérico que no dice que falte esperar. Se pregunta primero
-            # con checkDownload, que sí lo distingue.
-            if not esperar(args.report_id, espera_max=args.espera):
-                print(
-                    "  sigue construyéndose. Vuelva a correr el mismo comando "
-                    "más tarde; el reporte no se pierde."
-                )
-            else:
-                ruta = descargar(
-                    args.report_id,
-                    nombre,
-                    args.formato,
-                    metadatos=solicitud.get("solicitud"),
-                )
-                print("guardado: {}".format(ruta))
-
-        if args.cargar:
-            rutas = archivos_locales(args.archivo)
-            if not rutas:
-                parser.error(
-                    "No hay archivos que procesar en {}. Corra --solicitar "
-                    "primero.".format(DIR_DATOS)
-                )
-            cargar(
-                rutas,
-                solo_municipalidades=not args.todas_instituciones,
-                dry_run=args.dry_run,
-                desde=desde,
-                hasta=hasta,
-            )
-
+        total = procesar(args.archivo)
+        print(f"OK: {total} contratos ambientales cargados desde '{args.archivo}'")
         if args.calcular_factor:
             calcular_factor_inversion()
-
     except Exception as exc:
-        # El log de `sincronizaciones` es el mecanismo de trazabilidad del
-        # proyecto: un fallo del ETL también tiene que quedar registrado.
-        if not args.dry_run:
-            try:
-                with get_connection() as conn:
-                    registrar_sincronizacion(
-                        conn, fuente_codigo="SICOP", estado="error", mensaje=str(exc)
-                    )
-            except Exception:
-                pass
+        with get_connection() as conn:
+            registrar_sincronizacion(conn, fuente_codigo="SICOP", estado="error", mensaje=str(exc))
         raise
 
 

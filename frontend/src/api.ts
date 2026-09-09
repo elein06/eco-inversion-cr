@@ -183,3 +183,108 @@ export async function obtenerFactorInversion(): Promise<FactorInversion[]> {
 export async function obtenerContratosPorCanton(cantonId: number): Promise<ContratoAmbiental[]> {
   return obtenerJsonConDetalle<ContratoAmbiental[]>(`/contratos-ambientales?canton_id=${cantonId}`);
 }
+
+/* ------------------------------------------------------------------ */
+/* OSM / Overpass — Integrante 3                                      */
+/* ------------------------------------------------------------------ */
+
+/** Coincide con las claves de `CATEGORIAS_OSM` en `etl/osm/sync_osm.py`. */
+export type CategoriaOsm = "centro_acopio" | "escuela" | "via_principal";
+
+export interface InfraestructuraOsm {
+  poi_id: number;
+  canton_id: number | null;
+  categoria: CategoriaOsm;
+  nombre: string | null;
+  geom: GeoJSON.Point;
+  fecha_consulta: string;
+  valido_hasta: string;
+}
+
+/**
+ * Puntos de interés de OSM/Overpass de un cantón (fuente: Integrante 3):
+ * centros de acopio, escuelas y vías principales. Por defecto solo trae los
+ * vigentes (dentro de la caché de OSM_CACHE_DIAS días), que es justo lo que
+ * el backend cuenta para el Factor de Conectividad.
+ */
+export async function obtenerInfraestructuraPorCanton(
+  cantonId: number,
+  soloVigente = true,
+): Promise<InfraestructuraOsm[]> {
+  const parametros = new URLSearchParams({
+    canton_id: String(cantonId),
+    solo_vigente: String(soloVigente),
+  });
+  return obtenerJsonConDetalle<InfraestructuraOsm[]>(`/infraestructura?${parametros}`);
+}
+
+export interface FactorConectividad {
+  canton_id: number;
+  codigo_ine: string;
+  nombre: string;
+  provincia: string;
+  pois_centro_acopio: number;
+  pois_escuela: number;
+  pois_via_principal: number;
+  total_pois: number;
+  factor_conectividad: number;
+}
+
+/**
+ * Desglose del Factor de Conectividad de los 84 cantones (vista
+ * v_factor_conectividad). Usa `obtenerJsonConDetalle` a propósito: si el ETL
+ * todavía no corrió `--calcular-factor`, la API responde 503 con el comando
+ * que falta correr, igual que `/inversion/factor` de SICOP.
+ */
+export async function obtenerFactorConectividad(): Promise<FactorConectividad[]> {
+  return obtenerJsonConDetalle<FactorConectividad[]>("/infraestructura/factor");
+}
+
+/* ------------------------------------------------------------------ */
+/* OIJ / Poder Judicial — Integrante 4                                */
+/* ------------------------------------------------------------------ */
+
+/** Respuesta de los endpoints de /seguridad: siempre trae la advertencia ética junto a los datos. */
+export interface RespuestaSeguridad<T> {
+  advertencia: string;
+  datos: T;
+}
+
+export interface EstadisticaSeguridad {
+  estadistica_id: number;
+  canton_id: number;
+  tipo_delito: string;
+  cantidad: number;
+  anio: number;
+  fecha_consulta: string;
+}
+
+export interface FactorSeguridad {
+  canton_id: number;
+  codigo_ine: string;
+  nombre: string;
+  provincia: string;
+  poblacion: number | null;
+  total_delitos: number;
+  tasa_incidencia: number;
+  factor_seguridad: number;
+}
+
+/**
+ * Desglose del Factor de Seguridad de los 84 cantones (vista
+ * v_factor_seguridad). Usa `obtenerJsonConDetalle` a propósito: si el ETL
+ * todavía no corrió `--calcular-factor`, la API responde 503 con el comando
+ * que falta correr, igual que /inversion/factor e /infraestructura/factor.
+ * La advertencia ética viaja en la misma respuesta — nunca hardcodeada acá.
+ */
+export async function obtenerFactorSeguridad(): Promise<RespuestaSeguridad<FactorSeguridad[]>> {
+  return obtenerJsonConDetalle<RespuestaSeguridad<FactorSeguridad[]>>("/seguridad/factor");
+}
+
+/** Estadísticas policiales crudas (por tipo de delito y año) de un cantón. */
+export async function obtenerEstadisticasPorCanton(
+  cantonId: number,
+): Promise<RespuestaSeguridad<EstadisticaSeguridad[]>> {
+  const parametros = new URLSearchParams({ canton_id: String(cantonId) });
+  return obtenerJsonConDetalle<RespuestaSeguridad<EstadisticaSeguridad[]>>(`/seguridad?${parametros}`);
+}

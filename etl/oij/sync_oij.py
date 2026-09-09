@@ -17,9 +17,15 @@ Por eso este script agrupa y cuenta (canton + tipo_delito + anio) antes de
 cargar a `estadisticas_seguridad` - la transformacion real que pide el
 enunciado del curso, no una copia directa del archivo.
 
+El año de cada carga se resuelve con --anio, o si se omite, con
+OIJ_ANIO_REFERENCIA del .env de la raíz del repo - nunca se mezclan años sin
+que el equipo lo decida explícitamente (ver "Año de referencia" en
+factor_seguridad.py, que aplica el mismo criterio al calcular el factor).
+
 Uso:
     python sync_oij.py --archivo reportes/PJCROD_POLICIALES_V1-2025.csv --anio 2025
     python sync_oij.py --resource-id <id_recurso_ckan> --anio 2025   # fallback, no confirmado para este dataset
+    python sync_oij.py --calcular-factor                              # solo recrea la vista con lo ya cargado
 """
 import argparse
 import os
@@ -32,6 +38,7 @@ import requests
 from dotenv import load_dotenv
 
 from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
+from factor_seguridad import ANIO_REFERENCIA, calcular_factor_seguridad  # noqa: E402
 
 load_dotenv()
 
@@ -119,6 +126,16 @@ def normalizar(df: pd.DataFrame, anio_filtro: int | None) -> pd.DataFrame:
     """
     Convierte el registro por incidente en un agregado por canton + tipo_delito
     + anio, que es lo que espera la tabla `estadisticas_seguridad`.
+
+    El año a filtrar se resuelve con esta prioridad (documentada también en
+    factor_seguridad.py, que aplica el mismo criterio del lado de la vista):
+    1. `--anio` en la linea de comandos, si se paso.
+    2. `OIJ_ANIO_REFERENCIA` del .env, si `--anio` no se paso.
+    3. Si ninguno de los dos esta fijado, NO se filtra aca (se carga todo lo
+       que traiga el archivo) - pero si el archivo trae mas de un anio, se
+       avisa con fuerza: `calcular_factor_seguridad()` se va a negar a crear
+       la vista mientras la tabla tenga anios mezclados sin que el equipo
+       haya fijado OIJ_ANIO_REFERENCIA, para no calcular un factor enganoso.
     """
     df = df.copy()
     for col in ("tipo_delito", "canton", "provincia"):
@@ -133,8 +150,23 @@ def normalizar(df: pd.DataFrame, anio_filtro: int | None) -> pd.DataFrame:
     if len(df) < antes:
         print(f"Se descartaron {antes - len(df)} filas sin canton, delito o fecha valida")
 
-    if anio_filtro:
-        df = df[df["anio"] == anio_filtro]
+    anio_resuelto = anio_filtro if anio_filtro is not None else ANIO_REFERENCIA
+    if anio_resuelto is not None:
+        origen = "--anio" if anio_filtro is not None else "OIJ_ANIO_REFERENCIA (.env)"
+        antes_filtro = len(df)
+        df = df[df["anio"] == anio_resuelto]
+        print(f"Filtrado a año {anio_resuelto} (fuente: {origen}): {antes_filtro} -> {len(df)} filas")
+    else:
+        anios_presentes = sorted(df["anio"].dropna().unique().astype(int).tolist())
+        if len(anios_presentes) > 1:
+            print(
+                f"AVISO: el archivo trae {len(anios_presentes)} años distintos {anios_presentes} y "
+                "no se pasó --anio ni está fijada OIJ_ANIO_REFERENCIA en el .env. Se van a cargar "
+                "TODOS tal cual - pero 'sync_oij.py --calcular-factor' se va a negar a crear la vista "
+                "mientras la tabla tenga años mezclados sin un año de referencia fijado, para no "
+                "calcular un Factor de Seguridad engañoso. Recomendado: volver a correr con --anio "
+                "<año>, o fijar OIJ_ANIO_REFERENCIA en el .env de la raíz del repo."
+            )
 
     agregado = (
         df.groupby(["canton", "tipo_delito", "anio"], as_index=False)
@@ -187,11 +219,34 @@ def cargar(df: pd.DataFrame) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="ETL OIJ (CSV crudo por incidente -> estadisticas agregadas por canton)")
-    fuente = parser.add_mutually_exclusive_group(required=True)
+    fuente = parser.add_mutually_exclusive_group(required=False)
     fuente.add_argument("--resource-id", help="ID del recurso en el datastore de CKAN (fallback, no confirmado)")
     fuente.add_argument("--archivo", help="Ruta al CSV descargado del PJ (ej. reportes/PJCROD_POLICIALES_V1-2025.csv)")
-    parser.add_argument("--anio", type=int, help="Anio de referencia a filtrar (recomendado fijarlo por equipo)")
+    parser.add_argument(
+        "--anio",
+        type=int,
+        help=(
+            "Año a filtrar. Si se omite, usa OIJ_ANIO_REFERENCIA del .env "
+            f"(actualmente: {ANIO_REFERENCIA if ANIO_REFERENCIA is not None else 'sin fijar'}). "
+            "Ver 'Año de referencia' en etl/oij/factor_seguridad.py."
+        ),
+    )
+    parser.add_argument(
+        "--calcular-factor",
+        action="store_true",
+        help="Crea/recrea la vista v_factor_seguridad y muestra el ranking",
+    )
     args = parser.parse_args()
+
+    # --calcular-factor solo (sin --resource-id ni --archivo): recrea la
+    # vista con lo que ya esté cargado, sin descargar nada nuevo. Igual
+    # criterio que sync_osm.py --calcular-factor sin --canton.
+    if args.calcular_factor and not args.resource_id and not args.archivo:
+        calcular_factor_seguridad()
+        return
+
+    if not args.resource_id and not args.archivo:
+        parser.error("indique --resource-id o --archivo, o --calcular-factor solo")
 
     try:
         if args.resource_id:
@@ -204,6 +259,8 @@ def main() -> None:
             f"OK: {total} filas agregadas cargadas "
             f"({df['canton'].nunique()} cantones, {df['tipo_delito'].nunique()} tipos de delito)"
         )
+        if args.calcular_factor:
+            calcular_factor_seguridad()
     except Exception as exc:
         with get_connection() as conn:
             registrar_sincronizacion(conn, fuente_codigo="OIJ", estado="error", mensaje=str(exc))

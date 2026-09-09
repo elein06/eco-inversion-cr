@@ -19,6 +19,17 @@ Los pesos del índice (25% cada uno) son una decisión del equipo, no un estánd
 
 **Advertencia ética:** las estadísticas del OIJ son agregadas por cantón. El sistema nunca insinúa que un cantón "peligroso" implica algo sobre sus habitantes, y su relación con el índice de viabilidad es una correlación definida por el equipo, no una causalidad. Ver [docs/oij.md](docs/oij.md).
 
+**Año de referencia único (OIJ):** el Factor de Seguridad se calcula sobre
+un solo año de estadísticas a la vez — nunca mezclando años, porque un
+cantón con dos años de datos cargados no sería comparable con uno que solo
+tiene uno. Ese año se fija en `OIJ_ANIO_REFERENCIA` (ver
+[.env.example](.env.example)) y lo usan tanto la carga (`sync_oij.py`, como
+valor por defecto de `--anio`) como el cálculo del factor
+(`sync_oij.py --calcular-factor`, al construir `v_factor_seguridad`): si
+`estadisticas_seguridad` llega a tener datos de más de un año sin que esta
+variable esté fijada, el cálculo se niega a correr en vez de mezclarlos en
+silencio. Detalle completo en [docs/oij.md](docs/oij.md).
+
 Plan completo del proyecto (cronograma, riesgos, checklist de rúbrica): [docs/PLAN.md](docs/PLAN.md).
 
 ## Arquitectura
@@ -55,6 +66,14 @@ no solo el puntaje, sino de dónde sale):
 - `GET /inversion/factor` — Factor de Inversión Municipal por cantón con sus
   sub-puntajes; `GET /inversion/factor/{canton_id}` para uno solo
 - `GET /inversion/resumen` — contratos y montos por categoría (procedencia)
+- `GET /infraestructura/factor` — Factor de Conectividad por cantón con su
+  desglose por categoría de POI; `GET /infraestructura/factor/{canton_id}`
+  para uno solo
+- `GET /infraestructura/resumen` — POIs vigentes por categoría (procedencia)
+- `GET /seguridad/factor` — Factor de Seguridad por cantón con su desglose
+  (total de delitos, tasa por 10 000 hab.); `GET /seguridad/factor/{canton_id}`
+  para uno solo
+- `GET /seguridad/resumen` — incidentes por tipo de delito y año (procedencia)
 
 La lista completa —con parámetros, esquemas y un botón para probar cada
 llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
@@ -129,12 +148,14 @@ Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo
 ```bash
 # 1. SNIT — carga cantones + las 3 capas ambientales y calcula el Factor Ambiental
 cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --todas --calcular-factor
-cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --solicitar --todos --correo yo@ejemplo.com
-#    SICOP manda un codigo por correo; se confirma y el script baja, clasifica y carga:
-#    python sync_sicop.py --confirmar --codigo <codigo del correo>
-#    python sync_sicop.py --cargar --calcular-factor
-cd etl/osm     && pip install -r requirements.txt && python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06
-cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
+cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --archivo reportes/contratos_2025.xlsx --calcular-factor
+#    SICOP no tiene API limpia: el reporte se descarga a mano desde su módulo
+#    de datos abiertos (ver docs/sicop.md) y se procesa con --archivo
+cd etl/osm     && pip install -r requirements.txt && python cargar_todos_los_cantones.py --calcular-factor
+#    (o un cantón suelto: python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06 --calcular-factor)
+cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024 --calcular-factor
+#    --anio fija el año de referencia para esta carga; si se omite, usa
+#    OIJ_ANIO_REFERENCIA del .env — ver "Año de referencia único" más arriba
 ```
 
 Guías paso a paso para levantar cada fuente desde cero, pensadas para el resto

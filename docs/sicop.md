@@ -209,8 +209,17 @@ contratos y queda auditable dentro del dato. Lo que ni así se puede convertir
 se carga en su moneda original, y `v_factor_inversion` solo suma
 `moneda = 'CRC'`, de modo que nunca contamina el puntaje.
 
-Efecto medido sobre el reporte real:
+No se usa machine learning. Se define un diccionario de palabras clave que se busca (regex, insensible a mayúsculas) en la descripción del objeto contractual, agrupadas en **6 categorías** — las mismas que usan el panel del frontend (`frontend/src/SICOP/estilos.ts`) y el sub-puntaje de diversidad de la vista `v_factor_inversion` (ver abajo):
 
+```python
+PALABRAS_CLAVE_AMBIENTAL = {
+    "residuos": ["residuos"],
+    "reciclaje": ["reciclaje"],
+    "agua": ["alcantarillado", "tratamiento de aguas"],
+    "areas_verdes": ["arborizacion", "arborización", "reforestacion", "reforestación"],
+    "infraestructura_verde": ["infraestructura verde"],
+    "gestion_ambiental": ["gestion ambiental", "gestión ambiental"],
+}
 ```
 antes:  1014 CRC + 250 USD + 18 EUR  ->  ¢39 424 424 782  (mezclando unidades)
 ahora:  1282 CRC                     ->  ¢41 409 660 445
@@ -227,10 +236,9 @@ seis categorías son: `residuos`, `reciclaje`, `agua`, `areas_verdes`,
 `infraestructura_verde`, `gestion_ambiental`. Cuando una descripción encaja en
 varias, gana la primera según ese orden, que va de lo específico a lo genérico.
 
-El criterio vive completo en [`etl/sicop/clasificacion.py`](../etl/sicop/clasificacion.py)
-y se eligió así a propósito: se lee en 60 líneas, siempre da el mismo resultado
-para la misma entrada, y cuando se equivoca se ve exactamente por qué palabra
-se equivocó.
+`categoria_detectada` guarda la **categoría** (una de las 6 claves de arriba), no la palabra que matcheó — así una descripción que dice "reforestación" y otra que dice "arborización" cuentan como la misma categoría (`areas_verdes`) para el sub-puntaje de diversidad.
+
+Este criterio es simple e imperfecto a propósito: se documenta como regla explícita (no como IA) para poder justificarlo en la exposición.
 
 **Riesgo conocido, documentado en vez de disimulado:** habrá falsos positivos
 (un contrato de "recolección de residuos electrónicos de oficina" no es un
@@ -257,132 +265,11 @@ así en la exposición.
 
 ## Normalización y carga
 
-1. `cargar_tablas` lee los archivos bajados (csv, xlsx, json o zip) y decide
-   qué reporte es cada uno **por sus columnas**, no por el nombre del archivo:
-   el nombre que manda SICOP en `Content-Disposition` no es estable.
-
-   **Descargas que se solapan.** `--cargar` sin `--archivo` toma todo `data/`,
-   donde suele quedar más de una descarga del mismo reporte con rangos que se
-   pisan (una prueba corta y la buena, o dos corridas semanales). Las filas
-   repetidas se descartan comparando la fila completa —dos descargas del mismo
-   contrato traen los mismos valores en todas las columnas— y el ETL informa
-   cuántas quitó. Sin eso, el mismo contrato entra dos veces y el monto del
-   cantón se duplica sin que nada avise: con un reporte de prueba de 735
-   contratos junto al bueno de 19 157, la tabla quedaba en 19 892.
-
-   `data/` está en `.gitignore`, así que nada de esto llega al repositorio.
-2. `construir_dataset` hace los tres joins, calcula el monto, aplica el filtro
-   de gobiernos locales y clasifica.
-3. `cargar_contratos` resuelve `canton_id` contra `cantones` (por nombre +
-   provincia, y por nombre solo cuando es inequívoco) e inserta en
-   `contratos_ambientales`.
-
-   **Cantones renombrados.** SICOP conserva en su catálogo nombres de cantón
-   derogados, mientras que `cantones` viene del IGN con los vigentes. Sin
-   traducirlos, esos cantones quedan sin `canton_id` y su inversión ambiental
-   no aparece en el mapa. Son exactamente cuatro, verificados contra el reporte
-   real (96 gobiernos locales, 92 resolvían):
-
-   | En SICOP | Vigente (IGN) | Ley |
-   |---|---|---|
-   | Alfaro Ruiz | Zarcero | 9268 (2014) |
-   | Aguirre | Quepos | 9331 (2015) |
-   | Valverde Vega | Sarchí | 9440 (2017) |
-   | León Cortés | León Cortés Castro | nombre completo en la capa del IGN |
-
-   La equivalencia está en `CANTONES_RENOMBRADOS`, en
-   [`etl/sicop/carga_postgres.py`](../etl/sicop/carga_postgres.py). Con ella
-   resuelven los 96.
-4. Se registra la corrida en `sincronizaciones` con `fuente_id` = SICOP,
-   incluyendo cuántas filas se perdieron en cada paso.
-
-**Idempotencia:** `contratos_ambientales` no tiene llave natural en
-`db/schema.sql`, que es el esquema compartido del equipo. En vez de tocarlo, la
-carga borra los contratos SICOP del periodo que va a recargar y los vuelve a
-insertar dentro de la misma transacción. Reejecutar deja la tabla igual que si
-se hubiera corrido una sola vez, sin afectar periodos ya cargados.
-
-## Factor de Inversión Municipal
-
-La vista `v_factor_inversion` (creada por `--calcular-factor`, definida en
-[`etl/sicop/factor_inversion.py`](../etl/sicop/factor_inversion.py)) convierte
-los contratos en un puntaje 0-100 por cantón, con tres sub-puntajes:
-
-| Sub-puntaje | Qué mide | Peso interno |
-|---|---|---|
-| `sub_monto` | Monto ambiental por habitante, en percentil | 50% |
-| `sub_cantidad` | Cantidad de contratos ambientales, en percentil | 30% |
-| `sub_diversidad` | Cuántas de las 6 categorías aparecen | 20% |
-
-Decisiones detrás de esos números, todas del equipo y ninguna oficial:
-
-- **Por habitante, no absoluto**, para no premiar a los cantones grandes solo
-  por ser grandes. Si `cantones.poblacion` está vacía, se cae al monto
-  absoluto y la vista lo dice en su columna `base_monto`.
-
-  > **Estado actual (2026-09-05):** `cantones.poblacion` está en NULL en los 84
-  > cantones, así que `base_monto` sale `monto_absoluto` en todos y **el
-  > sub-puntaje de monto NO está normalizado por habitante**. El factor que se
-  > calcula hoy sí premia a los cantones grandes: es exactamente el sesgo que
-  > la decisión de arriba quería evitar. Hay que decirlo en la exposición
-  > mientras siga así.
-  >
-  > La misma columna vacía afecta al **Factor de Seguridad del OIJ**, que sin
-  > población usa el conteo bruto de delitos en vez de la tasa por 10 000
-  > habitantes (ver `_factor_seguridad` en `backend/app/indice.py`). Es decir:
-  > una sola columna vacía sesga dos de los cuatro factores, y en los dos el
-  > sesgo es por tamaño del cantón.
-  >
-  > Llenarla **no le corresponde a esta fuente**: `cantones` es la tabla
-  > compartida y la carga el ETL del SNIT, que es el único que debe tocarla
-  > (ver [`docs/snit.md`](snit.md) y la nota de orden en el README). Queda
-  > anotado acá como hallazgo, para que lo resuelva quien corresponda.
-- **Percentil y no min-max**, porque el gasto municipal tiene cola muy larga:
-  un solo contrato de alcantarillado de miles de millones aplastaría la escala
-  de los otros 83 cantones.
-- **La cantidad y la diversidad corrigen** el caso del cantón con un único
-  contrato gigante, que no demuestra el mismo compromiso sostenido.
-- **Un cantón sin contratos ambientales queda en 0, no en NULL.** La ausencia
-  de inversión municipal ambiental es información, no un dato faltante.
-
-A diferencia de `v_factor_ambiental` del SNIT, esta es una vista **normal** y
-no materializada: son sumas y conteos sin geometría, se calculan en
-milisegundos, y así queda al día sola en cuanto el ETL inserta contratos.
-
-## Cómo correrlo
-
-```bash
-cd etl/sicop
-pip install -r requirements.txt
-
-# Ver qué reportes existen y con qué criterio se clasifica
-python sync_sicop.py --listar-reportes
-python sync_sicop.py --criterio
-
-# 1. Encolar los tres reportes y pedir el código de confirmación
-python sync_sicop.py --solicitar --todos \
-    --desde 2026-06-01 --hasta 2026-09-01 --correo yo@ejemplo.com
-
-# 2. Confirmar con el código que llegó al correo (llega uno por reporte).
-#    El script ubica solo a qué reporte pertenece, espera a que SICOP lo
-#    construya y lo baja a data/
-python sync_sicop.py --confirmar --codigo Lw45ef
-
-#    Para ver qué reportId es cuál y cuáles faltan:
-python sync_sicop.py --pendientes
-
-# 3. Clasificar y revisar sin tocar la base
-python sync_sicop.py --cargar --dry-run
-
-# 4. Cargar y calcular el factor
-python sync_sicop.py --cargar --calcular-factor
-```
-
-> **Orden importante:** el ETL del SNIT va primero. Es el que llena la tabla
-> `cantones`, contra la que este ETL resuelve el `canton_id`.
-
-Si un reporte tarda más que `SICOP_ESPERA_MAX`, no se pierde: se retoma con
-`--descargar --report-id N`, sin volver a encolarlo.
+1. Leer el archivo descargado con `pandas.read_excel` / `read_csv`.
+2. Aplicar el filtro de palabras clave sobre `descripcion_objeto` → `categoria_detectada` (una de las 6 categorías de arriba).
+3. Vincular cada contrato a un `canton_id` (por nombre de municipalidad, normalizado contra `cantones.nombre`).
+4. Insertar en `contratos_ambientales` (ver [db/schema.sql](../db/schema.sql)).
+5. Registrar la corrida en `sincronizaciones` (`fuente_id` = SICOP).
 
 ## Frecuencia de sincronización
 
@@ -392,10 +279,56 @@ propio módulo).
 
 ## Variables de entorno
 
+La clasificación por palabras clave tendrá imprecisión inevitable (falsos positivos/negativos). Se documenta el criterio exacto usado en vez de presentarlo como perfecto.
+
+## Factor de Inversión Municipal — vista y endpoint
+
+`etl/sicop/factor_inversion.py` define `v_factor_inversion`: una vista normal
+(no materializada — son sumas y conteos sobre unos miles de filas sin
+geometría, se calcula en milisegundos y queda al día sola en cuanto el ETL
+inserta contratos nuevos) — misma arquitectura que `v_factor_ambiental`
+(SNIT), `v_factor_conectividad` (OSM) y `v_factor_seguridad` (OIJ).
+`backend/app/indice.py` solo lee esa vista, no recalcula nada.
+
+Metodología (decisión del equipo, no un indicador oficial): tres
+sub-puntajes, porque "inversión municipal ambiental" no es solo plata:
+
+- **Monto (50%)** — plata en contratos ambientales por habitante (o el monto
+  absoluto si el cantón no tiene `poblacion` cargada; queda registrado en la
+  columna `base_monto`). Solo se suman los contratos en colones: uno que
+  quedó en otra moneda porque SICOP no trajo tipo de cambio no se puede sumar
+  sin mentir sobre el monto — se cuenta aparte en `contratos_otra_moneda`.
+- **Cantidad (30%)** — cuántos contratos ambientales distintos. Un cantón con
+  un solo contrato gigante no demuestra el mismo compromiso sostenido que uno
+  con varios.
+- **Diversidad (20%)** — cuántas de las 6 categorías del clasificador
+  aparecen (`categorias / 6`).
+
+Monto y cantidad se normalizan con `PERCENT_RANK` (no min-max) porque el
+gasto municipal tiene cola muy larga: un solo contrato de alcantarillado de
+miles de millones aplastaría la escala de los otros 83 cantones. Un cantón
+sin ningún contrato ambiental queda en 0, no en `NULL`: la ausencia de
+inversión municipal ambiental es información, no un dato faltante.
+
+Columnas: `canton_id`, `codigo_ine`, `nombre`, `provincia`, `contratos`,
+`contratos_otra_moneda`, `monto_total`, `categorias`, `base_monto`,
+`sub_monto`, `sub_cantidad`, `sub_diversidad`, `factor_inversion`. El backend
+la expone en:
+
+- `GET /inversion/factor` — los 84 cantones con su desglose;
+  `GET /inversion/factor/{canton_id}` para uno solo
+- `GET /inversion/resumen` — contratos y montos por categoría (procedencia;
+  no depende de la vista, responde aunque no se haya corrido
+  `--calcular-factor`)
+
+Si `v_factor_inversion` todavía no existe, `/inversion/factor` responde
+`503` con el comando que falta correr — mismo criterio que
+`/infraestructura/factor` (OSM) y `/seguridad/factor` (OIJ). Se crea con:
+
+```bash
+cd etl/sicop
+python sync_sicop.py --calcular-factor
 ```
-SICOP_DATOS_ABIERTOS_URL=https://www.sicop.go.cr/app/module/pcont/public/ce-open-data
-SICOP_API_BASE_URL=https://prod-api.sicop.go.cr
-SICOP_TIMEOUT=120
-SICOP_ESPERA_MAX=1800
-SICOP_ESPERA_INTERVALO=30
-```
+
+(solo, o combinado con una carga: `python sync_sicop.py --archivo
+reportes/contratos_2025.xlsx --calcular-factor`).
