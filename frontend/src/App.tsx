@@ -56,11 +56,21 @@ export default function App() {
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
            mostrarCapasSnit={criterioOrden === "factor_ambiental"}
+            mostrarInfraestructuraOsm={criterioOrden === "factor_conectividad"}
           />
           <PanelBusquedaCanton
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
                  activo={criterioOrden === "factor_ambiental"}
+          />
+          {/* Equivalente de OSM (Integrante 3): mismo lugar, mismo criterio
+              de activación y mismo patrón de datos que SNIT y SICOP — pide
+              el desglose de los 84 cantones una vez a /infraestructura/factor
+              y los POIs del cantón abierto por separado. */}
+          <PanelInfraestructuraCanton
+            cantonSeleccionado={cantonSeleccionado}
+            onSeleccionarCanton={setCantonSeleccionado}
+            activo={criterioOrden === "factor_conectividad"}
           />
         </main>
       </div>

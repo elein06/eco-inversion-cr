@@ -28,6 +28,7 @@ import requests
 from dotenv import load_dotenv
 
 from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
+from factor_conectividad import calcular_factor_conectividad  # noqa: E402
 
 load_dotenv()
 
@@ -138,6 +139,24 @@ def categorizar(tags: dict) -> str | None:
     return None
 
 
+_SQL_INSERTAR_POI = """
+    INSERT INTO infraestructura_osm
+        (fuente_id, canton_id, osm_id, osm_tipo, categoria, nombre, geom)
+    SELECT
+        (SELECT fuente_id FROM fuentes WHERE codigo = 'OSM'),
+        %(canton_id)s, %(osm_id)s, %(osm_tipo)s, %(categoria)s, %(nombre)s,
+        ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)
+    WHERE ST_Contains(
+        (SELECT geom FROM cantones WHERE canton_id = %(canton_id)s),
+        ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)
+    )
+    ON CONFLICT (osm_id, osm_tipo) DO UPDATE
+        SET canton_id = EXCLUDED.canton_id,
+            fecha_consulta = now(),
+            valido_hasta = now() + interval '{dias} days'
+""".format(dias=OSM_CACHE_DIAS)
+
+
 def sincronizar_canton(nombre_canton: str, bbox: str, forzar: bool = False) -> int:
     with get_connection() as conn:
         canton_id = get_canton_id_por_nombre(conn, nombre_canton)
@@ -151,70 +170,104 @@ def sincronizar_canton(nombre_canton: str, bbox: str, forzar: bool = False) -> i
         datos_crudos = consultar_overpass(construir_query(bbox))
         resultado = overpy.Result.from_json(datos_crudos)
 
+        # El bbox que se consulta es un rectángulo (el ST_Extent del cantón),
+        # y los cantones de Costa Rica casi nunca son rectangulares — así que
+        # el bbox siempre agarra pedazo de los cantones vecinos (a veces hasta
+        # fuera del país, en zonas costeras o fronterizas). Por eso cada punto
+        # se valida contra el polígono REAL del cantón (ST_Contains) antes de
+        # insertarlo: lo que cae fuera se descarta acá, no se le asigna a
+        # `nombre_canton` solo porque apareció en su bbox. El ON CONFLICT
+        # también actualiza canton_id — así, si un punto ya había quedado mal
+        # asignado por una corrida vieja (antes de este filtro), la próxima
+        # vez que el cantón dueño real lo consulte, se corrige solo.
         insertados = 0
+        descartados = 0
         with conn.cursor() as cur:
             for nodo in resultado.nodes:
                 categoria = categorizar(nodo.tags)
                 if not categoria:
                     continue
                 cur.execute(
-                    """
-                    INSERT INTO infraestructura_osm
-                        (fuente_id, canton_id, osm_id, osm_tipo, categoria, nombre, geom)
-                    VALUES (
-                        (SELECT fuente_id FROM fuentes WHERE codigo = 'OSM'),
-                        %s, %s, 'node', %s, %s,
-                        ST_SetSRID(ST_MakePoint(%s, %s), 4326)
-                    )
-                    ON CONFLICT (osm_id, osm_tipo) DO UPDATE
-                        SET fecha_consulta = now(),
-                            valido_hasta = now() + interval '{dias} days'
-                    """.format(dias=OSM_CACHE_DIAS),
-                    (canton_id, nodo.id, categoria, nodo.tags.get("name"), float(nodo.lon), float(nodo.lat)),
+                    _SQL_INSERTAR_POI,
+                    {
+                        "canton_id": canton_id,
+                        "osm_id": nodo.id,
+                        "osm_tipo": "node",
+                        "categoria": categoria,
+                        "nombre": nodo.tags.get("name"),
+                        "lon": float(nodo.lon),
+                        "lat": float(nodo.lat),
+                    },
                 )
-                insertados += 1
+                if cur.rowcount:
+                    insertados += 1
+                else:
+                    descartados += 1
 
             for way in resultado.ways:
                 categoria = categorizar(way.tags)
                 if not categoria or not way.center_lon:
                     continue
                 cur.execute(
-                    """
-                    INSERT INTO infraestructura_osm
-                        (fuente_id, canton_id, osm_id, osm_tipo, categoria, nombre, geom)
-                    VALUES (
-                        (SELECT fuente_id FROM fuentes WHERE codigo = 'OSM'),
-                        %s, %s, 'way', %s, %s,
-                        ST_SetSRID(ST_MakePoint(%s, %s), 4326)
-                    )
-                    ON CONFLICT (osm_id, osm_tipo) DO UPDATE
-                        SET fecha_consulta = now(),
-                            valido_hasta = now() + interval '{dias} days'
-                    """.format(dias=OSM_CACHE_DIAS),
-                    (canton_id, way.id, categoria, way.tags.get("name"), float(way.center_lon), float(way.center_lat)),
+                    _SQL_INSERTAR_POI,
+                    {
+                        "canton_id": canton_id,
+                        "osm_id": way.id,
+                        "osm_tipo": "way",
+                        "categoria": categoria,
+                        "nombre": way.tags.get("name"),
+                        "lon": float(way.center_lon),
+                        "lat": float(way.center_lat),
+                    },
                 )
-                insertados += 1
+                if cur.rowcount:
+                    insertados += 1
+                else:
+                    descartados += 1
+
+        if descartados:
+            print(
+                f"  {descartados} elemento(s) descartado(s): el bbox de '{nombre_canton}' los trajo, "
+                "pero caen fuera de su polígono real (zona de un cantón vecino, o fuera de Costa Rica)"
+            )
 
         registrar_sincronizacion(
             conn,
             fuente_codigo="OSM",
             estado="exito" if insertados else "parcial",
             registros_procesados=insertados,
-            mensaje=f"Cantón: {nombre_canton}, bbox: {bbox}",
+            mensaje=f"Cantón: {nombre_canton}, bbox: {bbox}, descartados por polígono: {descartados}",
         )
         return insertados
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="ETL OSM/Overpass (POIs → PostGIS, con caché)")
-    parser.add_argument("--canton", required=True, help="Nombre del cantón (debe existir en tabla cantones)")
-    parser.add_argument("--bbox", required=True, help="minlat,minlon,maxlat,maxlon")
+    parser.add_argument("--canton", help="Nombre del cantón (debe existir en tabla cantones)")
+    parser.add_argument("--bbox", help="minlat,minlon,maxlat,maxlon")
     parser.add_argument("--forzar", action="store_true", help="Ignora la caché de 7 días")
+    parser.add_argument(
+        "--calcular-factor",
+        action="store_true",
+        help="Crea/recrea la vista v_factor_conectividad y muestra el ranking",
+    )
     args = parser.parse_args()
+
+    # --calcular-factor solo (sin --canton): recrea la vista con lo que ya
+    # esté cargado, sin consultar Overpass. Útil después de una carga masiva
+    # con cargar_todos_los_cantones.py, o para refrescar el ranking a mano.
+    if args.calcular_factor and not args.canton:
+        calcular_factor_conectividad()
+        return
+
+    if not args.canton or not args.bbox:
+        parser.error("indique --canton y --bbox, o --calcular-factor solo")
 
     try:
         total = sincronizar_canton(args.canton, args.bbox, forzar=args.forzar)
         print(f"OK: {total} POIs cargados/actualizados para '{args.canton}'")
+        if args.calcular_factor:
+            calcular_factor_conectividad()
     except Exception as exc:
         with get_connection() as conn:
             registrar_sincronizacion(conn, fuente_codigo="OSM", estado="error", mensaje=str(exc))

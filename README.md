@@ -35,7 +35,30 @@ El frontend **nunca** consulta SNIT, SICOP, OSM ni el Poder Judicial directament
 - `GET /contratos-ambientales` — contratos SICOP clasificados
 - `GET /infraestructura` — POIs de OSM (con caché de 7 días)
 - `GET /seguridad` — estadísticas OIJ agregadas por cantón
-- `GET /indice-viabilidad` / `POST /indice-viabilidad/recalcular` — índice calculado
+
+**Índice de viabilidad:**
+
+- `GET /indice-viabilidad` — índice calculado, con los pesos usados
+- `POST /indice-viabilidad/recalcular` — recalcula los 84 cantones
+
+**Desglose por factor** (lo que alimenta los paneles laterales del frontend:
+no solo el puntaje, sino de dónde sale):
+
+- `GET /ambiental/factor` — Factor Ambiental por cantón con sus tres
+  sub-puntajes; `GET /ambiental/factor/{canton_id}` para uno solo
+- `GET /ambiental/capas` — geometrías de las capas del SNIT para dibujarlas
+  sobre el mapa; `GET /ambiental/capas/resumen` — cuántas hay por tipo y
+  cuándo se sincronizaron (procedencia)
+- `GET /inversion/factor` — Factor de Inversión Municipal por cantón con sus
+  sub-puntajes; `GET /inversion/factor/{canton_id}` para uno solo
+- `GET /inversion/resumen` — contratos y montos por categoría (procedencia)
+- `GET /infraestructura/factor` — Factor de Conectividad por cantón con su
+  desglose por categoría de POI; `GET /infraestructura/factor/{canton_id}`
+  para uno solo
+- `GET /infraestructura/resumen` — POIs vigentes por categoría (procedencia)
+
+La lista completa —con parámetros, esquemas y un botón para probar cada
+llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
 
 ## Estructura del repositorio
 
@@ -93,8 +116,12 @@ Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo
 ```bash
 # 1. SNIT — carga cantones + las 3 capas ambientales y calcula el Factor Ambiental
 cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --todas --calcular-factor
-cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --archivo reportes/contratos.xlsx
-cd etl/osm     && pip install -r requirements.txt && python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06
+cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --solicitar --todos --correo yo@ejemplo.com
+#    SICOP manda un codigo por correo; se confirma y el script baja, clasifica y carga:
+#    python sync_sicop.py --confirmar --codigo <codigo del correo>
+#    python sync_sicop.py --cargar --calcular-factor
+cd etl/osm     && pip install -r requirements.txt && python cargar_todos_los_cantones.py --calcular-factor
+#    (o un cantón suelto: python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06 --calcular-factor)
 cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
 ```
 

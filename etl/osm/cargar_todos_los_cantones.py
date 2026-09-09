@@ -22,6 +22,7 @@ import time
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
 
 from db import get_connection  # noqa: E402
+from factor_conectividad import calcular_factor_conectividad  # noqa: E402
 from sync_osm import sincronizar_canton  # noqa: E402
 
 
@@ -54,6 +55,11 @@ def main() -> None:
     parser.add_argument("--limite", type=int, help="Solo cargar los primeros N cantones (prueba rápida)")
     parser.add_argument("--pausa", type=float, default=3.0, help="Segundos de espera entre consultas a Overpass")
     parser.add_argument("--forzar", action="store_true", help="Ignora la caché de 7 días")
+    parser.add_argument(
+        "--calcular-factor",
+        action="store_true",
+        help="Al terminar, crea/recrea la vista v_factor_conectividad y muestra el ranking",
+    )
     args = parser.parse_args()
 
     cantones = obtener_cantones_con_bbox(args.limite)
@@ -82,7 +88,17 @@ def main() -> None:
             time.sleep(args.pausa)
 
     print(f"\nResumen: {exitosos} con datos nuevos, {sin_cambios} sin cambios, {fallidos} con error.")
-    print("Recordá recalcular el índice después:")
+
+    if args.calcular_factor:
+        calcular_factor_conectividad()
+    else:
+        print(
+            "\nRecordá crear/actualizar la vista del factor antes de recalcular el índice:"
+        )
+        print("  python cargar_todos_los_cantones.py --calcular-factor")
+        print("  (o: python sync_osm.py --calcular-factor, sin --canton)")
+
+    print("\nY después, recalcular el índice:")
     print("  curl.exe -X POST http://localhost:8000/indice-viabilidad/recalcular")
 
 

@@ -72,17 +72,27 @@ def _factor_inversion(cur: Cursor) -> dict[int, float]:
 
 
 def _factor_conectividad(cur: Cursor) -> dict[int, float]:
-    """Densidad normalizada de infraestructura clave (OSM) por cantón."""
-    cur.execute(
-        """
-        SELECT canton_id, COUNT(*) AS total_pois
-        FROM infraestructura_osm
-        WHERE canton_id IS NOT NULL AND valido_hasta > now()
-        GROUP BY canton_id
-        """
-    )
-    conteos = {fila["canton_id"]: float(fila["total_pois"]) for fila in cur.fetchall()}
-    return _normalizar_min_max(conteos)
+    """
+    Factor de Conectividad (OSM) — responsable: Integrante 3.
+
+    Lee la vista `v_factor_conectividad`, que crea el ETL de OSM en
+    `etl/osm/factor_conectividad.py`. No recalcula nada aquí: la
+    normalización min-max ya vive en la vista, sobre los 84 cantones (con y
+    sin POIs), no solo sobre los que tienen datos — ver el porqué en ese
+    archivo. El detalle está en docs/osm.md.
+
+    Si la vista aún no existe —porque nadie ha corrido `sync_osm.py
+    --calcular-factor` en esta base— devuelve un dict vacío y
+    `calcular_y_guardar_indices` asigna 0.0.
+    """
+    cur.execute("SELECT to_regclass('v_factor_conectividad') IS NOT NULL AS existe")
+    if not cur.fetchone()["existe"]:
+        return {}
+
+    cur.execute("SELECT canton_id, factor_conectividad FROM v_factor_conectividad")
+    return {
+        fila["canton_id"]: float(fila["factor_conectividad"]) for fila in cur.fetchall()
+    }
 
 
 def _factor_seguridad(cur: Cursor) -> dict[int, float]:
