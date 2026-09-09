@@ -6,6 +6,7 @@ import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";;
 import PanelInversionCanton from "./SICOP/components/PanelInversionCanton";
 import PanelInfraestructuraCanton from "./OSM/components/PanelInfraestructuraCanton";
 import PanelSeguridadCanton from "./OIJ/components/PanelSeguridadCanton";
+import PanelIndiceCanton from "./Indice/components/PanelIndiceCanton";
 type CriterioOrden = "indice_total" | "factor_ambiental" | "factor_inversion" | "factor_conectividad" | "factor_seguridad";
 
 export default function App() {
@@ -92,6 +93,16 @@ export default function App() {
             cantonSeleccionado={cantonSeleccionado}
             onSeleccionarCanton={setCantonSeleccionado}
             activo={criterioOrden === "factor_seguridad"}
+          />
+          {/* Panel del Índice total: mismo lugar y mismo patrón de los otros
+              cuatro, pero en vez de una sola fuente muestra la fórmula real
+              (pesos × cada factor) y un resumen de las cuatro fuentes OSINT
+              juntas — el lugar donde se ve el valor real de combinarlas. */}
+          <PanelIndiceCanton
+            cantonSeleccionado={cantonSeleccionado}
+            indicesPorCanton={indicesPorCanton}
+            onSeleccionarCanton={setCantonSeleccionado}
+            activo={criterioOrden === "indice_total"}
           />
         </main>
       </div>
