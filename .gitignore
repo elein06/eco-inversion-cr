@@ -14,11 +14,13 @@ venv/
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 
 # --- Datos y caché de ETL ---
 etl/**/data/*
 !etl/**/data/.gitkeep
 *.log
+etl/oij/reportes/*.csv
 
 # --- Editor / OS ---
 .vscode/

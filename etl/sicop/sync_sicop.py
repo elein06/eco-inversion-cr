@@ -17,10 +17,17 @@ Uso:
     python sync_sicop.py --calcular-factor                         # solo recrea la vista
 """
 import argparse
+import glob
 import os
-import re
 import sys
+from datetime import date, timedelta
 
+# La consola de Windows usa cp1252 y rompe los nombres con tilde.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+# etl/common/db.py es compartido por las cuatro fuentes del proyecto y no es un
+# paquete instalable, así que se agrega su carpeta al path.
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
 
 import pandas as pd
@@ -50,15 +57,11 @@ PATRONES_POR_CATEGORIA: dict[str, re.Pattern] = {
     for categoria, palabras in PALABRAS_CLAVE_AMBIENTAL.items()
 }
 
-COLUMNAS_ESPERADAS = {
-    "Institución": "institucion",
-    "Municipalidad": "municipalidad",
-    "Monto adjudicado": "monto",
-    "Moneda": "moneda",
-    "Fecha de contrato": "fecha_contrato",
-    "Descripción del objeto": "descripcion_objeto",
-}
 
+def confirmar_y_bajar(nombre, report_id, codigo, formato, espera_max):
+    """
+    Confirma el código recibido por correo y, ya con el reporte
+    construyéndose, espera y lo baja. Es el paso que cierra el ciclo.
 
 def clasificar(descripcion: str) -> str | None:
     """Devuelve la categoría (una de las 6 de PALABRAS_CLAVE_AMBIENTAL) o None
@@ -71,54 +74,107 @@ def clasificar(descripcion: str) -> str | None:
     return None
 
 
-def cargar_reporte(ruta_archivo: str) -> pd.DataFrame:
-    if ruta_archivo.endswith(".csv"):
-        df = pd.read_csv(ruta_archivo)
+def archivos_locales(rutas_o_patrones):
+    """Expande rutas y comodines; si no se pasó nada, usa todo `data/`."""
+    if not rutas_o_patrones:
+        patrones = [os.path.join(DIR_DATOS, "*")]
     else:
-        df = pd.read_excel(ruta_archivo)
-    df = df.rename(columns=COLUMNAS_ESPERADAS)
-    return df
+        patrones = rutas_o_patrones
+
+    rutas = []
+    for patron in patrones:
+        encontrados = sorted(glob.glob(patron))
+        if not encontrados and os.path.exists(patron):
+            encontrados = [patron]
+        for ruta in encontrados:
+            if os.path.isfile(ruta) and not ruta.endswith(
+                (".meta.json", ".confirm.json", ".gitkeep")
+            ):
+                rutas.append(ruta)
+    return rutas
 
 
-def procesar(ruta_archivo: str) -> int:
-    df = cargar_reporte(ruta_archivo)
-    df["categoria_detectada"] = df["descripcion_objeto"].apply(clasificar)
-    df_ambiental = df[df["categoria_detectada"].notna()].copy()
+def cargar(rutas, solo_municipalidades, dry_run, desde, hasta):
+    print("\nLeyendo reportes descargados:")
+    tablas = cargar_tablas(rutas)
+    if not tablas:
+        raise ValueError(
+            "No se pudo leer ningún reporte. Baje los reportes primero con "
+            "'python sync_sicop.py --solicitar --todos'."
+        )
 
-    insertados = 0
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            for _, fila in df_ambiental.iterrows():
-                canton_id = get_canton_id_por_nombre(conn, str(fila.get("municipalidad", "")))
-                cur.execute(
-                    """
-                    INSERT INTO contratos_ambientales
-                        (fuente_id, canton_id, institucion, municipalidad, monto,
-                         moneda, fecha_contrato, descripcion_objeto, categoria_detectada)
-                    VALUES (
-                        (SELECT fuente_id FROM fuentes WHERE codigo = 'SICOP'),
-                        %s, %s, %s, %s, %s, %s, %s, %s
-                    )
-                    """,
-                    (
-                        canton_id,
-                        fila.get("institucion"),
-                        fila.get("municipalidad"),
-                        fila.get("monto") or 0,
-                        fila.get("moneda") or "CRC",
-                        fila.get("fecha_contrato"),
-                        fila.get("descripcion_objeto"),
+    df, stats = construir_dataset(tablas, solo_municipalidades=solo_municipalidades)
+
+    print("\nResultado de la clasificación:")
+    for clave in (
+        "contratos",
+        "carteles",
+        "instituciones",
+        "contratos_sin_lineas",
+        "contratos_sin_cartel",
+        "contratos_sin_institucion",
+        "descartados_no_municipales",
+        "evaluados",
+        "ambientales",
+        "no_ambientales",
+    ):
+        if clave in stats:
+            print("  {:<28} {}".format(clave, stats[clave]))
+
+    if len(df):
+        print("\nContratos ambientales por categoría detectada:")
+        for categoria, cantidad in df["categoria_detectada"].value_counts().items():
+            monto = df.loc[df["categoria_detectada"] == categoria, "monto"].sum()
+            print("  {:<22} {:>5} contratos  {:>18,.2f}".format(
+                categoria, cantidad, monto))
+
+    if dry_run:
+        print(
+            "\ndry-run: {} contratos ambientales detectados, sin tocar la "
+            "base".format(len(df))
+        )
+        if len(df):
+            print("\nMuestra (primeras 5 filas):")
+            for _, fila in df.head(5).iterrows():
+                print(
+                    "  [{}] {} | {} | {:,.2f} {} | {}".format(
                         fila["categoria_detectada"],
-                    ),
+                        str(fila["institucion"])[:34],
+                        str(fila["canton"])[:16],
+                        float(fila["monto"]),
+                        fila["moneda"],
+                        str(fila["descripcion_objeto"])[:60],
+                    )
                 )
-                insertados += 1
+        return len(df)
+
+    with get_connection() as conn:
+        insertados, sin_canton, borrados = cargar_contratos(
+            conn, df, desde=desde, hasta=hasta
+        )
         registrar_sincronizacion(
             conn,
             fuente_codigo="SICOP",
             estado="exito" if insertados else "parcial",
             registros_procesados=insertados,
-            mensaje=f"Archivo: {os.path.basename(ruta_archivo)}, filas totales: {len(df)}",
+            mensaje=(
+                "periodo {} a {}; evaluados {}, ambientales {}, "
+                "sin cantón {}, reemplazados {}; archivos: {}".format(
+                    desde,
+                    hasta,
+                    stats.get("evaluados", 0),
+                    stats.get("ambientales", 0),
+                    sin_canton,
+                    borrados,
+                    ", ".join(os.path.basename(r) for r in rutas),
+                )
+            ),
         )
+
+    print(
+        "\nOK: {} contratos ambientales cargados ({} sin cantón resuelto, "
+        "{} filas del periodo reemplazadas)".format(insertados, sin_canton, borrados)
+    )
     return insertados
 
 

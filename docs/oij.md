@@ -6,39 +6,42 @@
 
 ## Qué aporta
 
-Estadísticas policiales agregadas por cantón y año, usadas como proxy (inverso) de seguridad para el índice de viabilidad.
+Incidentes policiales por cantón, tipo de delito, año, agregados por el propio ETL del proyecto (el recurso original es a nivel de incidente, ver abajo), usados como proxy (inverso) de seguridad para el índice de viabilidad.
 
-## Endpoint / forma de consumo
+## Endpoint / forma de consumo (verificada)
 
-Portal de Datos Abiertos del Poder Judicial, construido sobre **CKAN**. No requiere token.
+Portal de Datos Abiertos del Poder Judicial, construido sobre **CKAN**, dataset `estadisticas-policiales`. No requiere token.
 
-- Dataset: `estadisticas-policiales`
-
+- Página del dataset: `https://datosabiertospj.poder-judicial.go.cr/dataset/estadisticas-policiales`
+- Descarga directa por año, ej.:
   ```
-  {OIJ_CKAN_BASE_URL}/dataset/estadisticas-policiales
+  https://pjcrdatosabiertos.blob.core.windows.net/datosabiertos/PJCROD_POLICIALES_V1/PJCROD_POLICIALES_V1-2025.csv
   ```
+- También hay XLSX, XML y RDF por año, y un `--resource-id` de CKAN por recurso — no se confirmó si el datastore de CKAN está activo para este dataset, así que **la vía verificada y recomendada es la descarga directa del CSV**, no la API `datastore_search`.
 
-- Recursos disponibles: CSV, XLS/XLSX, XML, RDF — se descarga el recurso directamente.
-- Alternativa vía API (si el recurso está en el datastore de CKAN):
+## Hallazgos del formato real (importante — difiere de lo que se asumió al planear el proyecto)
 
-  ```
-  GET {OIJ_CKAN_BASE_URL}/api/3/action/datastore_search?resource_id=<id_recurso>&limit=1000
-  ```
+Al inspeccionar el CSV real se encontró que **no es un archivo pre-agregado** como se pensó originalmente ("Cantón, Delito, Cantidad, Año"), sino un registro por incidente, sin encabezado, con 11 columnas posicionales:
 
-## Formato de respuesta (ejemplo API CKAN)
+| # | Columna | Ejemplo |
+|---|---|---|
+| 0 | tipo_delito | ASALTO, HOMICIDIO, ROBO, HURTO, ROBO DE VEHICULO, TACHA DE VEHICULO |
+| 1 | subtipo_delito / modalidad | CANDADO CHINO, ARREBATO |
+| 2 | fecha_hecho (YYYY-MM-DD) | 2025-01-01 |
+| 3 | tipo_víctima | PERSONA, VIVIENDA, VEHÍCULO |
+| 4 | clasificación de víctima | TURISTA/EXTRANJERO [PERSONA] |
+| 5 | grupo etario | Mayor de edad, Desconocido |
+| 6 | (columna reservada, vacía) | — |
+| 7 | nacionalidad | COSTA RICA, NICARAGUA |
+| 8 | provincia | SAN JOSE |
+| 9 | cantón | CURRIDABAT |
+| 10 | distrito | TIRRASES |
 
-```json
-{
-  "success": true,
-  "result": {
-    "records": [
-      { "Canton": "San José", "Delito": "Robo", "Cantidad": 1200, "Anio": 2024 }
-    ]
-  }
-}
-```
+Además, el archivo viene en **codificación latin-1 / cp1252, no UTF-8** (nombres con tilde o ñ se corrompen si se lee como UTF-8 — ej. "CAÑAS" → "CA�AS").
 
-## Normalización y carga
+Por esto, `etl/oij/sync_oij.py` no solo limpia el archivo: **agrupa y cuenta** filas por cantón + tipo_delito + año antes de insertar en `estadisticas_seguridad`. Esa agregación es la transformación real que exige el enunciado del curso (no basta con copiar el archivo tal cual).
+
+## Normalización y carga (flujo actual del script)
 
 1. `sync_oij.py` lee el recurso (CSV real del PJ, sin encabezado — ver el
    docstring del script para el formato posicional verificado; `datastore_search`
