@@ -1,4 +1,5 @@
-import { GeoJSON, MapContainer, Pane, TileLayer } from "react-leaflet";
+import { GeoJSON, MapContainer, TileLayer } from "react-leaflet";
+import type { Layer } from "leaflet";
 import type { IndiceViabilidad, Zona } from "../api";
 import CapasAmbientales from "../SNIT/components/CapasAmbientales";
 import PuntosInfraestructura from "../OSM/components/PuntosInfraestructura";
@@ -35,22 +36,20 @@ export default function MapView({
   return (
     <MapContainer center={[9.93, -84.08]} zoom={8} style={{ height: "100%", width: "100%" }}>
       {/*
-        Base sin nombres: con el tile estándar de OSM los nombres de cantón
-        y de lugar vienen dibujados dentro del mismo mosaico, así que
-        cualquier capa semitransparente encima (el relleno del índice, las
-        capas del SNIT, los puntos de OSM) los tapa sin remedio. Acá se usa
-        una base "sin etiquetas" y más abajo se agrega una segunda capa,
-        solo con los nombres, en un pane por encima de todo lo demás.
-
-        Se usa Esri (World Light Gray Base/Reference) en vez de CARTO: CARTO
-        empezó a pedir API key para sus basemaps y sin ella solo devuelve un
-        tile con la marca de agua "API KEY REQUIRED". El par de Esri es
-        gratuito sin necesidad de cuenta ni llave, y ya viene pensado para
-        este mismo truco (base + capa de referencia con los nombres).
+        Tile estándar de OSM: es el que trae el azul del mar y el relieve/
+        detalle de color por defecto. Antes se había cambiado por una base
+        "sin etiquetas" (CARTO, después Esri) para poder poner los nombres
+        en una capa aparte por encima del relleno de color — pero esas
+        bases son planas/grises a propósito, y perdían todo ese detalle.
+        El nombre de cada cantón ya no depende del tile: se agrega como
+        tooltip de Leaflet (ver onEachFeature más abajo), que por defecto
+        vive en el tooltipPane (z-index 650) — por encima del overlayPane
+        (400) donde está el relleno de color — así que queda visible sin
+        tener que sacrificar el mapa base.
       */}
       <TileLayer
-        attribution="Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ"
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {zonas.map((zona) => {
         const indice = indicesPorCanton.get(zona.canton_id);
@@ -68,6 +67,13 @@ export default function MapView({
             eventHandlers={{
               click: () => onSeleccionarCanton(zona.canton_id),
             }}
+            onEachFeature={(_feature, layer: Layer) => {
+              layer.bindTooltip(zona.nombre, {
+                permanent: true,
+                direction: "center",
+                className: "etiqueta-canton",
+              });
+            }}
           />
         );
       })}
@@ -75,17 +81,6 @@ export default function MapView({
       {mostrarInfraestructuraOsm && (
         <PuntosInfraestructura cantonSeleccionado={cantonSeleccionado} />
       )}
-      {/*
-        Pane con z-index por encima de overlayPane (400, donde viven los
-        rellenos de cantón, las capas del SNIT y los puntos de OSM): así
-        los nombres quedan siempre arriba, sin importar qué tan oscuro sea
-        el color debajo. `pointerEvents: "none"` para que los clics sigan
-        llegando a los cantones y no los tape esta capa (no tiene nada
-        clickeable, son solo etiquetas de texto).
-      */}
-      <Pane name="etiquetas-mapa" style={{ zIndex: 450, pointerEvents: "none" }}>
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}" />
-      </Pane>
     </MapContainer>
   );
 }

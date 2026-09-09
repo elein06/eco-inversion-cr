@@ -394,6 +394,31 @@ h4 {
   position: relative;
 }
 
+/* Nombre de cantón sobre el relleno de color (ver onEachFeature en
+   MapView.tsx). Se le quita el globo/fondo por defecto de Leaflet y se
+   deja solo el texto, con un halo blanco para que se lea encima de
+   cualquier color del semáforo (verde, amarillo, naranja o rojo). */
+.leaflet-tooltip.etiqueta-canton {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1f2937;
+  text-shadow:
+    0 1px 2px #fff,
+    0 -1px 2px #fff,
+    1px 0 2px #fff,
+    -1px 0 2px #fff;
+  pointer-events: none;
+}
+
+.leaflet-tooltip.etiqueta-canton::before {
+  display: none;
+}
+
 /* ------------------- Paneles flotantes sobre el mapa ----------------
    Comparten esta clase los 5 paneles (SNIT, SICOP, OSM, OIJ e Índice).
    El color de los datos (categorías, capas, factor OIJ) sigue viniendo
