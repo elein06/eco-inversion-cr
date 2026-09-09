@@ -66,7 +66,7 @@ SELECT
     conteos.total_pois,
     -- Min-max sobre los 84 cantones. Si todavía nadie tiene POIs cargados
     -- (rango 0), todos quedan en 50 en vez de dividir por cero — mismo
-    -- criterio que `_normalizar_min_max` usa para seguridad (OIJ).
+    -- criterio que usa v_factor_seguridad (OIJ) para la misma situación.
     CASE
         WHEN rango.maximo = rango.minimo THEN 50.0
         ELSE ROUND(

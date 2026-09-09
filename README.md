@@ -9,7 +9,7 @@ Trabajo de Investigación 2 — Seguridad Informática.
 | Fuente | Aporta | Factor del índice | Responsable | Detalle |
 |---|---|---|---|---|
 | **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Integrante 1 | [docs/snit.md](docs/snit.md) |
-| **SICOP** (datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Integrante 2 | [docs/sicop.md](docs/sicop.md) |
+| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Integrante 2 | [docs/sicop.md](docs/sicop.md) |
 | **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Integrante 3 | [docs/osm.md](docs/osm.md) |
 | **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Integrante 4 | [docs/oij.md](docs/oij.md) |
 
@@ -18,6 +18,17 @@ La fuente OIJ reemplaza a la fuente económica original del BCCR: evita el trám
 Los pesos del índice (25% cada uno) son una decisión del equipo, no un estándar oficial — se documentan en [backend/app/config.py](backend/app/config.py) y se devuelven en cada respuesta de `/indice-viabilidad`.
 
 **Advertencia ética:** las estadísticas del OIJ son agregadas por cantón. El sistema nunca insinúa que un cantón "peligroso" implica algo sobre sus habitantes, y su relación con el índice de viabilidad es una correlación definida por el equipo, no una causalidad. Ver [docs/oij.md](docs/oij.md).
+
+**Año de referencia único (OIJ):** el Factor de Seguridad se calcula sobre
+un solo año de estadísticas a la vez — nunca mezclando años, porque un
+cantón con dos años de datos cargados no sería comparable con uno que solo
+tiene uno. Ese año se fija en `OIJ_ANIO_REFERENCIA` (ver
+[.env.example](.env.example)) y lo usan tanto la carga (`sync_oij.py`, como
+valor por defecto de `--anio`) como el cálculo del factor
+(`sync_oij.py --calcular-factor`, al construir `v_factor_seguridad`): si
+`estadisticas_seguridad` llega a tener datos de más de un año sin que esta
+variable esté fijada, el cálculo se niega a correr en vez de mezclarlos en
+silencio. Detalle completo en [docs/oij.md](docs/oij.md).
 
 Plan completo del proyecto (cronograma, riesgos, checklist de rúbrica): [docs/PLAN.md](docs/PLAN.md).
 
@@ -31,7 +42,10 @@ Frontend (React + Leaflet)  →  Backend propio (FastAPI)  →  PostgreSQL + Pos
 
 El frontend **nunca** consulta SNIT, SICOP, OSM ni el Poder Judicial directamente — solo habla con la API propia del backend, que expone datos ya normalizados:
 
-- `GET /zonas` — cantones con geometría (GeoJSON)
+**Datos base, uno por fuente:**
+
+- `GET /zonas` — cantones con geometría (GeoJSON), la capa base del mapa;
+  `GET /zonas/{canton_id}` para uno solo
 - `GET /contratos-ambientales` — contratos SICOP clasificados
 - `GET /infraestructura` — POIs de OSM (con caché de 7 días)
 - `GET /seguridad` — estadísticas OIJ agregadas por cantón
@@ -56,6 +70,10 @@ no solo el puntaje, sino de dónde sale):
   desglose por categoría de POI; `GET /infraestructura/factor/{canton_id}`
   para uno solo
 - `GET /infraestructura/resumen` — POIs vigentes por categoría (procedencia)
+- `GET /seguridad/factor` — Factor de Seguridad por cantón con su desglose
+  (total de delitos, tasa por 10 000 hab.); `GET /seguridad/factor/{canton_id}`
+  para uno solo
+- `GET /seguridad/resumen` — incidentes por tipo de delito y año (procedencia)
 
 La lista completa —con parámetros, esquemas y un botón para probar cada
 llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
@@ -64,7 +82,7 @@ llamada— está en `http://localhost:8000/docs`, que FastAPI genera solo.
 
 ```
 /etl/snit          → ETL de Integrante 1 (WFS → GeoJSON → PostGIS)
-/etl/sicop         → ETL de Integrante 2 (descarga + clasificación + carga)
+/etl/sicop         → ETL de Integrante 2 (API SICOP → clasificación → PostgreSQL)
 /etl/osm           → ETL de Integrante 3 (Overpass → GeoJSON → caché)
 /etl/oij           → ETL de Integrante 4 (CKAN → estadísticas → carga)
 /etl/common        → conexión a BD y registro de sincronizaciones, compartido
@@ -85,13 +103,15 @@ cp .env.example .env
 docker compose up -d db
 ```
 
-Esto levanta Postgres+PostGIS en `localhost:5432` y carga automáticamente `db/schema.sql` (extensión PostGIS, tablas, datos semilla de `fuentes`).
+Esto levanta Postgres+PostGIS y carga automáticamente `db/schema.sql` (extensión PostGIS, tablas, datos semilla de `fuentes`).
 
-Sin Docker, se puede usar cualquier Postgres con PostGIS instalado y correr:
+Si el puerto 5432 ya lo ocupa un Postgres instalado en la máquina, cambiar `POSTGRES_PORT` en el `.env`: solo afecta al puerto del host, porque dentro de Docker el contenedor sigue en 5432 y el backend de compose le habla por el nombre `db`.
 
-```bash
-psql "$DATABASE_URL" -f db/schema.sql
-```
+La tabla `cantones` queda vacía: es el eje territorial contra el que se cruzan
+las cuatro fuentes, y la llena el **ETL del SNIT** con los límites oficiales del
+IGN (ver el paso 3). Ningún otro integrante debe cargar esa tabla, porque los
+`canton_id` de las otras tres fuentes dependen de esos códigos.
+
 
 ### 2. Backend (FastAPI)
 
@@ -104,6 +124,18 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 API disponible en `http://localhost:8000`, documentación interactiva en `http://localhost:8000/docs`.
+
+También se puede levantar dentro de Docker, que es lo más parecido a como va a
+correr en la demo:
+
+```bash
+docker compose up -d --build backend
+```
+
+En ese caso el backend no usa `DATABASE_URL` del `.env`: `docker-compose.yml`
+le pasa una propia que apunta al contenedor `db` por nombre de servicio. Para
+desarrollar conviene el `uvicorn --reload` de arriba, porque recarga al
+guardar; el contenedor hay que reconstruirlo.
 
 ### 3. ETL por fuente
 
@@ -122,8 +154,14 @@ cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --soli
 #    python sync_sicop.py --cargar --calcular-factor
 cd etl/osm     && pip install -r requirements.txt && python cargar_todos_los_cantones.py --calcular-factor
 #    (o un cantón suelto: python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06 --calcular-factor)
-cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
+cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024 --calcular-factor
+#    --anio fija el año de referencia para esta carga; si se omite, usa
+#    OIJ_ANIO_REFERENCIA del .env — ver "Año de referencia único" más arriba
 ```
+
+Guías paso a paso para levantar cada fuente desde cero, pensadas para el resto
+del equipo: [docs/guia-equipo-sicop.md](docs/guia-equipo-sicop.md) ·
+[docs/guia-equipo-osm.md](docs/guia-equipo-osm.md).
 
 Cada script trae su propia ayuda con todas las opciones disponibles:
 

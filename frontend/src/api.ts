@@ -118,7 +118,7 @@ async function obtenerJsonConDetalle<T>(ruta: string): Promise<T> {
   return respuesta.json() as Promise<T>;
 }
 
-/** Capas de un cantón buscado por nombre (sin tildes ni mayúsculas). */
+/** Capas de un cantón buscado por nombre (la API ignora tildes y mayúsculas). */
 export async function obtenerCapasPorCanton(
   tipo: TipoCapa,
   canton: string,
@@ -238,4 +238,53 @@ export interface FactorConectividad {
  */
 export async function obtenerFactorConectividad(): Promise<FactorConectividad[]> {
   return obtenerJsonConDetalle<FactorConectividad[]>("/infraestructura/factor");
+}
+
+/* ------------------------------------------------------------------ */
+/* OIJ / Poder Judicial — Integrante 4                                */
+/* ------------------------------------------------------------------ */
+
+/** Respuesta de los endpoints de /seguridad: siempre trae la advertencia ética junto a los datos. */
+export interface RespuestaSeguridad<T> {
+  advertencia: string;
+  datos: T;
+}
+
+export interface EstadisticaSeguridad {
+  estadistica_id: number;
+  canton_id: number;
+  tipo_delito: string;
+  cantidad: number;
+  anio: number;
+  fecha_consulta: string;
+}
+
+export interface FactorSeguridad {
+  canton_id: number;
+  codigo_ine: string;
+  nombre: string;
+  provincia: string;
+  poblacion: number | null;
+  total_delitos: number;
+  tasa_incidencia: number;
+  factor_seguridad: number;
+}
+
+/**
+ * Desglose del Factor de Seguridad de los 84 cantones (vista
+ * v_factor_seguridad). Usa `obtenerJsonConDetalle` a propósito: si el ETL
+ * todavía no corrió `--calcular-factor`, la API responde 503 con el comando
+ * que falta correr, igual que /inversion/factor e /infraestructura/factor.
+ * La advertencia ética viaja en la misma respuesta — nunca hardcodeada acá.
+ */
+export async function obtenerFactorSeguridad(): Promise<RespuestaSeguridad<FactorSeguridad[]>> {
+  return obtenerJsonConDetalle<RespuestaSeguridad<FactorSeguridad[]>>("/seguridad/factor");
+}
+
+/** Estadísticas policiales crudas (por tipo de delito y año) de un cantón. */
+export async function obtenerEstadisticasPorCanton(
+  cantonId: number,
+): Promise<RespuestaSeguridad<EstadisticaSeguridad[]>> {
+  const parametros = new URLSearchParams({ canton_id: String(cantonId) });
+  return obtenerJsonConDetalle<RespuestaSeguridad<EstadisticaSeguridad[]>>(`/seguridad?${parametros}`);
 }

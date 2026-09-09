@@ -1,21 +1,31 @@
 """
-ETL — Integrante 4 — Poder Judicial / OIJ (estadísticas policiales por cantón)
+ETL - Integrante 4 - Poder Judicial / OIJ (estadisticas policiales por canton)
 
-Reemplaza a la fuente original del BCCR: no requiere token y añade una
-dimensión de seguridad. Sin token, sobre CKAN, con recursos en CSV/XLS/XML/RDF.
+Reemplaza a la fuente original del BCCR: no requiere token y anade una
+dimension de seguridad. Sin token, publicado por el PJ, formato CSV/XLS/XML/RDF.
 
-Flujo:
-  1. Descargar un recurso CKAN (por archivo directo o vía datastore_search).
-  2. Limpiar con pandas y normalizar nombre de cantón / tipo de delito / año.
-  3. Cargar en `estadisticas_seguridad` (agregado por cantón, nunca por persona).
+IMPORTANTE - formato real verificado (ver docs/oij.md, seccion "Hallazgos del
+formato real"): el recurso CSV publicado en datosabiertospj.poder-judicial.go.cr
+NO trae encabezado ni una columna de "Cantidad" ya agregada. Es un registro por
+incidente, con 11 columnas posicionales, en codificacion latin-1 (no UTF-8):
 
-IMPORTANTE (ver docs/oij.md): estas son estadísticas agregadas. El sistema
-nunca debe insinuar que un cantón "peligroso" implica algo sobre sus
-habitantes, y la correlación con el índice de viabilidad no es causalidad.
+  0 tipo_delito | 1 subtipo_delito | 2 fecha_hecho (YYYY-MM-DD) | 3 tipo_victima
+  4 clasificacion_victima | 5 grupo_etario | 6 (columna reservada, vacia)
+  7 nacionalidad | 8 provincia | 9 canton | 10 distrito
+
+Por eso este script agrupa y cuenta (canton + tipo_delito + anio) antes de
+cargar a `estadisticas_seguridad` - la transformacion real que pide el
+enunciado del curso, no una copia directa del archivo.
+
+El año de cada carga se resuelve con --anio, o si se omite, con
+OIJ_ANIO_REFERENCIA del .env de la raíz del repo - nunca se mezclan años sin
+que el equipo lo decida explícitamente (ver "Año de referencia" en
+factor_seguridad.py, que aplica el mismo criterio al calcular el factor).
 
 Uso:
-    python sync_oij.py --resource-id <id_recurso_ckan> --anio 2024
-    python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024
+    python sync_oij.py --archivo reportes/PJCROD_POLICIALES_V1-2025.csv --anio 2025
+    python sync_oij.py --resource-id <id_recurso_ckan> --anio 2025   # fallback, no confirmado para este dataset
+    python sync_oij.py --calcular-factor                              # solo recrea la vista con lo ya cargado
 """
 import argparse
 import os
@@ -28,6 +38,7 @@ import requests
 from dotenv import load_dotenv
 
 from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
+from factor_seguridad import ANIO_REFERENCIA, calcular_factor_seguridad  # noqa: E402
 
 load_dotenv()
 
@@ -35,17 +46,38 @@ OIJ_CKAN_BASE_URL = os.environ.get(
     "OIJ_CKAN_BASE_URL", "https://datosabiertospj.poder-judicial.go.cr"
 )
 
-COLUMNAS_ESPERADAS = {
-    "Canton": "canton",
-    "Cantón": "canton",
+# Columnas posicionales del CSV real (sin encabezado) - ver docs/oij.md
+COLUMNAS_CSV = [
+    "tipo_delito",
+    "subtipo_delito",
+    "fecha_hecho",
+    "tipo_victima",
+    "clasificacion_victima",
+    "grupo_etario",
+    "_reservada",
+    "nacionalidad",
+    "provincia",
+    "canton",
+    "distrito",
+]
+
+# Por si el recurso viniera con nombres de columna propios (poco probable, no confirmado)
+RENOMBRES_DATASTORE = {
+    "Canton": "canton", "Cantón": "canton",
     "Delito": "tipo_delito",
-    "Cantidad": "cantidad",
-    "Anio": "anio",
-    "Año": "anio",
+    "Fecha": "fecha_hecho", "FechaHecho": "fecha_hecho",
 }
+
+# Encodings a probar en orden - el archivo del PJ viene en latin-1, no UTF-8
+ENCODINGS_A_PROBAR = ["latin-1", "cp1252", "utf-8"]
 
 
 def descargar_desde_datastore(resource_id: str) -> pd.DataFrame:
+    """
+    Fallback si el recurso tuviera datastore activo en CKAN. NO confirmado para
+    el dataset 'estadisticas-policiales': la via verificada y recomendada es
+    --archivo con el CSV descargado directamente del portal (ver docs/oij.md).
+    """
     url = f"{OIJ_CKAN_BASE_URL}/api/3/action/datastore_search"
     registros = []
     offset = 0
@@ -55,43 +87,106 @@ def descargar_desde_datastore(resource_id: str) -> pd.DataFrame:
         resp.raise_for_status()
         data = resp.json()
         if not data.get("success"):
-            raise RuntimeError(f"CKAN respondió success=false: {data}")
+            raise RuntimeError(f"CKAN respondio success=false: {data}")
         pagina = data["result"]["records"]
         registros.extend(pagina)
         if len(pagina) < limite:
             break
         offset += limite
-    return pd.DataFrame(registros)
+    df = pd.DataFrame(registros)
+    return df.rename(columns=RENOMBRES_DATASTORE)
 
 
 def cargar_desde_archivo(ruta_archivo: str) -> pd.DataFrame:
-    if ruta_archivo.endswith(".csv"):
-        return pd.read_csv(ruta_archivo)
-    return pd.read_excel(ruta_archivo)
+    """
+    Carga el CSV crudo del PJ: sin encabezado, 11 columnas posicionales,
+    codificacion latin-1. Se prueban varias codificaciones por si el archivo
+    cambia con el tiempo.
+    """
+    ultimo_error = None
+    for encoding in ENCODINGS_A_PROBAR:
+        try:
+            df = pd.read_csv(
+                ruta_archivo,
+                header=None,
+                names=COLUMNAS_CSV,
+                encoding=encoding,
+                dtype=str,
+                on_bad_lines="warn",
+            )
+            print(f"Archivo leido con encoding='{encoding}' ({len(df)} filas crudas)")
+            return df
+        except (UnicodeDecodeError, UnicodeError) as exc:
+            ultimo_error = exc
+            continue
+    raise ValueError(f"No se pudo leer el archivo con ninguna codificacion probada: {ultimo_error}")
 
 
 def normalizar(df: pd.DataFrame, anio_filtro: int | None) -> pd.DataFrame:
-    df = df.rename(columns=COLUMNAS_ESPERADAS)
-    columnas_requeridas = {"canton", "tipo_delito", "cantidad", "anio"}
-    faltantes = columnas_requeridas - set(df.columns)
-    if faltantes:
-        raise ValueError(f"Columnas faltantes en el recurso OIJ: {faltantes}")
+    """
+    Convierte el registro por incidente en un agregado por canton + tipo_delito
+    + anio, que es lo que espera la tabla `estadisticas_seguridad`.
 
-    df["anio"] = pd.to_numeric(df["anio"], errors="coerce").astype("Int64")
-    df["cantidad"] = pd.to_numeric(df["cantidad"], errors="coerce").fillna(0).astype(int)
-    if anio_filtro:
-        df = df[df["anio"] == anio_filtro]
-    return df.dropna(subset=["canton", "tipo_delito", "anio"])
+    El año a filtrar se resuelve con esta prioridad (documentada también en
+    factor_seguridad.py, que aplica el mismo criterio del lado de la vista):
+    1. `--anio` en la linea de comandos, si se paso.
+    2. `OIJ_ANIO_REFERENCIA` del .env, si `--anio` no se paso.
+    3. Si ninguno de los dos esta fijado, NO se filtra aca (se carga todo lo
+       que traiga el archivo) - pero si el archivo trae mas de un anio, se
+       avisa con fuerza: `calcular_factor_seguridad()` se va a negar a crear
+       la vista mientras la tabla tenga anios mezclados sin que el equipo
+       haya fijado OIJ_ANIO_REFERENCIA, para no calcular un factor enganoso.
+    """
+    df = df.copy()
+    for col in ("tipo_delito", "canton", "provincia"):
+        df[col] = df[col].astype(str).str.strip().str.upper()
+
+    df["fecha_hecho"] = pd.to_datetime(df["fecha_hecho"], errors="coerce")
+    df["anio"] = df["fecha_hecho"].dt.year
+
+    antes = len(df)
+    df = df.dropna(subset=["canton", "tipo_delito", "anio"])
+    df = df[(df["canton"] != "") & (df["canton"] != "NAN")]
+    if len(df) < antes:
+        print(f"Se descartaron {antes - len(df)} filas sin canton, delito o fecha valida")
+
+    anio_resuelto = anio_filtro if anio_filtro is not None else ANIO_REFERENCIA
+    if anio_resuelto is not None:
+        origen = "--anio" if anio_filtro is not None else "OIJ_ANIO_REFERENCIA (.env)"
+        antes_filtro = len(df)
+        df = df[df["anio"] == anio_resuelto]
+        print(f"Filtrado a año {anio_resuelto} (fuente: {origen}): {antes_filtro} -> {len(df)} filas")
+    else:
+        anios_presentes = sorted(df["anio"].dropna().unique().astype(int).tolist())
+        if len(anios_presentes) > 1:
+            print(
+                f"AVISO: el archivo trae {len(anios_presentes)} años distintos {anios_presentes} y "
+                "no se pasó --anio ni está fijada OIJ_ANIO_REFERENCIA en el .env. Se van a cargar "
+                "TODOS tal cual - pero 'sync_oij.py --calcular-factor' se va a negar a crear la vista "
+                "mientras la tabla tenga años mezclados sin un año de referencia fijado, para no "
+                "calcular un Factor de Seguridad engañoso. Recomendado: volver a correr con --anio "
+                "<año>, o fijar OIJ_ANIO_REFERENCIA en el .env de la raíz del repo."
+            )
+
+    agregado = (
+        df.groupby(["canton", "tipo_delito", "anio"], as_index=False)
+        .size()
+        .rename(columns={"size": "cantidad"})
+    )
+    agregado["anio"] = agregado["anio"].astype(int)
+    return agregado
 
 
 def cargar(df: pd.DataFrame) -> int:
     insertados = 0
+    cantones_no_reconocidos = set()
     with get_connection() as conn:
         with conn.cursor() as cur:
             for _, fila in df.iterrows():
                 canton_id = get_canton_id_por_nombre(conn, str(fila["canton"]))
                 if canton_id is None:
-                    continue  # cantón no reconocido — se omite y queda fuera del conteo
+                    cantones_no_reconocidos.add(fila["canton"])
+                    continue  # canton no reconocido en `cantones` - se omite y se reporta al final
                 cur.execute(
                     """
                     INSERT INTO estadisticas_seguridad
@@ -107,31 +202,65 @@ def cargar(df: pd.DataFrame) -> int:
                     (canton_id, fila["tipo_delito"], int(fila["cantidad"]), int(fila["anio"])),
                 )
                 insertados += 1
+        if cantones_no_reconocidos:
+            print(
+                f"AVISO: {len(cantones_no_reconocidos)} nombre(s) de canton sin match en `cantones`: "
+                f"{sorted(cantones_no_reconocidos)}"
+            )
         registrar_sincronizacion(
             conn,
             fuente_codigo="OIJ",
             estado="exito" if insertados else "parcial",
             registros_procesados=insertados,
-            mensaje=f"Filas totales procesadas: {len(df)}",
+            mensaje=f"Filas agregadas procesadas: {len(df)}; cantones sin match: {len(cantones_no_reconocidos)}",
         )
     return insertados
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ETL OIJ (CKAN → estadísticas de seguridad agregadas)")
-    fuente = parser.add_mutually_exclusive_group(required=True)
-    fuente.add_argument("--resource-id", help="ID del recurso en el datastore de CKAN")
-    fuente.add_argument("--archivo", help="Ruta a un recurso descargado (csv/xlsx)")
-    parser.add_argument("--anio", type=int, help="Año de referencia a filtrar (recomendado fijarlo por equipo)")
+    parser = argparse.ArgumentParser(description="ETL OIJ (CSV crudo por incidente -> estadisticas agregadas por canton)")
+    fuente = parser.add_mutually_exclusive_group(required=False)
+    fuente.add_argument("--resource-id", help="ID del recurso en el datastore de CKAN (fallback, no confirmado)")
+    fuente.add_argument("--archivo", help="Ruta al CSV descargado del PJ (ej. reportes/PJCROD_POLICIALES_V1-2025.csv)")
+    parser.add_argument(
+        "--anio",
+        type=int,
+        help=(
+            "Año a filtrar. Si se omite, usa OIJ_ANIO_REFERENCIA del .env "
+            f"(actualmente: {ANIO_REFERENCIA if ANIO_REFERENCIA is not None else 'sin fijar'}). "
+            "Ver 'Año de referencia' en etl/oij/factor_seguridad.py."
+        ),
+    )
+    parser.add_argument(
+        "--calcular-factor",
+        action="store_true",
+        help="Crea/recrea la vista v_factor_seguridad y muestra el ranking",
+    )
     args = parser.parse_args()
 
+    # --calcular-factor solo (sin --resource-id ni --archivo): recrea la
+    # vista con lo que ya esté cargado, sin descargar nada nuevo. Igual
+    # criterio que sync_osm.py --calcular-factor sin --canton.
+    if args.calcular_factor and not args.resource_id and not args.archivo:
+        calcular_factor_seguridad()
+        return
+
+    if not args.resource_id and not args.archivo:
+        parser.error("indique --resource-id o --archivo, o --calcular-factor solo")
+
     try:
-        df_crudo = (
-            descargar_desde_datastore(args.resource_id) if args.resource_id else cargar_desde_archivo(args.archivo)
-        )
+        if args.resource_id:
+            df_crudo = descargar_desde_datastore(args.resource_id)
+        else:
+            df_crudo = cargar_desde_archivo(args.archivo)
         df = normalizar(df_crudo, args.anio)
         total = cargar(df)
-        print(f"OK: {total} filas de estadísticas de seguridad cargadas")
+        print(
+            f"OK: {total} filas agregadas cargadas "
+            f"({df['canton'].nunique()} cantones, {df['tipo_delito'].nunique()} tipos de delito)"
+        )
+        if args.calcular_factor:
+            calcular_factor_seguridad()
     except Exception as exc:
         with get_connection() as conn:
             registrar_sincronizacion(conn, fuente_codigo="OIJ", estado="error", mensaje=str(exc))
