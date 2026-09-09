@@ -3,6 +3,7 @@ import { obtenerIndices, obtenerZonas, type IndiceViabilidad, type Zona } from "
 import MapView from "./components/MapView";
 import Sidebar from "./components/Sidebar";
 import PanelBusquedaCanton from "./SNIT/components/PanelBusquedaCanton";
+import PanelInfraestructuraCanton from "./OSM/components/PanelInfraestructuraCanton";
 type CriterioOrden = "indice_total" | "factor_ambiental" | "factor_inversion" | "factor_conectividad" | "factor_seguridad";
 
 export default function App() {
