@@ -8,10 +8,10 @@ Trabajo de Investigación 2 — Seguridad Informática.
 
 | Fuente | Aporta | Factor del índice | Responsable | Detalle |
 |---|---|---|---|---|
-| **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Integrante 1 | [docs/snit.md](docs/snit.md) |
-| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Integrante 2 | [docs/sicop.md](docs/sicop.md) |
-| **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Integrante 3 | [docs/osm.md](docs/osm.md) |
-| **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Integrante 4 | [docs/oij.md](docs/oij.md) |
+| **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Diana | [docs/snit.md](docs/snit.md) |
+| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Orlando | [docs/sicop.md](docs/sicop.md) |
+| **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Karina | [docs/osm.md](docs/osm.md) |
+| **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Elein | [docs/oij.md](docs/oij.md) |
 
 La fuente OIJ reemplaza a la fuente económica original del BCCR: evita el trámite de token del servicio SOAP y añade una dimensión de seguridad directamente relevante para el curso.
 
