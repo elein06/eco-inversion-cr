@@ -148,10 +148,9 @@ Cada integrante corre su propio script desde `/etl/<fuente>`, apuntando al mismo
 ```bash
 # 1. SNIT — carga cantones + las 3 capas ambientales y calcula el Factor Ambiental
 cd etl/snit    && pip install -r requirements.txt && python sync_snit.py --todas --calcular-factor
-cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --solicitar --todos --correo yo@ejemplo.com
-#    SICOP manda un codigo por correo; se confirma y el script baja, clasifica y carga:
-#    python sync_sicop.py --confirmar --codigo <codigo del correo>
-#    python sync_sicop.py --cargar --calcular-factor
+cd etl/sicop   && pip install -r requirements.txt && python sync_sicop.py --archivo reportes/contratos_2025.xlsx --calcular-factor
+#    SICOP no tiene API limpia: el reporte se descarga a mano desde su módulo
+#    de datos abiertos (ver docs/sicop.md) y se procesa con --archivo
 cd etl/osm     && pip install -r requirements.txt && python cargar_todos_los_cantones.py --calcular-factor
 #    (o un cantón suelto: python sync_osm.py --canton "San José" --bbox 9.9,-84.12,9.95,-84.06 --calcular-factor)
 cd etl/oij     && pip install -r requirements.txt && python sync_oij.py --archivo reportes/estadisticas_2024.csv --anio 2024 --calcular-factor

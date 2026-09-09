@@ -5,11 +5,16 @@ Flujo:
   1. Leer un reporte descargado manualmente del módulo de datos abiertos de
      SICOP (Excel/CSV/JSON) — SICOP no ofrece una API REST limpia.
   2. Clasificar cada contrato como "ambiental" con un filtro de palabras
-     clave por regex sobre la descripción del objeto contractual.
+     clave por regex sobre la descripción del objeto contractual, agrupadas
+     en 6 categorías (ver PALABRAS_CLAVE_AMBIENTAL) — no machine learning.
   3. Cargar los contratos ambientales en `contratos_ambientales`.
+  4. Con --calcular-factor: crear/recrear v_factor_inversion, que convierte
+     esos contratos en el Factor de Inversión Municipal del índice.
 
 Uso:
     python sync_sicop.py --archivo reportes/contratos_2025.xlsx
+    python sync_sicop.py --archivo reportes/contratos_2025.xlsx --calcular-factor
+    python sync_sicop.py --calcular-factor                         # solo recrea la vista
 """
 import argparse
 import os
@@ -22,26 +27,28 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from db import get_canton_id_por_nombre, get_connection, registrar_sincronizacion  # noqa: E402
+from factor_inversion import calcular_factor_inversion  # noqa: E402
 
 load_dotenv()
 
 # Criterio explícito y documentado (ver docs/sicop.md) — no es machine learning.
-PALABRAS_CLAVE_AMBIENTAL = [
-    "residuos",
-    "reciclaje",
-    "arborizacion",
-    "arborización",
-    "alcantarillado",
-    "gestion ambiental",
-    "gestión ambiental",
-    "infraestructura verde",
-    "tratamiento de aguas",
-    "reforestacion",
-    "reforestación",
-]
-PATRON_AMBIENTAL = re.compile(
-    "|".join(re.escape(p) for p in PALABRAS_CLAVE_AMBIENTAL), re.IGNORECASE
-)
+# Las palabras clave se agrupan en 6 categorías (no se guarda la palabra que
+# matcheó tal cual): son las mismas 6 que conoce el frontend
+# (frontend/src/SICOP/estilos.ts) y el denominador de sub_diversidad en
+# etl/sicop/factor_inversion.py. Varias palabras pueden apuntar a la misma
+# categoría (con y sin tilde, o sinónimos cercanos).
+PALABRAS_CLAVE_AMBIENTAL: dict[str, list[str]] = {
+    "residuos": ["residuos"],
+    "reciclaje": ["reciclaje"],
+    "agua": ["alcantarillado", "tratamiento de aguas"],
+    "areas_verdes": ["arborizacion", "arborización", "reforestacion", "reforestación"],
+    "infraestructura_verde": ["infraestructura verde"],
+    "gestion_ambiental": ["gestion ambiental", "gestión ambiental"],
+}
+PATRONES_POR_CATEGORIA: dict[str, re.Pattern] = {
+    categoria: re.compile("|".join(re.escape(p) for p in palabras), re.IGNORECASE)
+    for categoria, palabras in PALABRAS_CLAVE_AMBIENTAL.items()
+}
 
 COLUMNAS_ESPERADAS = {
     "Institución": "institucion",
@@ -54,10 +61,14 @@ COLUMNAS_ESPERADAS = {
 
 
 def clasificar(descripcion: str) -> str | None:
+    """Devuelve la categoría (una de las 6 de PALABRAS_CLAVE_AMBIENTAL) o None
+    si ninguna palabra clave aparece en la descripción del objeto contractual."""
     if not isinstance(descripcion, str):
         return None
-    match = PATRON_AMBIENTAL.search(descripcion)
-    return match.group(0).lower() if match else None
+    for categoria, patron in PATRONES_POR_CATEGORIA.items():
+        if patron.search(descripcion):
+            return categoria
+    return None
 
 
 def cargar_reporte(ruta_archivo: str) -> pd.DataFrame:
@@ -113,17 +124,32 @@ def procesar(ruta_archivo: str) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="ETL SICOP (reporte → clasificación → PostgreSQL)")
-    parser.add_argument("--archivo", required=True, help="Ruta al reporte descargado (xlsx/csv)")
+    parser.add_argument("--archivo", help="Ruta al reporte descargado (xlsx/csv)")
+    parser.add_argument(
+        "--calcular-factor",
+        action="store_true",
+        help="Crea/recrea la vista v_factor_inversion y muestra el ranking",
+    )
     args = parser.parse_args()
+
+    # --calcular-factor solo (sin --archivo): recrea la vista con lo que ya
+    # esté cargado, sin procesar ningún reporte nuevo. Mismo criterio que
+    # sync_osm.py y sync_oij.py --calcular-factor sin fuente.
+    if args.calcular_factor and not args.archivo:
+        calcular_factor_inversion()
+        return
+
+    if not args.archivo:
+        parser.error("indique --archivo, o --calcular-factor solo")
 
     try:
         total = procesar(args.archivo)
         print(f"OK: {total} contratos ambientales cargados desde '{args.archivo}'")
+        if args.calcular_factor:
+            calcular_factor_inversion()
     except Exception as exc:
         with get_connection() as conn:
-            registrar_sincronizacion(
-                conn, fuente_codigo="SICOP", estado="error", mensaje=str(exc)
-            )
+            registrar_sincronizacion(conn, fuente_codigo="SICOP", estado="error", mensaje=str(exc))
         raise
 
 
