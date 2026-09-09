@@ -1,26 +1,71 @@
+/* ------------------------------------------------------------------ */
+/* Sistema de diseño — Eco-Inversión Costa Rica                        */
+/* Cubre el chrome de la app (sidebar + paneles flotantes). El mapa    */
+/* (MapView.tsx, .mapa-contenedor) queda fuera a propósito.            */
+/* ------------------------------------------------------------------ */
+:root {
+  --color-fondo: #f6f7f5;
+  --color-superficie: #ffffff;
+  --color-borde: #e6e8e3;
+  --color-borde-fuerte: #d4d7d0;
+  --color-texto: #171a15;
+  --color-texto-suave: #6b7268;
+  --color-texto-tenue: #9aa094;
+
+  --color-acento: #16794f;
+  --color-acento-fuerte: #0f5c3b;
+  --color-acento-suave: #e3f3e9;
+
+  --radio-lg: 18px;
+  --radio-md: 12px;
+  --radio-sm: 8px;
+
+  --sombra-suave: 0 1px 2px rgba(23, 26, 21, 0.04), 0 1px 1px rgba(23, 26, 21, 0.03);
+  --sombra-panel: 0 20px 40px -16px rgba(23, 26, 21, 0.28), 0 2px 8px rgba(23, 26, 21, 0.06);
+}
+
 * {
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #111827;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: inherit;
+  letter-spacing: -0.01em;
 }
 
 .app {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--color-fondo);
 }
 
 .banner-mock {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 6px 16px;
-  font-size: 13px;
+  background: #fdf6e3;
+  color: #8a6116;
+  border-bottom: 1px solid #f3e2b3;
+  padding: 8px 16px;
+  font-size: 12.5px;
   text-align: center;
+  letter-spacing: 0.01em;
 }
 
 .app-body {
@@ -34,139 +79,501 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   height: 100%;
-  font-size: 16px;
+  font-size: 15px;
+  color: var(--color-texto-suave);
 }
 
+/* -------------------------- Sidebar -------------------------------- */
+
 .sidebar {
-  width: 340px;
+  width: 360px;
   flex-shrink: 0;
   overflow-y: auto;
-  padding: 16px;
-  border-right: 1px solid #e5e7eb;
-  background: #f9fafb;
+  padding: 22px 20px;
+  background: var(--color-superficie);
+  border-right: 1px solid var(--color-borde);
 }
 
 .sidebar h1 {
-  font-size: 18px;
-  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: var(--color-texto);
 }
 
 .subtitulo {
-  margin: 0 0 16px;
-  color: #6b7280;
-  font-size: 13px;
+  margin: 0 0 20px;
+  color: var(--color-texto-suave);
+  font-size: 12.5px;
 }
 
 .filtro {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #374151;
-  margin-bottom: 12px;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-texto-tenue);
+  margin-bottom: 16px;
 }
 
-.filtro select {
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+/* Selector moderno (reemplaza el <select> nativo de "Ordenar por") + el
+   botón que invierte la dirección del orden. */
+
+.filtro-controles {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.selector-moderno {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.boton-direccion {
+  flex-shrink: 0;
+  width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde-fuerte);
+  background: var(--color-superficie);
+  color: var(--color-texto-suave);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.boton-direccion:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento-fuerte);
+}
+
+.boton-direccion:focus-visible {
+  outline: none;
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 3px var(--color-acento-suave);
+}
+
+.selector-boton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde-fuerte);
+  background: var(--color-superficie);
+  color: var(--color-texto);
   font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.selector-boton:hover {
+  border-color: var(--color-acento);
+}
+
+.selector-boton:focus-visible,
+.selector-boton.abierto {
+  outline: none;
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 3px var(--color-acento-suave);
+}
+
+.selector-flecha {
+  font-size: 10px;
+  color: var(--color-texto-tenue);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.selector-flecha.abierta {
+  transform: rotate(180deg);
+}
+
+.selector-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 1200;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-panel);
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.selector-opcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 9px;
+  border-radius: var(--radio-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-texto);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.selector-opcion:hover {
+  background: #f4f5f2;
+}
+
+.selector-opcion.activa {
+  background: var(--color-acento-suave);
+  color: var(--color-acento-fuerte);
+  font-weight: 700;
+}
+
+.selector-punto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-acento);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.selector-opcion.activa .selector-punto {
+  opacity: 1;
 }
 
 .lista-cantones {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   padding: 0;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .lista-cantones li {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 9px 10px;
   font-size: 13px;
   cursor: pointer;
-  background: white;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.lista-cantones li:last-child {
-  border-bottom: none;
+  background: transparent;
+  border-radius: var(--radio-sm);
+  border: 1px solid transparent;
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .lista-cantones li:hover {
-  background: #f3f4f6;
+  background: #f4f5f2;
 }
 
 .lista-cantones li.activo {
-  background: #dbeafe;
+  background: var(--color-acento-suave);
+  border-color: #bfe3cd;
+}
+
+.fila-canton {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.fila-canton span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.punto-semaforo {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
 }
 
 .detalle {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 12px;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 16px;
 }
 
 .detalle h2 {
-  font-size: 15px;
-  margin: 0 0 10px;
+  font-size: 14.5px;
+  font-weight: 700;
+  margin: 0 0 12px;
 }
 
 .barra {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .barra-etiqueta {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
-  color: #374151;
-  margin-bottom: 2px;
+  font-size: 11.5px;
+  color: var(--color-texto-suave);
+  margin-bottom: 4px;
+}
+
+.barra-etiqueta span:last-child {
+  font-weight: 700;
+  color: var(--color-texto);
 }
 
 .barra-fondo {
-  background: #e5e7eb;
-  border-radius: 4px;
+  background: #eef0ec;
+  border-radius: 999px;
   height: 6px;
   overflow: hidden;
 }
 
 .barra-relleno {
-  background: #2563eb;
+  background: linear-gradient(90deg, var(--color-acento) 0%, #2fa06e 100%);
   height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
 }
 
 .pesos {
-  margin-top: 10px;
+  margin-top: 14px;
   font-size: 11px;
-  color: #6b7280;
+  color: var(--color-texto-tenue);
+  line-height: 1.5;
 }
 
 .advertencia {
-  margin-top: 8px;
-  font-size: 11px;
-  color: #92400e;
-  background: #fef3c7;
-  border-radius: 6px;
-  padding: 8px;
-}
-
-.mapa-contenedor {
-  flex: 1;
-  min-width: 0;
+  margin-top: 10px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #8a6116;
+  background: #fdf6e3;
+  border: 1px solid #f3e2b3;
+  border-radius: var(--radio-sm);
+  padding: 9px 10px;
 }
 
 .valores-canton {
   display: flex;
   align-items: baseline;
   gap: 6px;
+  flex-shrink: 0;
 }
 
-/* Índice total cuando la lista se ordena por otro factor: se muestra, pero no
-   compite con el número por el que realmente está ordenada. */
+.valores-canton strong {
+  font-variant-numeric: tabular-nums;
+}
+
 .valor-secundario {
-  color: #9ca3af;
+  color: var(--color-texto-tenue);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------- Mapa (sin tocar) ---------------------------- */
+
+.mapa-contenedor {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+/* ------------------- Paneles flotantes sobre el mapa ----------------
+   Comparten esta clase los 5 paneles (SNIT, SICOP, OSM, OIJ e Índice).
+   El color de los datos (categorías, capas, factor OIJ) sigue viniendo
+   de cada estilos.ts de fuente — eso no cambia, porque son los mismos
+   colores que usa el mapa. Acá solo se moderniza el marco. */
+
+.panel-flotante {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(6px);
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radio-lg);
+  border: 1px solid rgba(23, 26, 21, 0.06);
+  box-shadow: var(--sombra-panel);
+  width: 23rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: var(--color-texto);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.panel-header .panel-subt {
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+.panel-cerrar {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--color-texto-suave);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.panel-cerrar:hover {
+  background: #eef0ec;
+  color: var(--color-texto);
+}
+
+.panel-resumen {
+  margin: 0.5rem 0 0.8rem;
+  line-height: 1.5;
+  color: var(--color-texto);
+}
+
+.panel-resumen strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-seccion-titulo {
+  margin: 0.7rem 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.panel-nota {
+  color: var(--color-texto-tenue);
+  margin-top: 0.9rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.panel-error {
+  color: #b91c1c;
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.panel-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.panel-fila-tabla {
+  border-top: 1px solid var(--color-borde);
+}
+
+.panel-lista-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--color-borde);
+  font-size: 0.82rem;
+}
+
+.subpuntaje {
+  margin-top: 0.55rem;
+}
+
+.subpuntaje-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--color-texto-suave);
+  margin-bottom: 3px;
+}
+
+.subpuntaje-fondo {
+  background: #eef0ec;
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.subpuntaje-relleno {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-acento);
+  transition: width 0.25s ease;
+}
+
+/* ------------------------- Semáforo (índice) ------------------------- */
+
+.semaforo-tarjeta {
+  margin: 0.6rem 0 0.85rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--radio-md);
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.semaforo-numero {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.semaforo-punto {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.55);
+}
+
+.semaforo-pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.formula-indice {
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
