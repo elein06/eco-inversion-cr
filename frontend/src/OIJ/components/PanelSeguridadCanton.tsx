@@ -14,22 +14,7 @@ interface PanelProps {
   activo: boolean;
 }
 
-const PANEL: React.CSSProperties = {
-  position: "absolute",
-  top: "1rem",
-  right: "1rem",
-  zIndex: 1000,
-  background: "white",
-  padding: "0.9rem",
-  borderRadius: 8,
-  boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-  width: "23rem",
-  maxHeight: "80vh",
-  overflowY: "auto",
-  fontSize: "0.85rem",
-};
-
-const GRIS = "#64748b";
+const GRIS = "var(--color-texto-suave)";
 
 export default function PanelSeguridadCanton({
   cantonSeleccionado,
@@ -101,30 +86,26 @@ export default function PanelSeguridadCanton({
   // comando que falta correr — mismo criterio que los otros tres paneles.
   if (!detalle) {
     return error ? (
-      <div style={PANEL}>
-        <h3 style={{ margin: "0 0 0.4rem" }}>Factor de Seguridad (OIJ)</h3>
-        <p style={{ color: "#b91c1c", margin: 0 }}>{error}</p>
+      <div className="panel-flotante">
+        <h3 style={{ marginBottom: "0.4rem" }}>Factor de Seguridad (OIJ)</h3>
+        <p className="panel-error">{error}</p>
       </div>
     ) : null;
   }
 
   return (
-    <div style={PANEL}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <h3 style={{ margin: 0 }}>
+    <div className="panel-flotante">
+      <div className="panel-header">
+        <h3>
           {detalle.nombre}
-          <span style={{ fontWeight: 400, color: GRIS }}> · {detalle.provincia}</span>
+          <span className="panel-subt"> · {detalle.provincia}</span>
         </h3>
-        <button
-          onClick={() => onSeleccionarCanton(null)}
-          title="Cerrar"
-          style={{ border: "none", background: "none", cursor: "pointer", fontSize: "1.1rem" }}
-        >
+        <button className="panel-cerrar" onClick={() => onSeleccionarCanton(null)} title="Cerrar">
           ✕
         </button>
       </div>
 
-      <p style={{ margin: "0.3rem 0 0.7rem" }}>
+      <p className="panel-resumen">
         Factor de Seguridad <strong>{Number(detalle.factor_seguridad).toFixed(1)}</strong>
         {" · "}
         {detalle.total_delitos} {detalle.total_delitos === 1 ? "incidente registrado" : "incidentes registrados"}
@@ -152,26 +133,26 @@ export default function PanelSeguridadCanton({
         </p>
       ) : (
         <>
-          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+          {error && <p className="panel-error">{error}</p>}
 
           {cargandoEstadisticas ? (
             <p style={{ color: GRIS }}>Cargando estadísticas…</p>
           ) : (
             <div style={{ marginTop: "0.6rem" }}>
-              <h4 style={{ margin: "0 0 0.3rem", color: COLOR_ACENTO }}>
+              <h4 className="panel-seccion-titulo" style={{ color: COLOR_ACENTO }}>
                 Incidentes por tipo de delito ({porTipoDelito.length})
               </h4>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <table className="panel-tabla">
                 <tbody>
                   {porTipoDelito.map((fila) => (
-                    <tr key={fila.estadistica_id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                      <td style={{ padding: "0.25rem 0" }}>
+                    <tr key={fila.estadistica_id} className="panel-fila-tabla">
+                      <td style={{ padding: "0.3rem 0" }}>
                         {fila.tipo_delito}
                         <span style={{ color: GRIS, fontSize: "0.72rem" }}> · {fila.anio}</span>
                       </td>
                       <td
                         style={{
-                          padding: "0.25rem 0 0.25rem 0.4rem",
+                          padding: "0.3rem 0 0.3rem 0.4rem",
                           textAlign: "right",
                           whiteSpace: "nowrap",
                         }}
@@ -187,7 +168,7 @@ export default function PanelSeguridadCanton({
         </>
       )}
 
-      <p style={{ color: GRIS, marginTop: "0.7rem", fontSize: "0.75rem" }}>
+      <p className="panel-nota">
         Fuente: Poder Judicial / OIJ — estadísticas policiales agregadas por cantón. El Factor de
         Seguridad es el inverso de la tasa de incidencia (por 10 000 habitantes) normalizada
         contra los otros 83 cantones, con y sin datos: 100 es el que tiene menor incidencia
@@ -197,11 +178,11 @@ export default function PanelSeguridadCanton({
         <p
           style={{
             color: COLOR_ACENTO,
-            marginTop: "0.5rem",
+            marginTop: "0.6rem",
             fontSize: "0.75rem",
             fontWeight: 600,
             borderTop: "1px solid #fecaca",
-            paddingTop: "0.5rem",
+            paddingTop: "0.55rem",
           }}
         >
           ⚠ {advertencia}

@@ -7,7 +7,6 @@ import {
   type FactorAmbiental,
 } from "../../api";
 import { ESTILOS } from "../estilos";
-import { limpiarResaltado, resaltarGeometria } from "../mapa";
 
 interface PanelProps {
   cantonSeleccionado: number | null;
@@ -16,20 +15,7 @@ interface PanelProps {
   activo: boolean;
 }
 
-const PANEL: React.CSSProperties = {
-  position: "absolute",
-  top: "1rem",
-  right: "1rem",
-  zIndex: 1000,
-  background: "white",
-  padding: "0.9rem",
-  borderRadius: 8,
-  boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-  width: "23rem",
-  maxHeight: "80vh",
-  overflowY: "auto",
-  fontSize: "0.85rem",
-};
+const GRIS = "var(--color-texto-suave)";
 
 export default function PanelBusquedaCanton({
   cantonSeleccionado,
@@ -58,10 +44,6 @@ export default function PanelBusquedaCanton({
   // Las capas sí se piden a la API en cada selección: filtrarlas en el
   // navegador obligaría a descargar las 6 656 geometrías del país.
   useEffect(() => {
-    // El resaltado pertenece al cantón anterior: al cambiar deja de tener
-    // sentido y hay que borrarlo.
-    limpiarResaltado();
-
     if (!detalle) {
       setAreas([]);
       setCorredores([]);
@@ -98,25 +80,18 @@ export default function PanelBusquedaCanton({
   if (!detalle || !activo) return null;
 
   return (
-    <div style={PANEL}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <h3 style={{ margin: 0 }}>
+    <div className="panel-flotante">
+      <div className="panel-header">
+        <h3>
           {detalle.nombre}
-          <span style={{ fontWeight: 400, color: "#64748b" }}> · {detalle.provincia}</span>
+          <span className="panel-subt"> · {detalle.provincia}</span>
         </h3>
-        <button
-          onClick={() => {
-            limpiarResaltado();
-            onSeleccionarCanton(null);
-          }}
-          title="Cerrar"
-          style={{ border: "none", background: "none", cursor: "pointer", fontSize: "1.1rem" }}
-        >
+        <button className="panel-cerrar" onClick={() => onSeleccionarCanton(null)} title="Cerrar">
           ✕
         </button>
       </div>
 
-      <p style={{ margin: "0.3rem 0 0.7rem" }}>
+      <p className="panel-resumen">
         Factor Ambiental <strong>{Number(detalle.factor_ambiental).toFixed(1)}</strong>
         {" · "}
         {Number(detalle.pct_area_protegida).toFixed(1)}% protegido
@@ -124,10 +99,10 @@ export default function PanelBusquedaCanton({
         {Number(detalle.pct_corredor_biologico).toFixed(1)}% en corredor
       </p>
 
-      {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+      {error && <p className="panel-error">{error}</p>}
 
       {cargandoCapas ? (
-        <p style={{ color: "#64748b" }}>Cargando capas…</p>
+        <p style={{ color: GRIS }}>Cargando capas…</p>
       ) : (
         <>
           <Tabla
@@ -145,9 +120,7 @@ export default function PanelBusquedaCanton({
         </>
       )}
 
-      <p style={{ color: "#64748b", marginTop: "0.7rem", fontSize: "0.75rem" }}>
-        Fuente: SNIT — nodos SINAC e IGN, consumidos por WFS.
-      </p>
+      <p className="panel-nota">Fuente: SNIT — nodos SINAC e IGN, consumidos por WFS.</p>
     </div>
   );
 }
@@ -165,29 +138,18 @@ function Tabla({
 }) {
   return (
     <div style={{ marginTop: "0.7rem" }}>
-      <h4 style={{ margin: "0 0 0.3rem", color }}>
+      <h4 className="panel-seccion-titulo" style={{ color, margin: "0 0 0.35rem" }}>
         {titulo} ({filas.length})
       </h4>
       {filas.length === 0 ? (
-        <p style={{ margin: 0, color: "#64748b" }}>Ninguno en este cantón.</p>
+        <p style={{ margin: 0, color: GRIS }}>Ninguno en este cantón.</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="panel-tabla">
           <tbody>
             {filas.map((fila) => (
-              <tr
-                key={fila.capa_id}
-                onClick={() =>
-                  resaltarGeometria(
-                    fila.geom,
-                    fila.nombre ?? "Sin nombre",
-                    String(fila.atributos?.[campoDetalle] ?? ""),
-                  )
-                }
-                title="Ver en el mapa"
-                style={{ borderTop: "1px solid #e2e8f0", cursor: "pointer" }}
-              >
-                <td style={{ padding: "0.25rem 0" }}>{fila.nombre ?? "Sin nombre"}</td>
-                <td style={{ padding: "0.25rem 0", color: "#64748b", textAlign: "right" }}>
+              <tr key={fila.capa_id} className="panel-fila-tabla">
+                <td style={{ padding: "0.3rem 0" }}>{fila.nombre ?? "Sin nombre"}</td>
+                <td style={{ padding: "0.3rem 0", color: GRIS, textAlign: "right" }}>
                   {String(fila.atributos?.[campoDetalle] ?? "")}
                 </td>
               </tr>

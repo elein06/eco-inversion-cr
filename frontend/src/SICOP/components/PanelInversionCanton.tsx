@@ -14,22 +14,7 @@ interface PanelProps {
   activo: boolean;
 }
 
-const PANEL: React.CSSProperties = {
-  position: "absolute",
-  top: "1rem",
-  right: "1rem",
-  zIndex: 1000,
-  background: "white",
-  padding: "0.9rem",
-  borderRadius: 8,
-  boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-  width: "23rem",
-  maxHeight: "80vh",
-  overflowY: "auto",
-  fontSize: "0.85rem",
-};
-
-const GRIS = "#64748b";
+const GRIS = "var(--color-texto-suave)";
 
 export default function PanelInversionCanton({
   cantonSeleccionado,
@@ -87,33 +72,29 @@ export default function PanelInversionCanton({
 
   // El error se muestra aunque no haya cantón seleccionado: si la vista
   // v_factor_inversion todavía no existe, la API responde 503 con el comando
-  // que falta correr, y esconderlo dejaría el panel mudo para siempre.
+  // que falta correr, y ese texto es más útil que un "Error 503" pelado.
   if (!detalle) {
     return error ? (
-      <div style={PANEL}>
-        <h3 style={{ margin: "0 0 0.4rem" }}>Factor de Inversión (SICOP)</h3>
-        <p style={{ color: "#b91c1c", margin: 0 }}>{error}</p>
+      <div className="panel-flotante">
+        <h3 style={{ marginBottom: "0.4rem" }}>Factor de Inversión (SICOP)</h3>
+        <p className="panel-error">{error}</p>
       </div>
     ) : null;
   }
 
   return (
-    <div style={PANEL}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <h3 style={{ margin: 0 }}>
+    <div className="panel-flotante">
+      <div className="panel-header">
+        <h3>
           {detalle.nombre}
-          <span style={{ fontWeight: 400, color: GRIS }}> · {detalle.provincia}</span>
+          <span className="panel-subt"> · {detalle.provincia}</span>
         </h3>
-        <button
-          onClick={() => onSeleccionarCanton(null)}
-          title="Cerrar"
-          style={{ border: "none", background: "none", cursor: "pointer", fontSize: "1.1rem" }}
-        >
+        <button className="panel-cerrar" onClick={() => onSeleccionarCanton(null)} title="Cerrar">
           ✕
         </button>
       </div>
 
-      <p style={{ margin: "0.3rem 0 0.7rem" }}>
+      <p className="panel-resumen">
         Factor de Inversión <strong>{Number(detalle.factor_inversion).toFixed(1)}</strong>
         {" · "}
         {detalle.contratos} {detalle.contratos === 1 ? "contrato" : "contratos"}
@@ -134,7 +115,7 @@ export default function PanelInversionCanton({
           <SubPuntaje etiqueta="Cantidad (30%)" valor={Number(detalle.sub_cantidad)} />
           <SubPuntaje etiqueta="Diversidad (20%)" valor={Number(detalle.sub_diversidad)} />
 
-          <p style={{ color: GRIS, margin: "0.5rem 0 0", fontSize: "0.75rem" }}>
+          <p style={{ color: GRIS, margin: "0.6rem 0 0", fontSize: "0.75rem" }}>
             Monto y cantidad son percentiles contra los otros 83 cantones; diversidad es
             cuántas de las {TOTAL_CATEGORIAS} categorías aparecen ({detalle.categorias} acá).
             {detalle.base_monto === "monto_por_habitante"
@@ -143,14 +124,14 @@ export default function PanelInversionCanton({
           </p>
 
           {detalle.contratos_otra_moneda > 0 && (
-            <p style={{ color: "#b45309", margin: "0.4rem 0 0", fontSize: "0.75rem" }}>
+            <p style={{ color: "#b45309", margin: "0.5rem 0 0", fontSize: "0.75rem" }}>
               {detalle.contratos_otra_moneda}{" "}
               {detalle.contratos_otra_moneda === 1 ? "contrato quedó" : "contratos quedaron"} en
               otra moneda y no se suman al monto: SICOP no trajo tipo de cambio.
             </p>
           )}
 
-          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+          {error && <p className="panel-error">{error}</p>}
 
           {cargandoContratos ? (
             <p style={{ color: GRIS }}>Cargando contratos…</p>
@@ -160,7 +141,7 @@ export default function PanelInversionCanton({
         </>
       )}
 
-      <p style={{ color: GRIS, marginTop: "0.7rem", fontSize: "0.75rem" }}>
+      <p className="panel-nota">
         Fuente: SICOP — reportes de carteles, contratos e instituciones. La clasificación
         ambiental es por palabras clave y los pesos ({PESOS_FACTOR}) son decisión del equipo,
         no un indicador oficial. Solo cuenta gobiernos locales.
@@ -171,20 +152,13 @@ export default function PanelInversionCanton({
 
 function SubPuntaje({ etiqueta, valor }: { etiqueta: string; valor: number }) {
   return (
-    <div style={{ marginTop: "0.4rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem" }}>
+    <div className="subpuntaje">
+      <div className="subpuntaje-fila">
         <span>{etiqueta}</span>
         <span>{valor.toFixed(0)}</span>
       </div>
-      <div style={{ background: "#e2e8f0", borderRadius: 4, height: 6 }}>
-        <div
-          style={{
-            width: `${Math.min(valor, 100)}%`,
-            background: "#0369a1",
-            borderRadius: 4,
-            height: 6,
-          }}
-        />
+      <div className="subpuntaje-fondo">
+        <div className="subpuntaje-relleno" style={{ width: `${Math.min(valor, 100)}%` }} />
       </div>
     </div>
   );
@@ -211,14 +185,14 @@ function TablaContratos({ filas }: { filas: ContratoAmbiental[] }) {
         const { color, etiqueta } = estiloCategoria(categoria);
         return (
           <div key={categoria} style={{ marginTop: "0.6rem" }}>
-            <h4 style={{ margin: "0 0 0.3rem", color }}>
+            <h4 className="panel-seccion-titulo" style={{ color, margin: "0 0 0.35rem" }}>
               {etiqueta} ({contratosCategoria.length})
             </h4>
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+            <table className="panel-tabla" style={{ tableLayout: "fixed" }}>
               <tbody>
                 {contratosCategoria.map((contrato) => (
-                  <tr key={contrato.contrato_id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                    <td style={{ padding: "0.25rem 0", overflowWrap: "break-word" }}>
+                  <tr key={contrato.contrato_id} className="panel-fila-tabla">
+                    <td style={{ padding: "0.3rem 0", overflowWrap: "break-word" }}>
                       {contrato.descripcion_objeto ?? "Sin descripción"}
                       <div style={{ color: GRIS, fontSize: "0.72rem" }}>
                         {contrato.institucion}
@@ -228,7 +202,7 @@ function TablaContratos({ filas }: { filas: ContratoAmbiental[] }) {
                     <td
                       style={{
                         width: "7.5rem",
-                        padding: "0.25rem 0 0.25rem 0.4rem",
+                        padding: "0.3rem 0 0.3rem 0.4rem",
                         color: GRIS,
                         textAlign: "right",
                         whiteSpace: "nowrap",
