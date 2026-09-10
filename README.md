@@ -6,12 +6,12 @@ Trabajo de Investigación 2 — Seguridad Informática.
 
 ## Fuentes OSINT y responsables
 
-| Fuente | Aporta | Factor del índice | Responsable | Detalle |
-|---|---|---|---|---|
-| **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Diana | [docs/snit.md](docs/snit.md) |
-| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Orlando | [docs/sicop.md](docs/sicop.md) |
-| **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Karina | [docs/osm.md](docs/osm.md) |
-| **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Elein | [docs/oij.md](docs/oij.md) |
+| Fuente | Aporta | Factor del índice | Responsable | Enlace oficial | Detalle |
+|---|---|---|---|---|---|
+| **SNIT** (WFS) | Áreas protegidas, corredores biológicos, hidrografía | Ambiental (25%) | Diana | [snitcr.go.cr](https://www.snitcr.go.cr/ico_servicios_ogc) | [docs/snit.md](docs/snit.md) |
+| **SICOP** (API de datos abiertos) | Contratos municipales ambientales | Inversión (25%) | Orlando | [sicop.go.cr](https://www.sicop.go.cr/app/module/pcont/public/ce-open-data) | [docs/sicop.md](docs/sicop.md) |
+| **OpenStreetMap / Overpass** | Infraestructura y conectividad | Conectividad (25%) | Karina | [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Overpass_API) | [docs/osm.md](docs/osm.md) |
+| **Poder Judicial / OIJ** (CKAN) | Estadísticas policiales agregadas | Seguridad (25%) | Elein | [datosabiertospj.poder-judicial.go.cr](https://datosabiertospj.poder-judicial.go.cr/dataset/estadisticas-policiales) | [docs/oij.md](docs/oij.md) |
 
 La fuente OIJ reemplaza a la fuente económica original del BCCR: evita el trámite de token del servicio SOAP y añade una dimensión de seguridad directamente relevante para el curso.
 
