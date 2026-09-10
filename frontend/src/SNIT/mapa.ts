@@ -42,9 +42,13 @@ export function limpiarResaltado(): void {
 }
 
 /**
- * Acerca el mapa a una geometría del SNIT y la marca, como hace un buscador de
- * direcciones: contorno ámbar sobre la capa original, un punto en el centro y
- * un globo con el nombre.
+ * Acerca el mapa a una geometría y la marca, como hace un buscador de
+ * direcciones: contorno ámbar sobre la capa original (si es un área), un
+ * punto en el centro y un globo con el nombre.
+ *
+ * Sirve tanto para polígonos (áreas protegidas y corredores del SNIT) como
+ * para puntos (POIs de OSM: escuelas, centros de acopio, vías) — cualquier
+ * panel de detalle con geometría propia puede usar esta misma función.
  *
  * Los límites se calculan con L.geoJSON en vez de guardarlos en la base: la
  * geometría ya viaja en la respuesta, así que sacar su rectángulo envolvente
@@ -59,24 +63,37 @@ export function resaltarGeometria(
 
   limpiarResaltado();
 
-  const contorno = L.geoJSON(geom, {
-    style: {
-      color: "#b45309",
-      weight: 4,
-      fillColor: "#f59e0b",
-      fillOpacity: 0.35,
-      // La línea discontinua distingue el resaltado de las capas de fondo,
-      // que son continuas.
-      dashArray: "6 4",
-    },
-  });
+  // Un punto (POI de OSM) no tiene contorno que dibujar — el circleMarker
+  // de abajo ya lo señala. Si se le pasara igual a L.geoJSON, dibujaría un
+  // ícono de Leaflet por defecto para el tipo "Point" (el mismo problema de
+  // imagen rota que se evita más abajo con circleMarker), así que para
+  // puntos se salta el contorno y se calcula el centro directo de las
+  // coordenadas.
+  const esPunto = geom.type === "Point";
 
-  const limites = contorno.getBounds();
-  if (!limites.isValid()) return;
+  const contorno = esPunto
+    ? null
+    : L.geoJSON(geom, {
+        style: {
+          color: "#b45309",
+          weight: 4,
+          fillColor: "#f59e0b",
+          fillOpacity: 0.35,
+          // La línea discontinua distingue el resaltado de las capas de
+          // fondo, que son continuas.
+          dashArray: "6 4",
+        },
+      });
+
+  const limites = contorno?.getBounds();
+  if (contorno && (!limites || !limites.isValid())) return;
+
+  const [lon, lat] = esPunto ? (geom as GeoJSON.Point).coordinates : [0, 0];
+  const centro = limites ? limites.getCenter() : L.latLng(lat, lon);
 
   // Se usa circleMarker y no marker porque el icono por defecto de Leaflet
   // apunta a imágenes que los empaquetadores no resuelven solos.
-  const punto = L.circleMarker(limites.getCenter(), {
+  const punto = L.circleMarker(centro, {
     radius: 9,
     color: "#b45309",
     weight: 3,
@@ -89,10 +106,17 @@ export function resaltarGeometria(
       (detalle ? `<br/>${escapar(detalle)}` : ""),
   );
 
-  resaltado = L.layerGroup([contorno, punto]).addTo(mapa);
+  const capas = contorno ? [contorno, punto] : [punto];
+  resaltado = L.layerGroup(capas).addTo(mapa);
 
-  // maxZoom evita que una geometría chica deje el mapa pegado al suelo, sin
-  // contexto alrededor.
-  mapa.fitBounds(limites, { padding: [60, 60], maxZoom: 12 });
+  if (limites) {
+    // maxZoom evita que una geometría chica deje el mapa pegado al suelo,
+    // sin contexto alrededor.
+    mapa.flyToBounds(limites, { padding: [60, 60], maxZoom: 12, duration: 0.8 });
+  } else {
+    // Un punto no tiene "límites" que encuadrar: se centra ahí con un zoom
+    // fijo, lo bastante cerca para distinguirlo de sus vecinos.
+    mapa.flyTo(centro, Math.max(mapa.getZoom(), 16), { duration: 0.8 });
+  }
   punto.openPopup();
 }
