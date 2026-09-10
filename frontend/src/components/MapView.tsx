@@ -4,6 +4,7 @@ import L from "leaflet";
 import type { Layer } from "leaflet";
 import type { IndiceViabilidad, Zona } from "../api";
 import CapasAmbientales from "../SNIT/components/CapasAmbientales";
+import { registrarMapa } from "../SNIT/mapa";
 import PuntosInfraestructura from "../OSM/components/PuntosInfraestructura";
 interface MapViewProps {
   zonas: Zona[];
@@ -24,6 +25,13 @@ interface MapViewProps {
  * efecto acá, adentro del mapa: no hace falta repetir la lógica de
  * "enfocar" en cada panel por separado, ya enfoca sin importar de dónde
  * vino el clic.
+ *
+ * De paso, acá también se registra la instancia del mapa en SNIT/mapa.ts
+ * (`registrarMapa`). Antes eso solo pasaba dentro de CapasAmbientales, que
+ * solo se monta cuando la pestaña activa es SNIT — si el usuario entraba
+ * directo a otra pestaña (OSM, por ejemplo) sin pasar antes por SNIT, el
+ * mapa quedaba sin registrar y "Ver en el mapa" no hacía nada al hacer
+ * clic. Este componente sí está montado siempre, sin importar la pestaña.
  */
 function EnfoqueCanton({
   zonas,
@@ -33,6 +41,10 @@ function EnfoqueCanton({
   cantonSeleccionado: number | null;
 }) {
   const mapa = useMap();
+
+  useEffect(() => {
+    registrarMapa(mapa);
+  }, [mapa]);
 
   useEffect(() => {
     if (!cantonSeleccionado) return;

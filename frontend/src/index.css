@@ -443,6 +443,8 @@ h4 {
   overflow-y: auto;
   font-size: 0.85rem;
   color: var(--color-texto);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-borde-fuerte) transparent;
 }
 
 .panel-header {
