@@ -92,6 +92,8 @@ h4 {
   padding: 22px 20px;
   background: var(--color-superficie);
   border-right: 1px solid var(--color-borde);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-borde-fuerte) transparent;
 }
 
 .sidebar h1 {

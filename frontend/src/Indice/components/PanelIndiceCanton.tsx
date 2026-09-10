@@ -65,22 +65,10 @@ export default function PanelIndiceCanton({
     [seguridad, cantonSeleccionado],
   );
 
-  if (!activo) return null;
-
-  // Sin cantón elegido todavía: se muestra un panel liviano en vez de nada,
-  // para que quede claro que el resumen existe y cómo activarlo (clave para
-  // la demo: el valor de la app se ve al comparar un cantón contra otro).
-  if (!cantonSeleccionado || !indice) {
-    return (
-      <div className="panel-flotante">
-        <h3>Índice de Viabilidad</h3>
-        <p className="panel-resumen" style={{ color: "var(--color-texto-suave)" }}>
-          Hacé clic en un cantón (en el mapa o en la lista) para ver la fórmula exacta del
-          índice, el semáforo y el resumen de las cuatro fuentes OSINT que lo componen.
-        </p>
-      </div>
-    );
-  }
+  // Sin cantón seleccionado (o filtro no activo) no hay nada que mostrar:
+  // antes había un panel "vacío" con instrucciones, pero tapaba el mapa
+  // sin necesidad cuando todavía no se eligió ningún cantón.
+  if (!activo || !cantonSeleccionado || !indice) return null;
 
   const semaforo = semaforoPorIndice(indice.indice_total);
 
