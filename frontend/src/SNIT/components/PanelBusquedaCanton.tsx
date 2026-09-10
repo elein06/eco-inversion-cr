@@ -7,6 +7,7 @@ import {
   type FactorAmbiental,
 } from "../../api";
 import { ESTILOS } from "../estilos";
+import { limpiarResaltado, resaltarGeometria } from "../mapa";
 
 interface PanelProps {
   cantonSeleccionado: number | null;
@@ -74,6 +75,13 @@ export default function PanelBusquedaCanton({
     return () => {
       cancelado = true;
     };
+  }, [detalle]);
+
+  // Al cerrar el panel o cambiar de cantón, se borra el resaltado que haya
+  // quedado de un clic anterior en la tabla — si no, se queda pegado en el
+  // mapa apuntando a una geometría de un cantón que ya no se está viendo.
+  useEffect(() => {
+    if (!detalle) limpiarResaltado();
   }, [detalle]);
 
   // Sin cantón seleccionado el panel no existe: no estorba el mapa.
@@ -146,14 +154,25 @@ function Tabla({
       ) : (
         <table className="panel-tabla">
           <tbody>
-            {filas.map((fila) => (
-              <tr key={fila.capa_id} className="panel-fila-tabla">
-                <td style={{ padding: "0.3rem 0" }}>{fila.nombre ?? "Sin nombre"}</td>
-                <td style={{ padding: "0.3rem 0", color: GRIS, textAlign: "right" }}>
-                  {String(fila.atributos?.[campoDetalle] ?? "")}
-                </td>
-              </tr>
-            ))}
+            {filas.map((fila) => {
+              const detalleFila = String(fila.atributos?.[campoDetalle] ?? "");
+              return (
+                <tr
+                  key={fila.capa_id}
+                  className="panel-fila-tabla"
+                  onClick={() =>
+                    resaltarGeometria(fila.geom, fila.nombre ?? "Sin nombre", detalleFila || undefined)
+                  }
+                  style={{ cursor: "pointer" }}
+                  title="Ver en el mapa"
+                >
+                  <td style={{ padding: "0.3rem 0" }}>{fila.nombre ?? "Sin nombre"}</td>
+                  <td style={{ padding: "0.3rem 0", color: GRIS, textAlign: "right" }}>
+                    {detalleFila}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

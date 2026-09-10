@@ -1,4 +1,6 @@
-import { GeoJSON, MapContainer, TileLayer } from "react-leaflet";
+import { useEffect } from "react";
+import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
+import L from "leaflet";
 import type { Layer } from "leaflet";
 import type { IndiceViabilidad, Zona } from "../api";
 import CapasAmbientales from "../SNIT/components/CapasAmbientales";
@@ -10,6 +12,42 @@ interface MapViewProps {
   onSeleccionarCanton: (cantonId: number) => void;
   mostrarCapasSnit?: boolean;
   mostrarInfraestructuraOsm?: boolean;
+}
+
+/**
+ * Centra y acerca el mapa al cantón seleccionado, con animación.
+ *
+ * `cantonSeleccionado` es un solo estado compartido en App.tsx: lo cambian
+ * por igual un clic en el sidebar, un clic directo sobre el mapa y
+ * cualquiera de los cuatro paneles de detalle (SNIT/SICOP/OSM/OIJ) cuando
+ * el usuario elige otro cantón desde ahí. Por eso alcanza con un solo
+ * efecto acá, adentro del mapa: no hace falta repetir la lógica de
+ * "enfocar" en cada panel por separado, ya enfoca sin importar de dónde
+ * vino el clic.
+ */
+function EnfoqueCanton({
+  zonas,
+  cantonSeleccionado,
+}: {
+  zonas: Zona[];
+  cantonSeleccionado: number | null;
+}) {
+  const mapa = useMap();
+
+  useEffect(() => {
+    if (!cantonSeleccionado) return;
+    const zona = zonas.find((z) => z.canton_id === cantonSeleccionado);
+    if (!zona) return;
+
+    const limites = L.geoJSON(zona.geom as GeoJSON.GeoJsonObject).getBounds();
+    if (!limites.isValid()) return;
+
+    // flyToBounds anima el paneo y el zoom juntos (en vez de saltar de
+    // golpe), igual que resaltarGeometria en SNIT/mapa.ts.
+    mapa.flyToBounds(limites, { padding: [60, 60], maxZoom: 12, duration: 0.8 });
+  }, [cantonSeleccionado, zonas, mapa]);
+
+  return null;
 }
 
 /**
@@ -81,6 +119,7 @@ export default function MapView({
       {mostrarInfraestructuraOsm && (
         <PuntosInfraestructura cantonSeleccionado={cantonSeleccionado} />
       )}
+      <EnfoqueCanton zonas={zonas} cantonSeleccionado={cantonSeleccionado} />
     </MapContainer>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { obtenerFactorConectividad, type FactorConectividad, type InfraestructuraOsm } from "../../api";
 import { CACHE_DIAS_DEFECTO, estiloCategoria, ORDEN_CATEGORIAS } from "../estilos";
 import { useInfraestructuraOsm } from "../hooks/useInfraestructuraOsm";
+import { limpiarResaltado, resaltarGeometria } from "../../SNIT/mapa";
 
 interface PanelProps {
   cantonSeleccionado: number | null;
@@ -51,6 +52,13 @@ export default function PanelInfraestructuraCanton({
       ([, filas]) => filas.length > 0,
     );
   }, [pois]);
+
+  // Al cerrar el panel o cambiar de cantón, se borra el resaltado que haya
+  // quedado de un clic anterior en un POI — mismo criterio que el panel del
+  // SNIT (ver PanelBusquedaCanton).
+  useEffect(() => {
+    if (!detalle) limpiarResaltado();
+  }, [detalle]);
 
   if (!activo) return null;
 
@@ -114,7 +122,13 @@ export default function PanelInfraestructuraCanton({
                   </h4>
                   <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                     {filas.map((poi) => (
-                      <li key={poi.poi_id} className="panel-lista-item">
+                      <li
+                        key={poi.poi_id}
+                        className="panel-lista-item"
+                        onClick={() => resaltarGeometria(poi.geom, poi.nombre ?? "Sin nombre", etiqueta)}
+                        style={{ cursor: "pointer" }}
+                        title="Ver en el mapa"
+                      >
                         <span
                           aria-hidden
                           style={{
