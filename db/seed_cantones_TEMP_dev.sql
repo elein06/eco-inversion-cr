@@ -1,17 +1,19 @@
 -- ============================================================
--- SOLO PARA DESARROLLO LOCAL — NO ES EL SEED FINAL DEL PROYECTO
+-- ATAJO OPCIONAL DE DESARROLLO - NO ES EL SEED DEL PROYECTO
 --
--- Hallazgo: db/schema.sql crea `cantones` con geom NOT NULL, pero ningun
--- script del repo la puebla todavia (etl/snit/sync_snit.py solo carga
--- `capas_snit`, no `cantones`). Sin esta tabla poblada, get_canton_id_por_nombre()
--- siempre devuelve NULL y CUALQUIER ETL (SICOP, OSM, OIJ) descarta todas sus
--- filas silenciosamente. Esto bloquea a los 4 integrantes, no solo a OIJ.
+-- El eje territorial real ya lo carga el ETL del SNIT:
+--     cd etl/snit && python sync_snit.py --capa cantones
+-- que trae los 84 cantones con los limites oficiales del IGN (1:5mil) y los
+-- codigos contra los que las otras tres fuentes resuelven su canton_id.
 --
--- Este archivo es un parche temporal con 6 cantones y geometrias de
--- relleno (NO son los limites reales) solo para poder probar el flujo
--- de principio a fin en local. Cuando Integrante 1 cargue los limites
--- reales desde SNIT, este archivo debe eliminarse y las filas reales
--- deben reemplazar estas.
+-- Este archivo existe solo para probar el flujo de punta a punta en local sin
+-- esperar esa descarga: inserta 6 cantones con geometrias de relleno (NO son
+-- los limites reales) y codigos DEV-0N. Con esos datos el Factor Ambiental y
+-- cualquier cruce geografico dan numeros sin sentido, asi que no sirve para la
+-- demo ni para el indice.
+--
+-- Antes de cargar los cantones reales, borrar estas filas:
+--     DELETE FROM cantones WHERE codigo_ine LIKE 'DEV-%';
 -- ============================================================
 INSERT INTO cantones (codigo_ine, nombre, provincia, poblacion, geom) VALUES
 ('DEV-01', 'San José',    'San José',    350000, ST_GeomFromText('POLYGON((-84.10 9.92, -84.05 9.92, -84.05 9.96, -84.10 9.96, -84.10 9.92))', 4326)),

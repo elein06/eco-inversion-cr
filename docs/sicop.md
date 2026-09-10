@@ -330,5 +330,5 @@ cd etl/sicop
 python sync_sicop.py --calcular-factor
 ```
 
-(solo, o combinado con una carga: `python sync_sicop.py --archivo
-reportes/contratos_2025.xlsx --calcular-factor`).
+(solo, o combinado con una carga: `python sync_sicop.py --cargar
+--calcular-factor`, que procesa lo que haya en `data/`).
