@@ -8,7 +8,15 @@ from app.config import settings
 
 @contextmanager
 def get_db_connection():
-    conn = psycopg2.connect(settings.database_url)
+    # connect_timeout: cuánto esperar a que la base acepte la conexión.
+    # statement_timeout: tope por consulta, para que una consulta trabada no
+    # retenga la conexión para siempre. Si se exceden, psycopg2 lanza
+    # OperationalError / QueryCanceled y main.py lo convierte en un 503.
+    conn = psycopg2.connect(
+        settings.database_url,
+        connect_timeout=settings.db_connect_timeout,
+        options=f"-c statement_timeout={settings.db_statement_timeout_ms}",
+    )
     try:
         yield conn
     finally:

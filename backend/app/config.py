@@ -24,6 +24,19 @@ class Settings(BaseSettings):
     peso_conectividad: float = 0.25
     peso_seguridad: float = 0.25
 
+    # Autenticación (ver docs/autenticacion.md). JWT_SECRET no tiene valor
+    # por defecto a propósito: sin él la API se niega a arrancar.
+    jwt_secret: str = ""
+    jwt_minutos: int = 30
+    login_max_intentos: int = 5
+    login_bloqueo_minutos: int = 15
+
+    # Límites de espera hacia PostgreSQL. Sin ellos, una base lenta o caída
+    # deja cada solicitud colgada indefinidamente; con ellos la API responde
+    # 503 en pocos segundos (ver el experimento con Toxiproxy, ítem 4.10).
+    db_connect_timeout: int = 5
+    db_statement_timeout_ms: int = 15000
+
     # Dentro de docker-compose no hay .env montado y las variables llegan por
     # `environment:`; pydantic-settings las lee igual y el archivo ausente no
     # es un error. Un backend/.env, si existe, gana sobre el de la raíz.
