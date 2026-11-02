@@ -54,6 +54,26 @@ El frontend **nunca** consulta SNIT, SICOP, OSM ni el Poder Judicial directament
 
 - `GET /indice-viabilidad` — índice calculado, con los pesos usados
 - `POST /indice-viabilidad/recalcular` — recalcula los 84 cantones
+  (**requiere sesión de admin**)
+
+**Autenticación y escenarios privados** (detalle, roles y reglas de acceso en
+[docs/autenticacion.md](docs/autenticacion.md)):
+
+- `POST /auth/registro` — crea una cuenta con rol `usuario`
+- `POST /auth/login` — devuelve un token; se envía como `Authorization: Bearer <token>`
+- `GET /auth/yo` — datos de la sesión actual
+- `GET|POST /escenarios`, `GET|PUT|DELETE /escenarios/{id}` — escenarios del
+  usuario en sesión: pesos propios para el índice y una lista de cantones
+- `GET /escenarios/{id}/ranking` — cantones ordenados con los pesos del escenario
+- `GET /escenarios/{id}/export.csv` — el mismo ranking como CSV
+
+Solo el dueño de un escenario puede verlo, modificarlo o exportarlo. Los
+administradores se crean por línea de comandos, nunca por `/auth/registro`:
+
+```bash
+cd backend
+python -m app.crear_usuario --email admin@ejemplo.cr --rol admin
+```
 
 **Desglose por factor** (lo que alimenta los paneles laterales del frontend:
 no solo el puntaje, sino de dónde sale):
@@ -115,6 +135,26 @@ IGN (ver el paso 3). Ningún otro integrante debe cargar esa tabla, porque los
 
 ### 2. Backend (FastAPI)
 
+Antes de arrancar, poner un `JWT_SECRET` en el `.env` (sin él la API no
+levanta):
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Si la base ya existía antes de esta versión, aplicar una vez la migración de
+usuarios y escenarios:
+
+```bash
+docker compose exec -T db psql -U eco_inversion -d eco_inversion_cr < db/02_usuarios_escenarios.sql
+```
+
+En **PowerShell** el `<` no funciona; usar en su lugar:
+
+```powershell
+cmd /c "docker compose exec -T db psql -U eco_inversion -d eco_inversion_cr < db\02_usuarios_escenarios.sql"
+```
+
 ```bash
 cd backend
 python -m venv .venv
@@ -174,8 +214,13 @@ técnicas— en su archivo de `/docs`.
 Después de cargar datos nuevos, recalcular el índice:
 
 ```bash
-curl -X POST http://localhost:8000/indice-viabilidad/recalcular
+TOKEN=$(curl -s -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@ejemplo.cr","password":"..."}' | python -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
+curl -X POST http://localhost:8000/indice-viabilidad/recalcular -H "Authorization: Bearer $TOKEN"
 ```
+
+O desde `http://localhost:8000/docs`: botón **Authorize**, pegar el token.
 
 ### 4. Frontend (React + Vite + Leaflet)
 
@@ -187,6 +232,25 @@ npm run dev
 ```
 
 Disponible en `http://localhost:5173`. Si la API del backend todavía no tiene datos (o no está corriendo), el frontend cae automáticamente a datos de prueba (`src/mock.ts`) y lo indica con un banner, para no bloquear el desarrollo visual mientras el resto del equipo carga las fuentes reales.
+
+## Pruebas y calidad (backend)
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+
+ruff check .                 # linting (incluye reglas de seguridad tipo bandit)
+pytest tests/unit            # reglas de negocio, sin base de datos
+
+# Pruebas de API (F1, F2, F3 y autorización) contra una base de PRUEBAS.
+# La sesión borra y recrea el esquema: el nombre de la base debe terminar en _test.
+docker compose exec db createdb -U eco_inversion eco_inversion_test
+TEST_DATABASE_URL=postgresql://eco_inversion:changeme@localhost:5432/eco_inversion_test pytest
+```
+
+En PowerShell: `$env:TEST_DATABASE_URL="postgresql://..."; pytest`. Sin
+`TEST_DATABASE_URL`, las pruebas de API aparecen como *skipped*: una prueba
+omitida no cuenta como aprobada.
 
 ## Variables de entorno
 

@@ -12,6 +12,7 @@ services:
     volumes:
       - eco_inversion_db_data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/02_usuarios_escenarios.sql:/docker-entrypoint-initdb.d/02_usuarios_escenarios.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eco_inversion}"]
       interval: 5s
@@ -28,6 +29,8 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-eco_inversion}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-eco_inversion_cr}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # Sin valor por defecto: si falta en el .env, el backend se niega a arrancar.
+      JWT_SECRET: ${JWT_SECRET:-}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:

@@ -16,6 +16,7 @@ import json
 from psycopg2.extensions import cursor as Cursor
 
 from app.config import settings
+from app.pesos import combinar_factores, validar_pesos
 
 
 def _factor_ambiental(cur: Cursor) -> dict[int, float]:
@@ -134,12 +135,17 @@ def calcular_y_guardar_indices(cur: Cursor) -> int:
     cur.execute("SELECT canton_id FROM cantones")
     canton_ids = [fila["canton_id"] for fila in cur.fetchall()]
 
-    pesos = {
-        "ambiental": settings.peso_ambiental,
-        "inversion": settings.peso_inversion,
-        "conectividad": settings.peso_conectividad,
-        "seguridad": settings.peso_seguridad,
-    }
+    # validar_pesos lanza PesosInvalidos si config.py/.env quedó mal (por
+    # ejemplo, pesos que no suman 1): mejor fallar que guardar un índice
+    # que no significa nada.
+    pesos = validar_pesos(
+        {
+            "ambiental": settings.peso_ambiental,
+            "inversion": settings.peso_inversion,
+            "conectividad": settings.peso_conectividad,
+            "seguridad": settings.peso_seguridad,
+        }
+    )
 
     actualizados = 0
     for canton_id in canton_ids:
@@ -147,12 +153,9 @@ def calcular_y_guardar_indices(cur: Cursor) -> int:
         fi = factor_inversion.get(canton_id, 0.0)
         fc = factor_conectividad.get(canton_id, 0.0)
         fs = factor_seguridad.get(canton_id, 0.0)
-        total = round(
-            fa * pesos["ambiental"]
-            + fi * pesos["inversion"]
-            + fc * pesos["conectividad"]
-            + fs * pesos["seguridad"],
-            2,
+        total = combinar_factores(
+            {"ambiental": fa, "inversion": fi, "conectividad": fc, "seguridad": fs},
+            pesos,
         )
 
         cur.execute(
