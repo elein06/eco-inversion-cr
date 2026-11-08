@@ -1,0 +1,120 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1
+collecting ... collected 102 items / 96 deselected / 6 selected
+
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde PASSED [ 16%]
+tests/api/resiliencia/test_toxiproxy.py::test_r2_latencia_alta_da_503_por_connect_timeout FAILED [ 33%]
+tests/api/resiliencia/test_toxiproxy.py::test_r3_corte_total FAILED      [ 50%]
+tests/api/resiliencia/test_toxiproxy.py::test_r4_escritura_durante_el_corte_es_consistente PASSED [ 66%]
+tests/api/resiliencia/test_toxiproxy.py::test_r5_recuperacion_automatica FAILED [ 83%]
+tests/api/resiliencia/test_toxiproxy.py::test_r6_red_congelada_con_solicitud_en_curso_no_cuelga FAILED [100%]
+
+================================== FAILURES ===================================
+______________ test_r2_latencia_alta_da_503_por_connect_timeout _______________
+
+client = <starlette.testclient.TestClient object at 0x000002215C7A17F0>
+toxiproxy = <tests.api.resiliencia.conftest.Toxiproxy object at 0x000002215B088830>
+
+    def test_r2_latencia_alta_da_503_por_connect_timeout(client, toxiproxy):
+        toxiproxy.latencia(10_000)
+        r, segundos = cronometrar(lambda: client.get("/health/listo"))
+        assert_503_limpio(r)
+>       assert segundos < settings.db_connect_timeout + 2
+E       AssertionError: assert 7.073397899977863 < (5 + 2)
+E        +  where 5 = Settings(database_url='postgresql://eco_inversion:changeme@localhost:15432/eco_inversion_test?application_name=eco-api-resiliencia', cors_origins='http://localhost:5173', backend_host='0.0.0.0', backend_port=8000, peso_ambiental=0.25, peso_inversion=0.25, peso_conectividad=0.25, peso_seguridad=0.25, jwt_secret='secreto-solo-para-pruebas-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', jwt_minutos=30, login_max_intentos=5, login_bloqueo_minutos=15, db_connect_timeout=5, db_statement_timeout_ms=15000).db_connect_timeout
+
+tests\api\resiliencia\test_toxiproxy.py:60: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  eco.api:main.py:79 base_no_disponible request_id=a1c3e56bf65440708507f341331fdddd ruta=/health/listo error=OperationalError
+_____________________________ test_r3_corte_total _____________________________
+
+client = <starlette.testclient.TestClient object at 0x000002215C7A17F0>
+toxiproxy = <tests.api.resiliencia.conftest.Toxiproxy object at 0x000002215B088830>
+db = <connection object at 0x000002215C8779A0; dsn: 'user=eco_inversion password=xxx dbname=eco_inversion_test host=localhost port=5433', closed: 0>
+
+    def test_r3_corte_total(client, toxiproxy, db):
+        toxiproxy.cortar()
+    
+        r, segundos = cronometrar(lambda: client.get("/health/listo"))
+        assert_503_limpio(r)
+>       assert segundos < 2
+E       assert 2.0438272999599576 < 2
+
+tests\api\resiliencia\test_toxiproxy.py:70: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  eco.api:main.py:79 base_no_disponible request_id=645b89137d1e4536bcba44e22957500f ruta=/health/listo error=OperationalError
+_______________________ test_r5_recuperacion_automatica _______________________
+
+client = <starlette.testclient.TestClient object at 0x000002215C7A17F0>
+toxiproxy = <tests.api.resiliencia.conftest.Toxiproxy object at 0x000002215B088830>
+
+    def test_r5_recuperacion_automatica(client, toxiproxy):
+        toxiproxy.cortar()
+        assert client.get("/health/listo").status_code == 503
+    
+        toxiproxy.restaurar()
+        r, segundos = cronometrar(lambda: client.get("/health/listo"))
+        assert r.status_code == 200, r.text
+>       assert segundos < 1
+E       assert 2.1096816000062972 < 1
+
+tests\api\resiliencia\test_toxiproxy.py:108: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  eco.api:main.py:79 base_no_disponible request_id=b193668faa8f43c180b1b5d9f6a23461 ruta=/health/listo error=OperationalError
+___________ test_r6_red_congelada_con_solicitud_en_curso_no_cuelga ____________
+
+client = <starlette.testclient.TestClient object at 0x000002215C7A17F0>
+toxiproxy = <tests.api.resiliencia.conftest.Toxiproxy object at 0x000002215B088830>
+db = <connection object at 0x000002215C874F20; dsn: 'user=eco_inversion password=xxx dbname=eco_inversion_test host=localhost port=5433', closed: 0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002215C7AF650>
+
+    def test_r6_red_congelada_con_solicitud_en_curso_no_cuelga(client, toxiproxy, db, monkeypatch):
+        monkeypatch.setattr(settings, "db_statement_timeout_ms", 2000)
+        limite = 2 + 2 + 3  # statement_timeout + margen de la API + holgura de la prueba
+    
+        # La latencia deja la solicitud "en el camino" el tiempo suficiente para
+        # congelar la red justo despuÚs de que la API se conect¾.
+        toxiproxy.latencia(500)
+        resultado = {}
+    
+        def pedir():
+            resultado["r"], resultado["s"] = cronometrar(lambda: client.get("/health/listo"))
+    
+        hilo = threading.Thread(target=pedir, daemon=True)
+        hilo.start()
+        esperar_sesion_de_la_api(db)
+        toxiproxy.congelar()
+    
+        hilo.join(timeout=limite)
+        colgada = hilo.is_alive()
+        toxiproxy.restaurar()  # libera la solicitud colgada, si la hay
+        hilo.join(timeout=15)
+    
+>       assert not colgada, f"la API qued¾ colgada mßs de {limite} s con la red congelada"
+E       AssertionError: la API qued¾ colgada mßs de 7 s con la red congelada
+E       assert not True
+
+tests\api\resiliencia\test_toxiproxy.py:138: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  eco.api:main.py:79 base_no_disponible request_id=8ada1372d1c4421b854f2aaf9956b3d1 ruta=/health/listo error=OperationalError
+============================== warnings summary ===============================
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde
+  C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde
+  C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/api/resiliencia/test_toxiproxy.py::test_r2_latencia_alta_da_503_por_connect_timeout
+FAILED tests/api/resiliencia/test_toxiproxy.py::test_r3_corte_total - assert ...
+FAILED tests/api/resiliencia/test_toxiproxy.py::test_r5_recuperacion_automatica
+FAILED tests/api/resiliencia/test_toxiproxy.py::test_r6_red_congelada_con_solicitud_en_curso_no_cuelga
+=========== 4 failed, 2 passed, 96 deselected, 2 warnings in 48.61s ===========

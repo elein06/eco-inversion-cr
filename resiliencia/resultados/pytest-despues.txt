@@ -1,0 +1,27 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1
+collecting ... collected 102 items / 96 deselected / 6 selected
+
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde PASSED [ 16%]
+tests/api/resiliencia/test_toxiproxy.py::test_r2_latencia_alta_da_503_por_connect_timeout PASSED [ 33%]
+tests/api/resiliencia/test_toxiproxy.py::test_r3_corte_total PASSED      [ 50%]
+tests/api/resiliencia/test_toxiproxy.py::test_r4_escritura_durante_el_corte_es_consistente PASSED [ 66%]
+tests/api/resiliencia/test_toxiproxy.py::test_r5_recuperacion_automatica PASSED [ 83%]
+tests/api/resiliencia/test_toxiproxy.py::test_r6_red_congelada_con_solicitud_en_curso_no_cuelga PASSED [100%]
+
+============================== warnings summary ===============================
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde
+  C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/api/resiliencia/test_toxiproxy.py::test_r1_latencia_moderada_responde
+  C:\Users\Krina\source\repos\eco-inversion-cr\eco-inversion-cr\backend\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 6 passed, 96 deselected, 2 warnings in 20.67s ================

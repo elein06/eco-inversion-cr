@@ -3,6 +3,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "api: pruebas contra una base PostgreSQL+PostGIS de pruebas (requieren TEST_DATABASE_URL)",
+    "resiliencia: experimento con Toxiproxy (requiere además TOXIPROXY_URL, ver docs/resiliencia.md)",
 ]
 
 [tool.ruff]
