@@ -1,0 +1,101 @@
+# Ítem 3.1: comprobaciones obligatorias de cada PR hacia development o main.
+# Ambiente aislado: la base es un contenedor de servicio con datos ficticios
+# que crean las pruebas, y GitHub lo destruye al terminar el job.
+name: CI
+
+on:
+  pull_request:
+    branches: [development, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: eco_inversion_test
+          POSTGRES_USER: eco_ci
+          POSTGRES_PASSWORD: solo-para-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eco_ci -d eco_inversion_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://eco_ci:solo-para-ci@localhost:5432/eco_inversion_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.lock
+
+      - name: Instalar dependencias desde el lockfile
+        run: python -m pip install --require-hashes -r requirements-dev.lock
+
+      - name: Linting
+        run: ruff check --output-format=github .
+
+      - name: Compilación
+        run: python -m compileall -q app
+
+      # Toxiproxy (4.10) se ejecuta aparte: ver docs/resiliencia.md.
+      - name: Pruebas unitarias y de API
+        run: pytest -m "not resiliencia" -v --junitxml=reportes/pytest.xml
+
+      - name: Rechazar pruebas omitidas
+        run: python ../.github/scripts/verificar_junit.py reportes/pytest.xml
+
+      - name: Conservar reporte de pruebas
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pytest-${{ github.event.pull_request.head.sha }}
+          path: backend/reportes/
+          if-no-files-found: error
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias desde el lockfile
+        run: npm ci --no-audit --no-fund
+
+      - name: Linting
+        run: npm run lint
+
+      - name: Compilación
+        run: npm run build
