@@ -252,6 +252,10 @@ En PowerShell: `$env:TEST_DATABASE_URL="postgresql://..."; pytest`. Sin
 `TEST_DATABASE_URL`, las pruebas de API aparecen como *skipped*: una prueba
 omitida no cuenta como aprobada.
 
+**Resiliencia (Toxiproxy, ítem 4.10):** experimento con la base lenta, caída
+o congelada, más carga con Artillery. Pasos y resultados en
+[docs/resiliencia.md](docs/resiliencia.md).
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.
