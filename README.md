@@ -278,6 +278,19 @@ fijan con hashes en `backend/requirements*.lock`. Después de cambiar un
 encabezado (requiere [uv](https://docs.astral.sh/uv/)), en ese orden:
 primero `requirements.lock` y luego `requirements-dev.lock`.
 
+## Análisis de seguridad
+
+Semgrep CE, Gitleaks y OSV-Scanner corren en Docker con la misma configuración
+en local y en CI. Alcance, qué bloquea la integración y cómo tratar un hallazgo
+en [docs/seguridad.md](docs/seguridad.md).
+
+```bash
+docker compose -f docker-compose.seguridad.yml run --rm semgrep
+docker compose -f docker-compose.seguridad.yml run --rm gitleaks-archivos
+docker compose -f docker-compose.seguridad.yml run --rm gitleaks-historial
+docker compose -f docker-compose.seguridad.yml run --rm osv
+```
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.

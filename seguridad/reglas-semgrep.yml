@@ -1,0 +1,31 @@
+# Reglas propias de Semgrep (ver docs/seguridad.md). Los paquetes públicos no
+# siguen datos hacia cursores de psycopg2, que es como esta API consulta la base.
+rules:
+  - id: eco-sql-con-datos-de-la-solicitud
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Un parámetro de la solicitud llega al texto de una consulta SQL. Enviar
+      el valor como parámetro: cursor.execute("... = %s", (valor,)).
+    metadata:
+      cwe: "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+      owasp: "A03:2021 - Injection"
+      confidence: HIGH
+    pattern-sources:
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  @$ROUTER.$METODO(...)
+                  def $RUTA(..., $PARAMETRO, ...): ...
+              - pattern-inside: |
+                  @$ROUTER.$METODO(...)
+                  def $RUTA(..., $PARAMETRO: $TIPO, ...): ...
+              - pattern-inside: |
+                  @$ROUTER.$METODO(...)
+                  def $RUTA(..., $PARAMETRO: $TIPO = $DEFECTO, ...): ...
+          - focus-metavariable: $PARAMETRO
+    pattern-sinks:
+      - patterns:
+          - pattern: $CURSOR.execute($CONSULTA, ...)
+          - focus-metavariable: $CONSULTA

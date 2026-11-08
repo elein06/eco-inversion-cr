@@ -1,0 +1,79 @@
+# Análisis de seguridad (ítems 2.3 y 3.2, ver docs/seguridad.md).
+# Los mismos servicios se ejecutan en local y en CI.
+#
+#   docker compose -f docker-compose.seguridad.yml run --rm semgrep
+#
+# El código se monta en solo lectura. root solo es necesario para escribir los
+# reportes en la carpeta montada, porque el usuario del host varía.
+x-escaneo: &escaneo
+  user: root
+  volumes:
+    - ${ESCANEO_DIR:-.}:/src:ro
+    - ${REPORTES_DIR:-./reportes/seguridad}:/reportes
+
+services:
+  semgrep:
+    <<: *escaneo
+    image: semgrep/semgrep:1.183.0@sha256:2e45517a85e13a9cca14a2a00df6bb48affd66b8ebfae1b0991cd57578362fb0
+    working_dir: /src
+    volumes:
+      - ${ESCANEO_DIR:-.}:/src:ro
+      - ${REPORTES_DIR:-./reportes/seguridad}:/reportes
+      - ./seguridad:/reglas:ro
+    environment:
+      SEMGREP_SEND_METRICS: "off"
+    command:
+      - semgrep
+      - scan
+      - --metrics=off
+      - --error
+      - --no-git-ignore
+      - --config=p/python
+      - --config=p/javascript
+      - --config=p/typescript
+      - --config=p/react
+      - --config=p/security-audit
+      - --config=p/owasp-top-ten
+      - --config=p/dockerfile
+      - --config=p/docker-compose
+      - --config=p/github-actions
+      - --config=/reglas/reglas-semgrep.yml
+      - --text
+      - --json-output=/reportes/semgrep.json
+
+  # Todo el historial de Git: un secreto borrado después sigue expuesto.
+  gitleaks-historial:
+    <<: *escaneo
+    image: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    environment:
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+    command: >-
+      git /src --redact --no-banner --exit-code 1
+      --report-format json --report-path /reportes/gitleaks-historial.json
+
+  # Archivos actuales, incluidos los que todavía no tienen commit.
+  gitleaks-archivos:
+    <<: *escaneo
+    image: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    command: >-
+      dir /src --redact --no-banner --exit-code 1
+      --report-format json --report-path /reportes/gitleaks-archivos.json
+
+  # Dependencias del backend y del frontend: cualquier vulnerabilidad bloquea.
+  osv:
+    image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+    volumes:
+      - .:/src:ro
+    command: >-
+      scan source
+      -L requirements.txt:/src/backend/requirements-dev.lock
+      -L /src/frontend/package-lock.json
+
+  # Artillery solo se usa en el ambiente de pruebas: resultado informativo.
+  osv-herramientas:
+    image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+    volumes:
+      - .:/src:ro
+    command: scan source -L /src/resiliencia/package-lock.json
