@@ -1,0 +1,3 @@
+2026-11-08T12:43:01  +  0.0s  inicio de la carga (base normal)
+2026-11-08T12:43:21  + 20.0s  CORTE: proxy deshabilitado, la API no alcanza a PostgreSQL
+2026-11-08T12:43:41  + 40.0s  RESTAURADO: proxy habilitado de nuevo

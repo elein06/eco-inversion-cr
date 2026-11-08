@@ -1,0 +1,1585 @@
+﻿uvicorn : INFO:     Started server process [16708]
+En línea: 2 Carácter: 1
++ uvicorn app.main:app --host 127.0.0.1 --port 8000 2>&1 | Tee-Object . ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:     Started server process [16708]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:63092 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62467 - "GET /health/listo HTTP/1.1" 200 OK
+base_no_disponible request_id=65e3dcc5e99c49249886cdea4d1a1b10 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62481 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=30dd07e77d5549ef9068025763c23b86 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62481 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6132f9fe0dc642b4be1184a0e4eafac1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62483 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b0ca93fe998546e0b5f37b011b346448 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62483 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9b5fed99c94a441fb31854d1d59b7b33 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62487 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ef87546063e34ee0a9c0943c9dbc7d70 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62487 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=02c0d01053034ceeb7ef0d87c273c87e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62490 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0f78555792b04a79b64eb4a95aad5d31 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62490 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=61b77bf650444d95be8dc16dca4a64a2 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62493 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f397c97a9f844f6f930e0a2b7cba916a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62493 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=571a07493c984fac8500cba052687832 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62496 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a470349a7d2248e88a692085569adc41 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62496 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3292eea0ee694ea183d78df56dcd09d6 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62499 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=765331fbfbae4b568cf1b3f075d2b101 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62499 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ae64297b8ea840aca5fdcee1b9337448 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62502 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=895e5042e1494b6fbbba276640799120 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62502 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=741fcf86927a4f6e9e083e4a66ad9cf3 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62505 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1143bc4235dc4a188611a267ec402bed ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62505 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8e33003cec134dd1892b4d20156fb77c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62508 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b954fa34f8f9405093cfcd64482331e7 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62508 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=83940805ef4f4cec94860e5cf081638a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62511 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=57ed14ca242140f4ac02b790bc391a33 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62511 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3d27befd537d4c7d9ae062774145d495 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62514 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4ff2f85c05b14a96af24a2a256902b41 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62514 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a08c27b36dc148b9bf2ae7f4bed6539b ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62517 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=069418596aee464197b1fa1bab5d30fb ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62517 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=97c42fbfbf684604b1791e28e18880f3 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62520 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dd30a880bd3f4d3e89508b71cfdaf65e ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62520 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aaabd994a27f41ef8b02be0b0ac93c80 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62523 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=23573e66eaac4ca88d7f1c6f0181daef ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62523 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e593a23a3a6b482d9245c72e4fef0ab5 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62526 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=616409f92e8044a8887a461fc4b5de00 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62526 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b4e95733c9f54d4d80a9a8304e7e30ce ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62529 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=83abf446c0cf4f2cacfd952bf0f46529 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62529 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8cfaedab78a44a91befd87f4c56f0786 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62532 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b8039a40894e4745b224e49b0dd1d65d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62532 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7e9a6356bc6141b39c6be5bacc9275e9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62535 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e6536e6ec148477a9afee190f47b5c22 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62535 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4410fd7c044546f29a29d97fa2dc754a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62538 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=85f3a1acd1304ee98f13adcfd36a315d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62538 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=520d68b5e40d4e598eee51f3f250b4b7 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62541 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c0781b125a1b40bcaf72531ff1482952 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62541 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4788220377ac48adb004396727c766d9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62544 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c9adbe70a2194bb1a724ecb58e2cb521 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62544 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dbbdd784d7f74d09a75798be8c7b6819 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62547 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=050ae3b5aea546ffac50e9f7bbd32a6f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62547 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ea931c9b3ac7410e84f7d0622b8d4a06 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62550 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b327fdf0639c4640a85c2deafea16d7d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62550 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3200d543dac942018c994b4c82c5321c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62553 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d139578b153b4f60ace237cbf8505499 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62553 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=27ed0bcd61d14e5db672c4def07bb6d9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62558 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=17624a797d764b1da4d992fc3bbd96f3 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62558 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=78340dab376b45539e2dbe9dac221311 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62561 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aed7c9c761e242acbc95d531e0008c66 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62561 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=59c0e4af26364811aeaa5f5a5e27e3f9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62564 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3235b94c086d4ef1997ffda3534f457e ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62564 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=13367224684443e29ab89175675e4ba9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62567 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=304f4b49d4614c36a5beb85c9bfcef94 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62567 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8d2f80719b2741fe84b90ddc3e9122c5 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62570 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=eadca4da699141dc8527d056a7f1259f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62570 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e403dbb62d9e4f1182f237ec5837faef ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62574 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=992a437fed774c948f26f8a687daaf5d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62574 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=256dcb45d21542cdaee5c18b8fdcaf36 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62577 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d14c8376eb244f2ebbf6d866355ca61b ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62577 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=60787e4575c248d3bc13352563b5d31b ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62580 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aaa456e0865b46568edf8a441a42b89b ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62582 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f0214e34687249029c741a84552e86f1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62580 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=28983d731c24416d8952b0a0083ab4b7 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62582 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d91dc0c817c043b7baa0ef342338e897 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62586 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c4eae332ab8a40349fbddbda630fd9c7 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62586 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a165ae44f9a8439183c62f50931346fc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62590 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=034fa8e9d4544882971f4dff46db3df9 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62590 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f099c04ab66d49af881d206846bf90a1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62593 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=88ac3fc71c7942028543b82c9d3cfe34 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62593 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8b5a9168fede49b59fbe98c239f680cc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62596 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e04154174c3d4505b0eba6f7603f2eb0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62596 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2b8a6698e6924400ac5db54a419b5aa8 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62599 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0c054263efb4450c9c94e676c1ea69df ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62599 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=5eb5b19980e54df5bf9a8dafa87070c7 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62602 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a467a8b8e7f7457b96e365917369d30f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62602 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3c468ebac750489ba5890539b0de2730 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62606 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c3e96a52b027491b8fe3ef8282874ba1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62606 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=050cc778ab074916ba5746e4148ebadc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62609 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=fb7a7f492b6c441199dc95342d081426 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62609 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=131d06b8ab7a44b088dddbb9800d8be0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62612 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=087a91484b334279aa6551b1c44f06a5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62612 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=710aa6e295f84a5599c7db2a1204f751 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62615 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=34b046f3b49c46f2bb7cfbb9fcd948ba ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62615 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e3d8bcab456148159db57c363132fe14 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62617 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8d20ebaba7224fbcb80afca5e839a002 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62617 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c819ba70110b44f992a96a2c9b054f32 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62621 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6eb515e51ddc431fb5da33aafcceebce ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62621 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=44bac9e4afc64c93b8e0580a87fc11cc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62624 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4f9d661f0a1541458322c7e699641e72 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62624 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2d422ff0c0884958a7f397876993fa9f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62627 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bf6d4a602d2d42a784d7db7f565b958d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62627 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2ca07bd083e24ac5afa6b365d0beb288 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62630 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=77d7fb0a220e494f956aaff370ccecd3 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62630 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=892fb77051e54e679f49ddefff8a5496 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62632 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2ba1c670f1004fa3b1073a8e4b95c8c1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62632 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=507f44ad748143e985caed86f0fac012 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62636 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3a47d111a544448382d4e493dd158b24 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62636 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c370a7e6341346d4b791a9890b45f740 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62639 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2853fa30a3154317a4193fae3c5db4ae ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62639 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dc03ef9436f2471ab6ce52edd8c73bb1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62642 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2b0f93456eb848d8896fb72a6aec5503 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62642 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=09695886a25246d281c7932f5fb560f4 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62645 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e05b21e8107b4c6d985c82a236619645 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62645 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dc1d94a1e89f46209d04beb1433028ef ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62647 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6c87a1113da54438bc8420aa9343e48d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62647 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aa02a6070b65458882721e7cbe3ba358 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62651 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=34228cfb1d37457e9b880f9bd6c94482 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62651 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3abe12c695bb40de8d57cb3f97dcdc58 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62654 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bc92bd2218054deea03c69d31bd82381 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62654 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=89a13983a30b4ffe86a7b11bed705b28 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62657 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=562500ca4f7b4f29abb5cda326058383 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62657 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2e30dfa883ed4ef1820d81288134ee71 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62660 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6ea5d0ec94344004a28ab670e18a7aa3 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62660 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=195c7eceea014d98a04f0740947d87b5 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62663 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9bea30f2a66e4297aa9b5e81064adf88 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62663 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a83457ca7dd341e5a5e0152f7b5d2f35 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62666 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d5a793603a3147a78831eabc1bf34615 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62666 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8ad662ba943d4c41b284016c151cbc7d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62669 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dd6573fda0bd40d8ab3e6ff523e3897c ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62669 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2ab22253879b40ce9f544cadcb6b8203 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62672 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d440f0e465f94a7abd96879998880442 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62672 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c2cd52ba277043ceac7a66888979dbc0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62675 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3c8abe2d8f0548bc9d8fba42091df9e0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62675 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7f355b400a1a442d8a7c480b2dfb92f5 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62678 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a0668e187eb4459d9eacbfda2de33f95 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62678 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=237795bed28548079b2990ac871b1c3d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62681 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=902b2e69a7dd4edf8d96ae3081bd35cb ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62681 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=28d08e04a8ea4a98852cde25f4992ffc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62684 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bc8ff6c5b3bb460c85a00b01d7945372 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62684 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d069cc731e5f410084020559ba4a15ca ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62687 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8bc9ff7716cf447f9e9887bb17b29e07 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62687 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e2c16a2d0c62487c983f4836dc3c16ab ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62690 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ea835c993f3d4fc0bff5ff6e8db9687a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62690 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3def2235e1db4cde8f41109673ba3bfa ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62693 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9a145a7030484abebca1c94bbb37e261 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62693 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=93a37a0b581946d5abd6e3c2f7ffcede ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62696 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d4bb8553f9b94bd6835b8e5ef1ebe0a5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62696 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=76f63a5aba814d70a9f304fd1980d068 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62699 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bd55a67404c94936bff80ee1f7b69edd ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62699 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c379d03a55694ca0886bd0733d390323 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62702 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6244abc6a99b4314ab6af80c05f8a47d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62702 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=771e104722d34539922acc02182bcb87 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62705 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=878c97b774a94dcb926a94a130e7d489 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62705 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6a6c0d1eb2674ac9bc029a75cd8c0001 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62708 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8f0b25b576f7474c95774bd3143e30b1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62708 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=000de1509aa948b1a74fdc01b4011c28 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62711 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=726bfd6c1f2e439582d080f9cfe02053 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62713 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6b7b9db414f04a19b3b54e6149e749b4 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62711 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b320c2607c344c33a52aa365f49f83c1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62713 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6a3717df1c6e484e9675c7904d2994de ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62717 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f818e2ceda5a42788867a82f48f2f961 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62717 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=33d65859236d46c6a3bb91762014ce26 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62720 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d0b4882a6bea47e4b18cbffd149ad7ef ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62720 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2abf0643ae5845c48935804821635eb2 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62723 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f277263a2c7f4876854b1ef06631625b ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62723 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ee347c98a5cf4a8094d69aa81a8ed59a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62726 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f7b6c74dd54f424b815ad5cecf3b7786 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62726 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f685b94afe1449bfa30bd994615772ad ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62729 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a244da447f734b4ebf31642842c27b4a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62729 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3e13dd5cc6f645ea82558f117a116ea4 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62732 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6709bbc7b0e740dda654391d58d5756d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62732 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2cd14f5f42564d55a5c63909f87a9f23 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62735 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=570a27d72e254daa92265a216303bfe8 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62735 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a26d782fb5a648be823bd1d324b155dc ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:62738 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c1ca4daafb4748b9961ffd34bf07bbea ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:62738 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+INFO:     127.0.0.1:62742 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62744 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62748 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62750 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62742 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62744 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62752 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62750 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62748 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62752 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62757 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62759 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62757 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62763 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62759 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62765 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62763 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62768 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62765 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62768 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62772 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62774 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62772 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62778 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62774 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62780 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62778 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62783 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62780 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62783 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62787 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62789 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62787 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62789 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62793 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62795 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62798 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62793 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62795 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62798 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62802 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62804 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62802 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62804 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62808 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62810 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62813 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62808 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62810 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62813 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62822 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62824 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62822 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62828 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62824 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62830 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62828 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62833 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62830 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62833 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62840 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62842 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62840 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62846 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62842 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62848 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62846 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62851 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62848 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62851 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62855 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62857 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62855 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62861 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62857 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62863 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62861 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62866 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62863 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62866 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62870 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62872 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62870 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62876 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62872 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62878 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62876 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62881 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62878 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62881 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62885 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62887 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62885 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62887 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62891 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62893 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62896 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62891 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62893 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62896 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62900 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62902 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62900 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62902 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62906 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62908 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62906 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62911 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62908 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62911 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62915 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62917 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62915 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62917 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62922 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62924 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62922 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62927 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62924 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62927 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62931 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62933 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62931 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62933 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62937 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62939 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62942 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62937 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62939 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62942 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62946 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62948 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62946 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62948 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62952 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62954 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62957 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62952 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62957 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62954 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62961 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62963 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62961 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62967 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62963 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62969 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62967 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62972 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62969 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62972 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62976 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62978 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62976 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62978 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62982 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62984 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62982 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62987 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62984 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62987 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62991 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62993 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62991 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62993 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62997 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62999 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62997 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63002 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62999 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63002 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63006 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63008 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63006 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63012 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63008 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63014 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63012 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63017 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63014 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63017 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63021 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63023 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63021 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63023 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63027 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63029 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63027 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63032 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63029 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63032 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63036 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63038 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63036 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63038 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63042 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63044 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63047 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63042 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63044 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63047 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63051 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63053 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63051 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63056 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63053 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63059 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63062 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63056 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63059 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63062 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63066 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63068 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63066 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63068 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63072 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63074 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63072 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63077 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63074 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63077 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63081 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63083 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63081 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63089 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63083 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63091 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63089 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63094 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63091 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63094 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63098 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63100 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63098 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63104 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63100 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63106 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63104 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63109 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63106 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63109 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63113 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63113 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63119 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63121 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63119 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63124 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63121 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63124 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63128 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63130 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63128 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63134 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63130 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63136 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63134 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63139 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63136 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63139 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63143 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63145 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63143 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63145 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63149 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63151 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63149 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63154 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63151 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63154 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63158 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63160 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63158 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63160 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63164 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63166 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63169 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63164 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63166 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63169 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63173 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63175 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63173 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63175 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63179 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63181 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63184 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63179 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63181 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63184 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63188 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63190 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63188 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63194 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63190 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63196 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63194 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63199 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63196 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63199 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63206 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63206 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63209 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63209 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63213 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63213 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63216 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63216 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63219 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63219 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63224 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63227 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63224 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63227 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63231 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63234 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63231 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63234 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63237 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63237 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63243 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63243 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63246 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63246 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63249 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63249 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63252 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63252 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63256 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63256 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63259 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63262 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63259 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63262 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63265 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63265 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63268 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63268 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63271 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63271 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63274 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63274 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63277 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63277 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63280 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63280 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63283 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63283 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63286 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63286 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63289 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63291 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63289 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63291 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63295 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63295 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63298 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63298 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63301 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63301 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63304 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63307 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63304 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63307 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63312 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63312 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63315 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63315 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63318 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63318 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63323 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63323 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63326 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63326 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63329 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63329 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63332 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63332 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63335 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63335 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63338 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63338 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63341 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63341 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63344 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63344 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63347 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63347 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63351 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63351 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63356 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63356 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63359 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63359 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63363 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63363 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63366 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63366 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63369 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63369 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63373 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63373 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63376 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63376 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63380 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63380 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63383 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63383 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63386 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63386 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63396 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63396 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63402 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63402 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63406 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63406 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63409 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63409 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63412 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63412 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63416 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63416 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63419 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63419 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63422 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63425 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63422 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63425 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63428 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63428 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65100 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65119 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65122 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65119 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65122 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65125 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65125 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65128 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65128 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65131 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65131 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65134 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65134 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65137 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65137 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65140 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65140 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65143 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65143 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65146 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65146 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65149 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65149 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65152 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65152 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65155 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65155 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65158 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65158 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65161 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65161 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65164 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65164 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65167 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65167 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65170 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65170 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65173 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65173 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65176 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65176 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65179 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65179 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65182 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65182 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65185 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65185 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65188 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65188 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65191 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65191 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65194 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65194 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65197 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65197 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65200 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65200 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65203 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65203 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65206 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65206 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65209 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65209 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65212 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65212 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65215 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65215 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65218 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65218 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65221 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65221 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65224 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65224 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65227 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65227 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65230 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65230 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65233 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65233 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65236 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65236 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65239 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65239 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65242 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65242 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65245 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65245 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65248 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65248 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65251 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65251 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65254 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65254 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65257 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65257 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65260 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65260 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65263 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65263 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65266 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65266 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65270 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65270 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65273 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65273 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65276 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65276 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65279 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65279 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65282 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65282 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65285 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65285 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65288 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65288 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65291 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65291 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65294 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65294 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65297 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65297 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65300 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65300 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65303 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65303 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65306 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65306 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65309 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65309 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65312 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65312 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65315 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65315 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65318 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65318 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65321 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65321 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65324 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65324 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65327 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65327 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65330 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65330 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65333 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65333 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65336 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65336 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65339 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65339 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65342 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65342 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65345 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65345 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65348 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65348 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65351 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65351 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65354 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65354 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65357 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65357 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65362 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65362 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65365 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65365 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65368 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65368 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65371 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65371 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65374 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65374 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65377 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65377 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65380 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65380 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65383 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65383 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65386 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65386 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65389 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65389 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65392 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65392 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65396 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65396 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65399 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65399 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65402 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65402 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65405 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65405 - "GET /zonas HTTP/1.1" 200 OK
+base_no_disponible request_id=6d85fdd9cc68418a8cd32988fac8192a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65408 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9e5608045dcd4429bcc84074de1fbcb0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65408 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ebcf21c80067465692792c73d2d66532 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65412 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=716704c9b9584c61bcf5c28ad5021214 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65412 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2da2c678467544e28ef819db96e8daf4 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65415 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=efe6a0bbe0114299b99e00981ab45db8 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65415 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=67df7bf5276343b98eebd49611a2cad0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65418 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f7db6b9761444daa803a3b3f79acd59f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65418 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e58b1b78e5d74661b3071e993a0be49d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65421 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e62e07040b284829845b3c27de41ac75 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65421 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f7acdacf7b084b4081b5f6afd336a987 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65424 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f62b761a1ad14bbca52ab6d2dc5c80bc ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65424 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dd5cb9fc071941b096f4305f6917f02c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65427 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=70d31a5866154460be92d2bb15f9320d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65427 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1fb42f72c26443be89f05cc60f9994c3 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65430 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1dde6c94dd7749d0beaa17728f7dd420 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65430 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=abcbb6bfd09c4491adb083c61c328d09 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65433 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=848f8f7da80d4cd6942016daeb3cf419 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65433 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e38c30ff6603493490ccb3677bc7005a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65436 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=318e15a151ad47c2b440f7ae42287854 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65436 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a86d4be8f2cb4d9c88f1e5e909988153 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65439 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b590cea59064453c81763b8f72271008 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65439 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f40a9c47e923473fb31070ac4be1543c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65442 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=24a3f015e8c5436aabb87df3579a3f66 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65442 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d34297f45999465397984a6f975195ab ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65446 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4ea70998542b41508012e7d3456ba342 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65446 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f017cd9c235b44b29e4457adf2d55a0a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65449 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a59a3704060e45ad8642fe6a039f9158 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65449 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a9272cdb964b44e491c65ecc25905981 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65452 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=545014321e584f5fa1067c63d20257ad ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65452 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=18d3d16bcb1145bb8d0a45990c9078cb ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65455 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=15504cdc202545cd9d2e8998c4d2da4d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65455 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c2a6e3472ae44cb891d272e635598816 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65458 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6121ddc2736f402e876472833efcd129 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65458 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1cad76bb1a0a445fb85bd666f4c73b80 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65461 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2e93fbe5053546b5a602ce1e76fd8878 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65461 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ed8febca3578419bba551ba376fec237 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65464 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f7264b5f2d1441369bce5ebf74414f24 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65464 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4a6b600556454290b574d5fa11e71255 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65468 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=98f64df82f1e4f0d904669cebab040d4 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65468 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8c751fca37144df6b8d6cc2164609e07 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65471 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=5c4d8a427d154740b043d99b9e903897 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65471 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=badcb0bff6894f5c954dee2ad6f0a5b0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65474 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=872cc8bb4250470fbb1dcc9a345d0839 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65474 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8684b326fa8a4aec9d6a70cab774a4e9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65477 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7db42eb9a7774724b7aadd050cb12a46 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65477 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dbcd52f2fcb9468ab43a3919d7ddd869 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65480 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bae883b658c44d03b92f84c0a0019fba ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65480 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ab5d9053ee7243959b644c5717781550 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65483 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=81520a70c5f94582ba649890f6bee2a8 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65483 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aa6d55f507f54ddc95e9a9eca301c331 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65486 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0921aa4de27c451d99062bb159e84e7f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65486 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=00196387918b409599db69c866ea1a8d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65489 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a1f096cbff474cd2bd5713eb673db099 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65489 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e1781bb4477c4076bf613d237ffc27ca ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65492 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=61e2100fc8da4a719de647b90de38e00 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65492 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1e477de8c18d4299bf509279c78746ec ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65495 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ef27f6cf6ea4409b8514bfbcade66e3d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65495 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=bacf1085ab644e3c95942700381c1310 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65498 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1504d060a5494f9ea9540e70ff0c78e6 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65498 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9c9a9c64f33542b38f0840ddbb566740 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65501 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=356ab7ca7ab1493b8e88c3d231eee9e5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65501 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=894fb99f7caf4da1b5f581217c0e2ecd ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65504 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4a5643fe2b2f466c838c1c856547b5a5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65504 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2889c360fd35491e918e5053e72a8faa ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65507 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a11b79f4d8774d358234f03ba3cd38a1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65507 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e6dff97e8df54de3b8dcc5a58e43b7da ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65510 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ac0b9e9a0fac4eacbb4ec2fbf550abe1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65510 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a9cbef7c84a341249d055cd738c111d7 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65513 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=23a2258fd13842e78573a14ab819f71a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65513 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b801e268653e44b9b1ade65bfad51143 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65516 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=834598bd1a764882a5100f052bdc960f ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65516 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=099ea85835b74f5e959795d58ebf3e2a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65519 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=cc3eaafc807e42a1b97630812b77c3b0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65519 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0bdf4c6f55a147d2930a3970e542435f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65522 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=530d3eb605c54af28ce9847ad47c7b2d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65522 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=95e7d2ffe28d4512a870ce4a61d43cd3 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65525 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=51272cca2e544c728df9a330427718ae ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65525 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7cc62a4e0a3c498ebef92ea06043e709 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65528 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d2e7c456163544bd962892066c2f5b5e ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65528 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=aeccd16315eb4d0e9262aba36fd3768d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65531 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=278975c5f8584b579c14cd7d9ef58d38 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65531 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e410aeefc25f47149dd39d08764b3b96 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:65534 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=13de45a19007404da5ba7b7b35ee3bc9 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:65534 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c5d90080756d4605b3f039ceeead7f0e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49154 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=80e7890c20c1496ab25962330bedd0e5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49154 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=379fc801795a4e86877521ba5736f2d1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49157 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2d6a2282c7074c1190b92a76b74fa968 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49157 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c3f7a84a69ed42f1ad7649f5c8af2e73 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49160 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=50523808dde8453e96cbb4cc4451602c ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49160 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c83f25d5b3764a20af38be34a0f3099e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49163 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d32aa595c7854ffc80515ef0b10757b9 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49163 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b323a8ee0fea4e5087ca36f439bddc8a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49166 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d12ce01008f04f0caf2f0b2c8829931b ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49166 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ec49164ad6614e5290503b9016384e91 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49169 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e98004bff64d4b0f9129e327e59868fe ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49169 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=99deda22ccbb42d185eceb439359a841 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49172 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a501a4444bb8428782a394499173d192 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49172 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f22797d71683419e9ff26b9043e65c73 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49175 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d198fdcb338f443e9085c1e1fa690d1c ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49175 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=baa3a5d6c97e41d2bafeadfd9c84620b ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49178 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=cf7a63f1465d4cc180ca5f853f326911 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49178 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=82aa89b8a87a4e7a9c8b625a6fec032e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49181 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4f21a48435ab47a3be599d2ced5c206d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49181 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9b5123c84e744777838c51a8d9c812ff ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49184 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8b6ef6c737c145c085d48819127ab0f5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49184 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=27e695b2f4cd466ba8b542a866640c04 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49187 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=20d501e1ac4c4801a54a458f8b44b433 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49187 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8f9703f2a06e4057bb657ca353a7b4eb ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49190 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7fda98345cf8465280ffcf0196bbd5b0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49190 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8ec9d0326a704ea3840b243aedc48fc3 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49193 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8310dab247c64ad1931906c9ff4d0200 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49193 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0f48ab101b024f91924ec3d13da0ec38 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49196 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ee515006af97456182e56b25f92d35c0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49196 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c0f542e3a5fc435e8c3e1aaeccd6f40e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49199 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=23dc53d58f2342e0b772b21f5c5fde44 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49199 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2aba176a76f4449b8b192b8e4f47874d ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49202 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a600427c069c49df89a17df77863e068 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49202 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=accdf6e8f22d4ad5b194c2d94b981609 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49205 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6c3bd2ef02ea4602951aeb7127457265 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49205 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=500b86e02a0c45ceae87716218b6bc3f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49208 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f1de9032a8e742d3a76b05632486109c ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49208 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1bf52f4c633b409095b27f41c939a9c9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49211 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=9bef5c84c1574b91856181e71657b6d1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49211 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b77d807482ba41a98c52d5ca6f43e1b1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49214 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d3d3047bee8d4cb8878d40917c889e3a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49214 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7c331eb105a747ac86bc86cfb1a76865 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49217 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ccef5729a82d48d2ac8bf34eb7932afe ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49217 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=613a852ed99546839a6f5998148d8dc5 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49220 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=05929f3b7c0c49cc9fa63b6d3b4ec237 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49220 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3996060077b341a0b7d55a396c2fa70c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49223 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4ce4da05949e4480910401201a3bdc6d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49223 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=0e2d580bd19e4d97bda68190e9415915 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49226 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c0f9a53ef98444418f2dc8cab6d9fa5a ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49226 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f0b2c1ed26b1481482245a04c34ac4ef ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49229 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=df5a79ee71154507ada1f8b8a5d54605 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49229 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=65b1e5aebe8f4609a08d4b9837022e6f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49232 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=85d9c356c5f54e13b58285ebff51476e ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49232 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3a4a5f64124c4812b7ef483e2632a957 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49235 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6598c678d067406fb870853717137c00 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49235 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6614012ac17447dc8a3e676ec2a9e3b1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49238 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=10991fe930d040afa1155f4cadab9360 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49238 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=738fe586bb454895acecf1cf1b1d94b7 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49241 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=f277d14a0bdd4d65b815e3ba99d7a8af ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49241 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=5eaa76354b814740b7a0008c823da2c6 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49244 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=4ab0f64926034661aec3902bc39e15fb ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49244 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=89b3f21e21ff4b40a4342e2b901d8d82 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49247 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b5eada26d595490eb9eaaa45e591d1c2 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49247 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=6357ecac79cd4609892051c52f2f76ba ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49250 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=63f0a15b026842c08cc2ddd861a0abfc ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49250 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c873c409331a428497b8421cc4f5e05e ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49253 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=94c7b07601fd4f27a96eee03ce50c12d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49253 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3ea81fbd8af14e7380c57b7c213fcd62 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49256 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e4ae2ee43d62415599fc3e4885b305ac ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49256 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=45e50c50ab524c8d8dfd7354731670d4 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49259 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=582807b7a3d549a69a534bf15988de95 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49259 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=85ac77ff113445b8b7856705217e7a9a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49262 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8097bbd807894617b012edd8d4b443b1 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49262 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e061b36c178f4e9882f7c4e8567465f0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49265 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=74dac9bf702a4ae0bad6e8005e0c131b ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49265 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=dfbad5a369884421b2ab0fffa66c5ea9 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49268 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=129c509b421a499d938d8d7e0f5dccbd ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49268 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b4187d21e396477e90ffdae9b4847483 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49271 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=57c18f8ee6a8465697e5828b03b47530 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49271 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=261b930e8f6a4cb2a4066444ed370ee0 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49274 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=195a042bf8084c6e88c491d76bcd292e ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49274 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e5a5eeef99e34d8080981881c338b04f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49277 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=e8184331061b45089ad567dbf9f4342b ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49277 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1274d9a2e18d4e6b855a0a0ca21372e8 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49280 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c80ba9e7db274593b7d3c41597cd4e77 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49280 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b424d5d35ad147ddb23d7c7c6d6c5c42 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49283 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=86a97f6991574f1d98f0d8adef4753b0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49283 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=592966e490344f3aba209a48d453f505 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49286 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ba2e61050e534cf2b897234669624991 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49286 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=c93d43938f774d04807a1bd6624f30d1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49289 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=2c1038170a174410ad1ccd745a59c2c2 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49289 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8f6a8f10f0b940b6a6249c9ed787d315 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49292 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=be4b249a9dd94844a262323ae094c160 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49292 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=247984e9b7fb425baa345e01384b9b1a ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49295 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=489f2d075b8b4f4490bbb556c03950ef ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49295 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=ff506269d31d45aea0b296da2e0758e1 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49298 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a6fab2c1342c4dafa791ae2acd2a2d13 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49298 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=84a677612b7844c89f24de4ecc4fac87 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49301 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b98cfe24b568427aa7cbd90e553e3108 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49301 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=15c074a2eb9342b6940321d245a72f52 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49304 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=64b6dd42d58d4ec5b7c2c3884d2df55c ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49304 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b458f344b85b4c3b99d2957386da35a4 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49307 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3bff8c6be2674a38a0d267b08c3dc4b8 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49307 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=1713eac5be9f4480a975a5efbad1d645 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49310 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b00361ac6fc74671ae0ec48959d6c045 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49310 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b1d2aa58440c4dcdb3bd8424bcb9ce9f ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49313 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=268d54eab1f948eb8bf270e48eef4ddc ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49313 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=fa978ea375eb4c3c97f7c2c202039d04 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49316 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=7291ff4651da4f6399ae45f39c7addf5 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49316 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=a1193695c0404515b53b6df2c0c695b6 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49319 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b02de11cab51413aa5d3989a7442511d ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49319 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=8341a805348b425993f9359daf66ab42 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49322 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=38235003073f4cc9afd7c4f9a96e4cc0 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49322 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=3df608e29b3c4fa286bfe197ba447a2c ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49325 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=65bab4b77a2c497ab37da6eb924c80fa ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49325 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=d8a6034ba63c4b1687552e461ac9a1c8 ruta=/health/listo error=OperationalError
+INFO:     127.0.0.1:49328 - "GET /health/listo HTTP/1.1" 503 Service Unavailable
+base_no_disponible request_id=b122d2eb71214688b5195aa07e116c74 ruta=/zonas error=OperationalError
+INFO:     127.0.0.1:49328 - "GET /zonas HTTP/1.1" 503 Service Unavailable
+INFO:     127.0.0.1:49332 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49332 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49335 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49335 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49338 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49338 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49341 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49341 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49344 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49344 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49347 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49347 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49350 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49350 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49353 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49353 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49356 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49356 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49359 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49359 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49362 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49362 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49365 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49365 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49368 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49368 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49371 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49371 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49374 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49374 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49377 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49377 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49380 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49380 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49383 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49383 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49386 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49386 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49389 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49389 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49392 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49392 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49395 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49395 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49398 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49398 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49401 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49401 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49404 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49404 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49407 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49407 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49410 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49410 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49413 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49413 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49416 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49416 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49419 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49419 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49422 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49422 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49425 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49425 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49428 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49428 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49431 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49431 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49434 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49434 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49437 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49437 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49440 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49440 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49443 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49443 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49446 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49446 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49449 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49449 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49452 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49452 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49455 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49455 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49458 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49458 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49461 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49461 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49464 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49464 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49467 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49467 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49470 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49470 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49473 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49473 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49476 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49476 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49479 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49479 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49482 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49482 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49485 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49485 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49488 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49488 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49491 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49491 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49494 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49494 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49497 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49497 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49500 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49500 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49503 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49503 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49506 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49506 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49509 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49509 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49512 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49512 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49515 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49515 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49518 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49518 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49521 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49521 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49527 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49527 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49533 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49533 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49536 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49536 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49539 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49539 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49542 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49542 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49545 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49545 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49548 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49548 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49551 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49551 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49554 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49554 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49557 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49557 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49560 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49560 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49563 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49563 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49566 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49566 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49569 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49569 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49572 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49572 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49575 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49575 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49578 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49578 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49581 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49581 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49584 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49584 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49587 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49587 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49590 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49590 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49593 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49593 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49596 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49596 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49599 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49599 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49602 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49602 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49605 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49605 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49608 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49608 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49611 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49611 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49614 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49614 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49617 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49617 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49620 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49620 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49623 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49623 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49626 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49626 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49629 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49629 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49632 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49632 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49635 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49635 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49638 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49638 - "GET /zonas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49641 - "GET /health/listo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49641 - "GET /zonas HTTP/1.1" 200 OK

@@ -35,7 +35,8 @@ consulta, y `main.py` convierte cualquier `OperationalError` en un 503 con
 | C1 | carga de 5 sol/s; corte de los 20 a los 40 s | 60 s | 200 → 503 rápidos sin timeouts → 200 | automática |
 
 R1–R6 están en `backend/tests/api/resiliencia/test_toxiproxy.py`; C1 en
-`resiliencia/experimento_carga.py` + `resiliencia/artillery.yml`. Las pruebas
+`resiliencia/experimento_carga.py` + `resiliencia/artillery.yml`
+(Artillery 2.0.34, versión fijada en `resiliencia/package-lock.json`). Las pruebas
 restauran el proxy al terminar aunque fallen.
 
 ## Hallazgo (R6) y corrección
@@ -82,6 +83,7 @@ pytest -m resiliencia -v
 $env:DATABASE_URL="postgresql://eco_inversion:${pw}@127.0.0.1:15432/eco_inversion_test"
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 #    y en otra terminal, desde la raíz del repositorio:
+npm ci --prefix resiliencia        # solo la primera vez: Artillery fijado en package-lock.json
 python resiliencia/experimento_carga.py
 ```
 
@@ -89,6 +91,11 @@ Se usa `127.0.0.1` y no `localhost` a propósito: en Windows `localhost` intenta
 primero IPv6, el proxy solo escucha en IPv4 y cada conexión pierde ~2 s antes
 de reintentar. En la primera corrida en Windows eso sumó 2 s a R2, R3 y R5 y
 las hizo fallar por tiempo; no era un defecto de la API sino del ambiente.
+
+Artillery se instala con `npm ci` en `resiliencia/node_modules` (ignorado por
+Git) y no con `npx`: en Windows, una descarga de `npx` interrumpida dejó la
+caché de npm corrupta varias veces. `npm ci` instala exactamente lo que dice
+el lockfile y falla si no coincide.
 
 El paso 2 siembra la base `_test` con datos ficticios que luego usa el paso 3.
 Sin `TOXIPROXY_URL` las pruebas aparecen como *skipped*: un experimento que no
@@ -99,14 +106,34 @@ mismo `X-Request-ID` que recibe el cliente.
 
 ## Resultados
 
-| ID | Antes de la corrección | Después |
+Corrida del 2026-11-08 en Windows 11 + Docker Desktop. Archivos en
+`resiliencia/resultados/`.
+
+| ID | Antes de la corrección | Después de la corrección |
 |---|---|---|
 | R1–R5 | aprobadas | aprobadas |
-| R6 | **falla**: colgada > 7 s (> 60 s sin límite) | aprobada: 503 en ~4 s |
-| C1 | — | 0–20 s: 200 · 20–40 s: 100 % 503 en ≤ 4 ms, 0 timeouts · desde 40 s: 200 |
+| R6 | **falla**: la API quedó colgada > 7 s (`pytest-antes.txt`) | aprobada (`pytest-despues.txt`) |
+| Suite completa | — | 102 aprobadas (`pytest-completo-despues.txt`) |
+| C1 | — | ver abajo (`carga-20261108-125253-*`) |
 
-La evidencia de cada corrida (salida de pytest, reportes de C1 y logs) está
-enlazada en el registro de hallazgos del proyecto.
+C1, 600 solicitudes (5 usuarios/s, 60 s):
+
+| Fase | Respuestas | Tiempo |
+|---|---|---|
+| 0–20 s, base normal | 200 | p95 ≈ 40 ms |
+| 20–40 s, corte total | 503 (la ventana de 30–40 s: 100 % 503) | máx. 30 ms |
+| 40–60 s, restaurada | 200 sin reiniciar la API | p95 ≈ 43 ms |
+| Todo el experimento | 0 errores de red o timeout, 0 usuarios fallidos | — |
+
+Las ventanas de Artillery no coinciden al segundo con el corte, por eso las de
+20–30 s y 40–50 s mezclan 200 y 503. Los 503 de la API quedan en
+`api-log.txt` con su `request_id`.
+
+Corridas descartadas, conservadas por transparencia: `pytest-windows-ipv6.txt`
+(R2, R3 y R5 fallaron por los ~2 s de IPv6 descritos arriba) y
+`descartada-carga-20261108-124300-*` (Artillery tardó ~22 s en arrancar en
+Windows y el corte ocurrió antes de la carga; se corrigió el script para
+iniciar el reloj cuando Artillery empieza a enviar solicitudes).
 
 ## Limitaciones
 

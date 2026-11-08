@@ -1,0 +1,8 @@
+{
+  "name": "eco-inversion-resiliencia",
+  "private": true,
+  "description": "Herramientas del experimento de resiliencia (ítem 4.10, docs/resiliencia.md)",
+  "devDependencies": {
+    "artillery": "2.0.34"
+  }
+}

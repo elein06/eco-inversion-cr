@@ -13,15 +13,16 @@ Al terminar deja en resiliencia/resultados/:
     carga-<fecha>-resumen.md   respuestas y latencia por cada 10 s
 
 Requisitos: Toxiproxy corriendo (docker-compose.resiliencia.yml), la API
-corriendo y conectada A TRAVÉS del proxy, Node.js para npx. Solo usa la
-biblioteca estándar de Python.
+corriendo y conectada A TRAVÉS del proxy, y Artillery instalado una vez con
+la versión fijada en resiliencia/package-lock.json. Solo usa la biblioteca
+estándar de Python.
 
+    npm ci --prefix resiliencia
     python resiliencia/experimento_carga.py
 """
 
 import json
 import os
-import shutil
 import subprocess
 import sys
 import threading
@@ -35,7 +36,8 @@ RESULTADOS = AQUI / "resultados"
 API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000")
 TOXIPROXY_URL = os.environ.get("TOXIPROXY_URL", "http://127.0.0.1:8474")
 UPSTREAM = os.environ.get("TOXIPROXY_UPSTREAM", "db:5432")
-ARTILLERY = "artillery@2.0.34"  # versión fija: el experimento debe ser reproducible
+# Instalado con `npm ci --prefix resiliencia` (versión fijada en package-lock.json).
+ARTILLERY = AQUI / "node_modules" / ".bin" / ("artillery.cmd" if os.name == "nt" else "artillery")
 CORTE_EN_S, RESTAURAR_EN_S = 20, 40
 
 
@@ -69,7 +71,10 @@ def comprobar_api():
             if r.status == 200:
                 return
     except Exception as e:  # noqa: BLE001
-        sys.exit(f"La API no está lista en {API_URL}/health/listo: {e}")
+        sys.exit(
+            f"La API no está lista en {API_URL}/health/listo: {e}\n"
+            "¿Está corriendo uvicorn en otra terminal, con DATABASE_URL apuntando al puerto 15432?"
+        )
 
 
 def linea_de_tiempo(registro: list[str]):
@@ -80,7 +85,7 @@ def linea_de_tiempo(registro: list[str]):
         registro.append(f"{ahora}  +{time.monotonic() - inicio:5.1f}s  {texto}")
         print(registro[-1], flush=True)
 
-    marcar("inicio de la carga (base normal)")
+    marcar("Artillery inició la carga (base normal)")
     time.sleep(CORTE_EN_S)
     toxiproxy("POST", "/proxies/postgres", {"enabled": False})
     marcar("CORTE: proxy deshabilitado, la API no alcanza a PostgreSQL")
@@ -134,34 +139,42 @@ def resumir(reporte: Path, linea: list[str]) -> str:
 
 
 def main():
-    npx = shutil.which("npx")
-    if not npx:
-        sys.exit("No se encontró npx: instale Node.js para correr Artillery.")
+    if not ARTILLERY.exists():
+        sys.exit(
+            "Falta Artillery. Instálelo una vez (necesita Node.js), desde la raíz del repo:\n"
+            "    npm ci --prefix resiliencia"
+        )
     RESULTADOS.mkdir(exist_ok=True)
     sello = datetime.now().strftime("%Y%m%d-%H%M%S")
     reporte = RESULTADOS / f"carga-{sello}.json"
 
-    # Descarga Artillery ANTES de empezar el reloj: si se bajara durante la
-    # corrida, el corte podría ocurrir antes de que llegue la primera carga.
-    subprocess.run([npx, "--yes", ARTILLERY, "--version"], check=True, capture_output=True)  # noqa: S603
     preparar_proxy()
     comprobar_api()
+    print("Iniciando Artillery (en Windows puede tardar ~20 s en arrancar)...", flush=True)
     registro: list[str] = []
     hilo = threading.Thread(target=linea_de_tiempo, args=(registro,), daemon=True)
 
     entorno = {**os.environ, "API_URL": API_URL}
-    comando = [
-        npx,
-        "--yes",
-        ARTILLERY,
-        "run",
-        str(AQUI / "artillery.yml"),
-        "--output",
-        str(reporte),
-    ]
-    proceso = subprocess.Popen(comando, env=entorno)  # noqa: S603 (comando fijo)
-    hilo.start()
+    comando = [str(ARTILLERY), "run", str(AQUI / "artillery.yml"), "--output", str(reporte)]
+    proceso = subprocess.Popen(  # noqa: S603 (comando fijo)
+        comando,
+        env=entorno,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    # El reloj del corte arranca cuando Artillery empieza a enviar carga, no
+    # cuando se lanza el proceso: en Windows Artillery tarda ~20 s en arrancar
+    # y el corte ocurría antes de la primera solicitud.
+    for linea in proceso.stdout:
+        print(linea, end="", flush=True)
+        if "Phase started" in linea and not hilo.is_alive():
+            hilo.start()
     proceso.wait()
+    if not registro:
+        sys.exit("Artillery nunca inició la fase de carga: el experimento queda INCOMPLETO.")
     hilo.join(timeout=5)
     toxiproxy("POST", "/proxies/postgres", {"enabled": True})  # por si se interrumpió
 
