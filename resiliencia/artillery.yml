@@ -1,0 +1,21 @@
+# Carga constante durante el experimento de resiliencia (ítem 4.10).
+# No se corre sola: la lanza resiliencia/experimento_carga.py, que además
+# corta y restaura la base en los momentos indicados en docs/resiliencia.md.
+config:
+  target: "{{ $env.API_URL }}"
+  phases:
+    - name: experimento
+      duration: 60
+      arrivalRate: 5
+  http:
+    # Igual que la API: si una solicitud no responde en 10 s, cuenta como error.
+    timeout: 10
+  # Se omiten /health (no toca la base) y las rutas con sesión: el objetivo es
+  # medir cómo responde la API cuando la base falla, no la autenticación.
+scenarios:
+  - name: lectura que depende de la base
+    flow:
+      - get:
+          url: "/health/listo"
+      - get:
+          url: "/zonas"

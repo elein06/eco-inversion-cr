@@ -252,6 +252,32 @@ En PowerShell: `$env:TEST_DATABASE_URL="postgresql://..."; pytest`. Sin
 `TEST_DATABASE_URL`, las pruebas de API aparecen como *skipped*: una prueba
 omitida no cuenta como aprobada.
 
+**Resiliencia (Toxiproxy, ítem 4.10):** experimento con la base lenta, caída
+o congelada, más carga con Artillery. Pasos y resultados en
+[docs/resiliencia.md](docs/resiliencia.md).
+## Integración continua
+
+Cada PR hacia `development` o `main` ejecuta
+[.github/workflows/ci.yml](.github/workflows/ci.yml): instala desde los
+lockfiles, corre linting y compilación de backend y frontend, y las pruebas
+unitarias y de API contra un PostGIS temporal con datos ficticios. Una prueba
+omitida hace fallar el CI. El reporte queda como artefacto de la ejecución.
+
+Equivalente local del frontend:
+
+```bash
+cd frontend
+npm ci
+npm run lint
+npm run build
+```
+
+Las dependencias de Python se declaran en `backend/requirements*.txt` y se
+fijan con hashes en `backend/requirements*.lock`. Después de cambiar un
+`.txt`, regenerar los dos lockfiles con los comandos que aparecen en su
+encabezado (requiere [uv](https://docs.astral.sh/uv/)), en ese orden:
+primero `requirements.lock` y luego `requirements-dev.lock`.
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.
