@@ -255,6 +255,12 @@ omitida no cuenta como aprobada.
 **Resiliencia (Toxiproxy, ítem 4.10):** experimento con la base lenta, caída
 o congelada, más carga con Artillery. Pasos y resultados en
 [docs/resiliencia.md](docs/resiliencia.md).
+
+**DAST (ZAP, ítem 4.7):** análisis dinámico de la API en un ambiente aislado
+con datos ficticios, con rutas públicas y autenticadas. Requiere Docker:
+`python dast/ejecutar_dast.py`. Plan, condiciones de fallo, resultados y
+hallazgos en [docs/dast.md](docs/dast.md).
+
 ## Integración continua
 
 Cada PR hacia `development` o `main` ejecuta

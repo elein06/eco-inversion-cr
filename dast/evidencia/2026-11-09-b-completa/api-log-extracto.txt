@@ -1,0 +1,34 @@
+# Extracto de api-log.txt (corrida b, 2026-11-09). Log completo: ~3 MB, no versionado.
+# Generado con grep sobre el log de uvicorn y los eventos de seguridad (logger eco.seguridad).
+
+## Respuestas HTTP por código
+   5783  200
+      3  201
+   1882  307
+    581  401
+     30  403
+    673  404
+   4702  405
+    175  409
+   5714  422
+     32  500
+
+## Eventos de seguridad registrados durante el análisis
+     30 "evento": "acceso_denegado", "resultado": "denegado"
+     45 "evento": "acceso_sin_sesion", "resultado": "denegado"
+     40 "evento": "exportacion", "resultado": "exito"
+   2740 "evento": "login", "resultado": "exito"
+    536 "evento": "login", "resultado": "fallido"
+      2 "evento": "registro", "resultado": "exito"
+    175 "evento": "registro", "resultado": "rechazado"
+
+## Respuestas 500 (H-DAST-02): rutas
+      8 /ambiental/factor
+      8 /infraestructura/factor
+      8 /inversion/factor
+      8 /seguridad/factor
+
+## Respuestas 500: ejemplo de solicitud y excepción
+INFO:     127.0.0.1:57832 - "GET /ambiental/factor?canton=%27%22%00%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E&provincia= HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:60036 - "GET /ambiental/factor?canton=%27%22%00%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E&provincia= HTTP/1.1" 500 Internal Server Error
+     32 ValueError: A string literal cannot contain NUL (0x00) characters.

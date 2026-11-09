@@ -1,0 +1,217 @@
+# Plan DAST reproducible con ZAP Automation Framework (ítem 4.7).
+# Documentación: docs/dast.md. Se ejecuta con dast/ejecutar_dast.py, que
+# levanta el ambiente aislado, crea la cuenta de prueba y define estas
+# variables de entorno (nunca se escriben valores reales aquí):
+#
+#   DAST_TARGET        URL base de la API, p. ej. http://api:8000
+#   DAST_EMAIL         cuenta ficticia de rol "usuario" creada por el script
+#   DAST_PASSWORD      contraseña aleatoria generada en cada corrida
+#   DAST_ESCENARIO_ID  escenario propio de esa cuenta (ruta autenticada con id real)
+#   DAST_REPORTES      carpeta donde ZAP deja los reportes
+#
+# Condiciones de fallo (código de salida de ZAP):
+#   1 -> error del plan: la API no responde, la sesión no funciona (requestor
+#        con código inesperado), un job falla, o hay alertas de riesgo Medio
+#        o Alto que no estén en alertFilter con una excepción registrada.
+#   2 -> solo advertencias (alertas de riesgo Bajo): no bloquea.
+#   0 -> sin hallazgos que superen el umbral.
+
+env:
+  contexts:
+    - name: eco-api
+      urls:
+        - ${DAST_TARGET}
+      # Solo la API del ambiente aislado: ZAP no sale a ningún otro host.
+      includePaths:
+        - "${DAST_TARGET}.*"
+      excludePaths: []
+      # Tecnologías que el proyecto NO usa (FastAPI + PostgreSQL/PostGIS sobre
+      # Linux, servido por uvicorn). ZAP omite las cargas específicas de
+      # ellas: es la forma principal de acotar el análisis activo sin dejar
+      # fuera reglas que sí aplican (SQLi de PostgreSQL, inyección de
+      # comandos de Linux, etc.).
+      technology:
+        exclude:
+          - Db.MySQL
+          - Db.MariaDB
+          - Db.Microsoft SQL Server
+          - Db.Oracle
+          - Db.SQLite
+          - Db.Microsoft Access
+          - Db.Firebird
+          - Db.SAP MaxDB
+          - Db.Sybase
+          - Db.IBM DB2
+          - Db.HypersonicSQL
+          - Db.MongoDB
+          - Db.CouchDB
+          - Language.ASP
+          - Language.Java
+          - Language.JSP/Servlet
+          - Language.PHP
+          - Language.Ruby
+          - OS.MacOS
+          - OS.Windows
+          - WS.Apache
+          - WS.IIS
+          - WS.Tomcat
+      authentication:
+        # Login JSON real (POST /auth/login). ZAP toma access_token de la
+        # respuesta y lo envía como Authorization: Bearer en cada solicitud.
+        method: json
+        parameters:
+          loginPageUrl: ${DAST_TARGET}/auth/login
+          loginRequestUrl: ${DAST_TARGET}/auth/login
+          loginRequestBody: '{"email":"{%username%}","password":"{%password%}"}'
+        verification:
+          # Cada 30 solicitudes ZAP consulta /auth/yo. Si ya no hay sesión
+          # (token vencido, cuenta bloqueada) vuelve a iniciarla.
+          method: poll
+          loggedInRegex: '"usuario_id"'
+          loggedOutRegex: 'Se requiere iniciar'
+          pollFrequency: 30
+          pollUnits: requests
+          pollUrl: ${DAST_TARGET}/auth/yo
+          pollPostData: ""
+      sessionManagement:
+        method: headers
+        parameters:
+          Authorization: "Bearer {%json:access_token%}"
+      users:
+        - name: dast-usuario
+          credentials:
+            username: ${DAST_EMAIL}
+            password: ${DAST_PASSWORD}
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    continueOnFailure: false
+    progressToStdout: true
+
+jobs:
+  # ---------------------------------------------------------------- 1. Sesión
+  # Antes de analizar nada se comprueba que la sesión autenticada funciona Y
+  # que sin ella se rechaza: si el login de ZAP falla, el plan se detiene con
+  # error en vez de "aprobar" un análisis que nunca entró a las rutas privadas.
+  - name: sesion-autenticada-funciona
+    type: requestor
+    parameters:
+      user: dast-usuario
+    requests:
+      - url: ${DAST_TARGET}/auth/yo
+        method: GET
+        responseCode: 200
+      - url: ${DAST_TARGET}/escenarios
+        method: GET
+        responseCode: 200
+      - url: ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+        method: GET
+        responseCode: 200
+      - url: ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/ranking
+        method: GET
+        responseCode: 200
+      - url: ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/export.csv
+        method: GET
+        responseCode: 200
+
+  - name: sin-sesion-se-rechaza
+    type: requestor
+    requests:
+      - url: ${DAST_TARGET}/auth/yo
+        method: GET
+        responseCode: 401
+      - url: ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+        method: GET
+        responseCode: 401
+
+  # --------------------------------------------------------------- 2. Rastreo
+  # La API es JSON, así que el inventario real de rutas (con sus cuerpos POST
+  # y PUT) sale del contrato OpenAPI que publica FastAPI. Los spiders cubren
+  # lo que el contrato no declare: uno sin sesión (rutas públicas) y otro con
+  # la sesión de la cuenta de prueba (rutas autenticadas).
+  - name: importar-openapi
+    type: openapi
+    parameters:
+      apiUrl: ${DAST_TARGET}/openapi.json
+      targetUrl: ${DAST_TARGET}
+      context: eco-api
+
+  - name: rastreo-publico
+    type: spider
+    parameters:
+      context: eco-api
+      url: ${DAST_TARGET}/
+      maxDuration: 2
+
+  - name: rastreo-autenticado
+    type: spider
+    parameters:
+      context: eco-api
+      user: dast-usuario
+      url: ${DAST_TARGET}/
+      maxDuration: 2
+
+  # -------------------------------------------------------- 3. Análisis pasivo
+  - name: analisis-pasivo
+    type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ------------------------------------------------ 4. Análisis activo acotado
+  # Con la sesión de la cuenta de prueba (alcanza rutas públicas y privadas).
+  # Acotado por tecnología (arriba), por tiempo total y por regla; intensidad
+  # media. Si llega a maxScanDurationInMins, ejecutar_dast.py lo marca como
+  # INCOMPLETO. Solo contra el ambiente aislado con datos ficticios: el
+  # análisis activo envía cargas de inyección y puede borrar o modificar datos.
+  - name: analisis-activo
+    type: activeScan
+    parameters:
+      context: eco-api
+      user: dast-usuario
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 20
+      threadPerHost: 4
+    policyDefinition:
+      defaultStrength: medium
+      defaultThreshold: medium
+
+  - name: analisis-pasivo-final
+    type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ------------------------------------------------------------ 5. Evidencia
+  - name: reporte-html
+    type: report
+    parameters:
+      template: traditional-html
+      reportDir: ${DAST_REPORTES}
+      reportFile: zap-reporte.html
+      reportTitle: "DAST Eco-Inversión CR (ítem 4.7)"
+    risks: [high, medium, low, info]
+    confidences: [high, medium, low, confirmed]
+
+  - name: reporte-json
+    type: report
+    parameters:
+      template: traditional-json
+      reportDir: ${DAST_REPORTES}
+      reportFile: zap-reporte.json
+    risks: [high, medium, low, info]
+    confidences: [high, medium, low, confirmed]
+
+  # Rutas efectivamente solicitadas durante el análisis (inventario auditable).
+  - name: rutas-analizadas
+    type: export
+    parameters:
+      context: eco-api
+      type: url
+      source: history
+      fileName: ${DAST_REPORTES}/rutas-analizadas.txt
+
+  # ------------------------------------------------- 6. Condición de fallo
+  - name: condicion-de-fallo
+    type: exitStatus
+    parameters:
+      errorLevel: Medium
+      warnLevel: Low

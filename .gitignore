@@ -27,6 +27,9 @@ etl/**/data/*
 *.log
 etl/oij/reportes/*.csv
 
+# --- DAST (ítem 4.7): reportes de cada corrida; la evidencia va en dast/evidencia/ ---
+dast/resultados/
+
 # --- Editor / OS ---
 .vscode/
 .idea/
