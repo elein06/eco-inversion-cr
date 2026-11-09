@@ -108,7 +108,8 @@ prioridad) dentro del modelo de Threat Dragon y en el PDF.
   Backend es quien decide si alguien es admin.
 - Con T-11 cada letra de STRIDE tiene al menos una amenaza, y los tres flujos
   críticos (F1, F2 y F3) tienen amenazas propias.
-- Las soluciones de las amenazas abiertas van en el ítem **1.4**.
+- Las amenazas abiertas quedan registradas para que el equipo decida si se corrigen;
+  este ítem solo pide identificarlas y priorizarlas.
 
 ## Cambios después de la revisión
 
