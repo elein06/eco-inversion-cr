@@ -1,0 +1,8 @@
+# Fuera del alcance de Semgrep: ver docs/seguridad.md.
+node_modules/
+dist/
+.venv/
+__pycache__/
+reportes/
+backend/tests/
+resiliencia/

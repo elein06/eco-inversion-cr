@@ -3,6 +3,9 @@
 .env.local
 *.env
 
+# --- Reportes de CI y análisis de seguridad ---
+reportes/
+
 # --- Python ---
 __pycache__/
 *.pyc

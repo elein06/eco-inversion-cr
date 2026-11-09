@@ -6,11 +6,12 @@ en verde sin haber probado la API.
 """
 
 import sys
-import xml.etree.ElementTree as ET
+# El XML lo genera pytest en el mismo job: no es una entrada de terceros.
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 
 
 def main(ruta: str) -> int:
-    raiz = ET.parse(ruta).getroot()
+    raiz = ET.parse(ruta).getroot()  # nosemgrep: python.lang.security.use-defused-xml-parse.use-defused-xml-parse
     suites = [raiz] if raiz.tag == "testsuite" else raiz.findall("testsuite")
     total = sum(int(s.get("tests", 0)) for s in suites)
     omitidas = sum(int(s.get("skipped", 0)) for s in suites)
