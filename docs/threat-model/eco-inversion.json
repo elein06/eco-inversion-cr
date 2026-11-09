@@ -781,22 +781,42 @@
                   "status": "Open",
                   "severity": "Medium",
                   "type": "Spoofing",
-                  "description": "Recurso: proceso Backend FastAPI. Los JWT no se guardan en el servidor, así que no hay forma de invalidarlos antes de que expiren a los 30 minutos (cerrar sesión solo borra el token en el navegador). Desactivar la cuenta sí corta el token de inmediato, porque el backend revisa el campo activo en cada petición.\nImpacto: si alguien roba un token (por ejemplo desde el navegador o un equipo compartido), puede usarlo y hacerse pasar por el usuario hasta que el token expire, aunque la víctima ya haya cerrado sesión. Además, la aplicación no tiene opción para cambiar la contraseña.\nPrioridad: Probabilidad 2 (primero hay que robar el token) × Impacto 2 (acceso limitado al tiempo de vida del token) = 4 → Media.",
+                  "description": "Recurso: proceso Backend FastAPI. Los JWT no se guardan en el servidor, así que no hay forma de invalidarlos antes de que expiren a los 30 minutos: no existe un cierre de sesión del lado del servidor. Desactivar la cuenta sí corta el token de inmediato, porque el backend revisa el campo activo en cada petición.\nImpacto: si alguien roba un token (por ejemplo desde el navegador o un equipo compartido), puede usarlo y hacerse pasar por el usuario hasta que el token expire. Además, la aplicación no tiene opción para cambiar la contraseña.\nPrioridad: Probabilidad 2 (primero hay que robar el token) × Impacto 2 (acceso limitado al tiempo de vida del token) = 4 → Media.",
                   "mitigation": "",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 8,
                   "score": "4 (P2 × I2)"
+                },
+                {
+                  "id": "b27caeea-f54c-4b4b-a184-0d2f53134a24",
+                  "title": "T-11 Usuario normal intenta hacer acciones de admin",
+                  "status": "Mitigated",
+                  "severity": "Low",
+                  "type": "Elevation of privilege",
+                  "description": "Recurso: proceso Backend FastAPI, flujo F2 \"Login admin y recalcular\" (POST /indice-viabilidad/recalcular) y el registro (POST /auth/registro). Un usuario normal intenta hacer algo que solo puede hacer el admin: llamar a recalcular el índice, o registrarse mandando \"rol\": \"admin\".\nImpacto: si lo lograra, podría cambiar el índice oficial que ven los inversionistas (integridad del flujo F2).\nPrioridad: Probabilidad 1 (ya está controlado y probado) × Impacto 3 (afecta el resultado principal del sistema) = 3 → Baja.",
+                  "mitigation": "requiere_admin (backend/app/auth.py) relee el rol de la base en cada petición y responde 403 si no es admin. El registro usa extra=\"forbid\": si viene el campo \"rol\" responde 422 y no crea la cuenta. El admin solo se crea por la línea de comandos (python -m app.crear_usuario). Probado en tests/api/test_autorizacion.py (test_recalcular_como_usuario_403_y_el_indice_no_cambia, test_rol_degradado_pierde_el_permiso_con_token_vigente) y tests/api/test_auth.py (test_registro_no_permite_elegir_rol_admin).",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 11,
+                  "score": "3 (P1 × I3)"
                 }
               ],
               "threatFrequency": {
-                "spoofing": 3,
+                "spoofing": 4,
                 "tampering": 0,
                 "repudiation": 0,
                 "informationDisclosure": 0,
                 "denialOfService": 2,
-                "elevationOfPrivilege": 0
+                "elevationOfPrivilege": 2
               }
+            },
+            "tools": {
+              "items": [
+                "boundary",
+                "button-remove"
+              ],
+              "name": null
             }
           },
           {
@@ -1261,8 +1281,7 @@
             "shape": "flow",
             "attrs": {
               "line": {
-                "stroke": "red",
-                "strokeWidth": 2.5,
+                "stroke": "#333333",
                 "targetMarker": {
                   "name": "block"
                 },
@@ -1283,7 +1302,7 @@
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
-              "hasOpenThreats": true,
+              "hasOpenThreats": false,
               "isBidirectional": true,
               "isEncrypted": false,
               "isPublicNetwork": false,
@@ -1292,11 +1311,11 @@
                 {
                   "id": "25b04c65-82d2-49c0-bc83-676f363801a1",
                   "title": "T-09 Acceso a escenarios de otro usuario (IDOR)",
-                  "status": "Open",
+                  "status": "Mitigated",
                   "severity": "Low",
                   "type": "Information disclosure",
                   "description": "Recurso: flujo \"Peticiones API + token JWT\", rutas /escenarios/{id} (ver, editar, borrar y exportar CSV). Un usuario autenticado podría cambiar el id en la URL para intentar acceder a escenarios de otra persona (IDOR).\nImpacto: lectura o modificación de escenarios privados de otros usuarios.\nPrioridad: Probabilidad 1 (el backend ya verifica que el escenario pertenezca al usuario del token; el riesgo queda si un endpoint nuevo olvida esa verificación) × Impacto 3 (datos privados de terceros) = 3 → Baja.",
-                  "mitigation": "",
+                  "mitigation": "_obtener_propio (backend/app/routers/escenarios.py) compara el dueño del escenario con el usuario del token y responde 404 si no coincide, igual que si no existiera, y registra el evento acceso_denegado. Los UPDATE y DELETE repiten usuario_id en el WHERE. Probado en tests/api/test_autorizacion.py (test_escenario_de_otro_404_sin_exponer_datos y test_modificar_escenario_de_otro_404_y_no_cambia), también con el rol admin.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 9,
@@ -1306,7 +1325,7 @@
               "trustBoundaryIds": [],
               "threatFrequency": {
                 "tampering": 0,
-                "informationDisclosure": 1,
+                "informationDisclosure": 3,
                 "denialOfService": 0
               }
             },
@@ -1830,8 +1849,8 @@
             "connector": "normal",
             "data": {
               "type": "tm.Flow",
-              "name": "Llamadas directas a la API",
-              "description": "",
+              "name": "Llamadas directas a la API (cualquier actor, con o sin token)",
+              "description": "Anónimo, Usuario y Admin pueden llamar a la API sin pasar por el frontend (curl, Swagger, scripts). Se dibuja una sola flecha desde Anónimo para no saturar el diagrama.",
               "outOfScope": false,
               "isTrustBoundary": false,
               "reasonOutOfScope": "",
@@ -1844,7 +1863,7 @@
               "trustBoundaryIds": []
             },
             "labels": [
-              "Llamadas directas a la API"
+              "Llamadas directas a la API (cualquier actor, con o sin token)"
             ],
             "id": "8e8b495f-c57b-4b46-b1a5-bbc9c3c62852",
             "source": {
@@ -2382,12 +2401,12 @@
             ],
             "id": "b00983df-0697-49e4-8b59-62ab853a8263",
             "source": {
-              "x": 1450,
-              "y": 110
+              "x": 1600,
+              "y": 135
             },
             "target": {
-              "x": 1450,
-              "y": 400
+              "x": 1600,
+              "y": 335
             },
             "vertices": []
           },
@@ -2444,6 +2463,6 @@
     ],
     "diagramTop": 1,
     "reviewer": "",
-    "threatTop": 10
+    "threatTop": 11
   }
 }
