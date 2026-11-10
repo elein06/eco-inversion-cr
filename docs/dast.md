@@ -16,10 +16,10 @@ no debe verlo Beto.
 ```
 ejecutar_dast.py ──► docker compose -p eco-dast (red interna "dast")
       │                 db  (PostGIS, tmpfs, sin puertos, datos ficticios)
-      │                 api (imagen de backend/, sin montar el código)
+      │                 backend (imagen de backend/, sin montar el código)
       │                 zap (zaproxy/zap-stable:2.16.1, solo ve la red "dast")
       │
-      ├─ 1. levanta db + api y espera /health/listo
+      ├─ 1. levanta db + backend y espera /health/listo
       ├─ 2. crea las vistas v_factor_* con el SQL de los ETL
       ├─ 3. registra una cuenta ficticia por POST /auth/registro y le crea un escenario
       ├─ 4. ejecuta el plan de ZAP y guarda su salida
@@ -137,12 +137,15 @@ INCOMPLETO.
 
 ## Resultados
 
-Corridas del 2026-11-09 contra el commit `1bceb32` (el código de la API es el
-mismo en `development`). Ejecutadas en el workspace Linux de Claude **sin
-Docker** (modo `--objetivo`, ZAP 2.16.1 y PostgreSQL 16 + PostGIS 3 nativos),
-porque ese entorno no tiene acceso a Docker Hub. Archivos en `dast/evidencia/`:
-`resumen.md`, `zap-reporte.json`, `zap-salida.txt` y, en **b**, las rutas y un
-extracto del log de la API. El reporte HTML no se versiona (sus enlaces
+Corridas del 2026-11-09. Las corridas **a** a **c** se ejecutaron contra el
+commit `1bceb32` en el workspace Linux de Claude **sin Docker** (modo
+`--objetivo`, ZAP 2.16.1 y PostgreSQL 16 + PostGIS 3 nativos), porque ese
+entorno no tiene acceso a Docker Hub. La corrida **d** es el camino normal:
+`python dast/ejecutar_dast.py` con Docker Desktop en Windows, sobre el commit
+del ítem (base `development`) más el cambio de nombre del servicio `api` a
+`backend` (ver abajo), que se versionó a continuación. El código de la API es el mismo en todas.
+Archivos en `dast/evidencia/`: `resumen.md`, `zap-reporte.json`,
+`zap-salida.txt` y, en **b** y **d**, las rutas y un extracto del log de la API. El reporte HTML no se versiona (sus enlaces
 `http://127.0.0.1` activan la regla `plaintext-http-link` de Semgrep en CI);
 se genera en cada corrida local y queda en el artefacto de GitHub Actions.
 
@@ -151,20 +154,40 @@ se genera en cada corrida local y queda en el artefacto de GitHub Actions.
 | **a** exploratoria | Primera versión del plan, sin vistas ni filtro de tecnologías. Llegó al límite de 15 min. Ver `NOTA.md`. | Sería INCOMPLETO con las reglas actuales |
 | **b** completa | Plan actual. Sesión verificada; 34 rutas (9 con sesión); análisis activo de 10 min 28 s. | **APROBADO** (1 alerta Baja) |
 | **c** sesión inválida | `--demo-sesion-invalida`: ZAP recibe una contraseña incorrecta, `/auth/yo` da 401 en vez de 200 y el script detiene ZAP en segundos. | **INCOMPLETO**, código 1 |
+| **d** Docker | Ambiente aislado completo con `dast/docker-compose.yml` e imagen oficial de ZAP. Sesión verificada; 34 rutas (9 con sesión); análisis activo de 8 min 37 s; 9,6 min en total. | **APROBADO** (2 alertas Bajas) |
+| **e** GitHub Actions | Workflow `DAST` en el PR #21, commit `c8f4435`, runner `ubuntu-24.04`: [ejecución 42719554136](https://github.com/elein06/eco-inversion-cr/actions/runs/42719554136). Reportes en el artefacto `dast-c8f44359f248346bd420f9aad51cd87e5a3d0807` (30 días). Job de 6 min 26 s. | **APROBADO** (job en verde) |
 
-Corrida **b**, alertas de ZAP:
+La primera ejecución con Docker en Windows terminó INCOMPLETO antes de llegar a
+ZAP: Python enviaba el SQL de las vistas a `psql` en cp1252 y la `ó` de los
+comentarios del ETL llegaba como byte inválido. Se corrigió enviándolo siempre
+como UTF-8. El script lo reportó como incompleto, no como aprobado.
+
+Al versionar la evidencia de Docker, el job Seguridad del PR falló: Gitleaks
+(regla `generic-api-key`) marcó 52 coincidencias en los reportes porque el
+servicio se llamaba `api` y cada URL empezaba con `http://api:8000/…`, que la
+regla lee como `api: <clave>`. Era un falso positivo, pero en vez de excluir la
+evidencia del análisis de secretos se renombró el servicio a `backend`, se
+quitó ese commit de la rama y se repitió la corrida **d**.
+
+Alertas de ZAP en las corridas **b** y **d** (instancias de **b** / **d**):
 
 | Riesgo | Id | Alerta | Instancias |
 |---|---|---|---|
-| Bajo | 10021 | X-Content-Type-Options Header Missing | 28 |
-| Informativo | 10111 | Authentication Request Identified | 3 |
-| Informativo | 10112 | Session Management Response Identified | 68 |
-| Informativo | 10104 | User Agent Fuzzer | 108 |
+| Bajo | 10021 | X-Content-Type-Options Header Missing | 28 / 28 |
+| Bajo | 10116 | ZAP is Out of Date | — / 1 |
+| Informativo | 10111 | Authentication Request Identified | 3 / 3 |
+| Informativo | 10112 | Session Management Response Identified | 68 / 4 |
+| Informativo | 10104 | User Agent Fuzzer | 108 / 108 |
 
-Durante esa corrida la API respondió a 19 575 solicitudes y registró 45
-accesos sin sesión, 30 accesos denegados, 536 logins fallidos y 175 registros
-rechazados (`api-log-extracto.txt`). Las 32 respuestas 500 devolvieron un
-cuerpo genérico, sin trazas.
+La 10116 solo aparece en **d** porque la imagen de ZAP está fijada en 2.16.1
+para que el análisis sea reproducible; actualizarla queda a cargo de Renovate
+(ítem 7.6).
+
+En la corrida **d** la API respondió a 19 866 solicitudes y registró 45
+accesos sin sesión, 30 accesos denegados, 520 logins fallidos y 175 registros
+rechazados (`api-log-extracto.txt`; en **b**: 19 575 solicitudes y 536 logins
+fallidos). En las dos hubo exactamente 32 respuestas 500, todas de
+H-DAST-02, con cuerpo genérico y sin trazas.
 
 ## Hallazgos
 
@@ -172,16 +195,16 @@ Para pasar al registro único del proyecto. Ninguno está corregido todavía.
 
 | Id | Riesgo | Hallazgo | Evidencia | Tratamiento propuesto |
 |---|---|---|---|---|
-| **H-DAST-01** | Bajo | Ninguna respuesta de la API envía `X-Content-Type-Options: nosniff` (alerta ZAP 10021). | Corrida **b**, `zap-reporte.json` | Middleware que agregue `X-Content-Type-Options: nosniff` (y `Cache-Control: no-store` en respuestas con sesión). Una prueba de API que lo verifique. |
-| **H-DAST-02** | Bajo | Un byte NUL (`%00`) en `canton` o `provincia` de `/ambiental/factor`, `/inversion/factor`, `/infraestructura/factor` y `/seguridad/factor` produce un **500** no controlado (`ValueError: A string literal cannot contain NUL`). La consulta está parametrizada: no es inyección, es validación de entrada. ZAP **no** lo alertó (el cuerpo es genérico); se encontró revisando el log de la API. | Corrida **b**, `api-log-extracto.txt` (32 respuestas 500) | Rechazar NUL con 422 en esos parámetros (validación de FastAPI o un manejador global de `ValueError`). Prueba de regresión con `?canton=a%00b`. |
+| **H-DAST-01** | Bajo | Ninguna respuesta de la API envía `X-Content-Type-Options: nosniff` (alerta ZAP 10021). | Corridas **b** y **d**, `zap-reporte.json` | Middleware que agregue `X-Content-Type-Options: nosniff` (y `Cache-Control: no-store` en respuestas con sesión). Una prueba de API que lo verifique. |
+| **H-DAST-02** | Bajo | Un byte NUL (`%00`) en `canton` o `provincia` de `/ambiental/factor`, `/inversion/factor`, `/infraestructura/factor` y `/seguridad/factor` produce un **500** no controlado (`ValueError: A string literal cannot contain NUL`). La consulta está parametrizada: no es inyección, es validación de entrada. ZAP **no** lo alertó (el cuerpo es genérico); se encontró revisando el log de la API. | Corridas **b** y **d**, `api-log-extracto.txt` (32 respuestas 500 en cada una) | Rechazar NUL con 422 en esos parámetros (validación de FastAPI o un manejador global de `ValueError`). Prueba de regresión con `?canton=a%00b`. |
 | **H-DAST-03** | Bajo | `/ambiental/factor` responde **500** si la vista `v_factor_ambiental` no existe; las otras tres rutas de factores responden 503 con un mensaje claro (`_exigir_vista`). Alertas ZAP 90022 y 10023. | Corrida **a**, `zap-reporte.json` | Aplicar la misma comprobación de vista en `routers/ambiental.py`. |
 
 ## Limitaciones
 
-- **El modo Docker y el workflow de CI todavía no se ejecutaron.** Las
-  corridas de arriba usaron el mismo plan y el mismo script en modo
-  `--objetivo`. La primera ejecución de `python dast/ejecutar_dast.py` en
-  Docker Desktop y la del workflow en el PR son las que validan ese camino.
+- El modo Docker se validó en Windows (corrida **d**) y en GitHub Actions
+  (corrida **e**). Los reportes de **e** viven solo en el artefacto, que
+  GitHub borra a los 30 días: descargarlo antes de la evaluación si se quiere
+  conservar.
 - Las imágenes `zaproxy/zap-stable:2.16.1` y `postgis/postgis:16-3.4` están
   fijadas por etiqueta, no por digest. Para fijarlas:
   `docker pull zaproxy/zap-stable:2.16.1` y
@@ -197,6 +220,7 @@ Para pasar al registro único del proyecto. Ninguno está corregido todavía.
   eso lo cubren las pruebas de API.
 - Hay 500 que ZAP no reporta como alerta si el cuerpo no expone detalles
   (H-DAST-02). Por eso el script conserva el log de la API como evidencia.
-- ZAP inicia sesión con mucha frecuencia (2 740 logins en la corrida **b**).
+- ZAP inicia sesión con mucha frecuencia (2 740 logins en la corrida **b**,
+  2 693 en **d**).
   No afecta el resultado, pero llenaría de ruido una alerta de logins
   (ítem 7.3) si el análisis se corriera contra el ambiente desplegado.

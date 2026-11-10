@@ -1,0 +1,33 @@
+# Extracto de api-log.txt (corrida d, Docker, 2026-11-09). Log completo no versionado.
+# Generado con grep sobre 'docker compose logs backend' (uvicorn + logger eco.seguridad).
+
+## Respuestas HTTP por código
+   6099  200
+      3  201
+   1858  307
+    565  401
+     30  403
+    711  404
+   4623  405
+    175  409
+   5770  422
+     32  500
+
+## Eventos de seguridad registrados durante el análisis
+     30 "evento": "acceso_denegado", "resultado": "denegado"
+     45 "evento": "acceso_sin_sesion", "resultado": "denegado"
+     46 "evento": "exportacion", "resultado": "exito"
+   2693 "evento": "login", "resultado": "exito"
+    520 "evento": "login", "resultado": "fallido"
+      2 "evento": "registro", "resultado": "exito"
+    175 "evento": "registro", "resultado": "rechazado"
+
+## Respuestas 500 (H-DAST-02): rutas
+      8 GET /ambiental/factor
+      8 GET /infraestructura/factor
+      8 GET /inversion/factor
+      8 GET /seguridad/factor
+
+## Respuestas 500: ejemplo y excepción
+INFO:     172.22.0.4:46876 - "GET /ambiental/factor?canton=%27%22%00%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E&provincia= HTTP/1.1" 500 Internal Server Error
+     32 ValueError: A string literal cannot contain NUL (0x00) characters.

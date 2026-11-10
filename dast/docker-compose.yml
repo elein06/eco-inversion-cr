@@ -29,7 +29,9 @@ services:
       retries: 30
     networks: [dast]
 
-  api:
+  # Se llama "backend" y no "api": con "api:8000/..." en las URL, la regla
+  # generic-api-key de Gitleaks marca como secreto cada ruta de los reportes.
+  backend:
     build: ../backend
     depends_on:
       db:
@@ -59,7 +61,7 @@ services:
     profiles: [zap]   # no arranca con "up"; el script lo ejecuta con "run"
     command: ["zap.sh", "-cmd", "-autorun", "/zap/wrk/zap-plan.yaml"]
     environment:
-      DAST_TARGET: http://api:8000
+      DAST_TARGET: http://backend:8000
       DAST_EMAIL: ${DAST_EMAIL:-}
       DAST_PASSWORD: ${DAST_PASSWORD:-}
       DAST_ESCENARIO_ID: ${DAST_ESCENARIO_ID:-}

@@ -3,7 +3,7 @@
 # levanta el ambiente aislado, crea la cuenta de prueba y define estas
 # variables de entorno (nunca se escriben valores reales aquí):
 #
-#   DAST_TARGET        URL base de la API, p. ej. http://api:8000
+#   DAST_TARGET        URL base de la API, p. ej. http://backend:8000
 #   DAST_EMAIL         cuenta ficticia de rol "usuario" creada por el script
 #   DAST_PASSWORD      contraseña aleatoria generada en cada corrida
 #   DAST_ESCENARIO_ID  escenario propio de esa cuenta (ruta autenticada con id real)

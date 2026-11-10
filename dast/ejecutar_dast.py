@@ -438,13 +438,13 @@ def main() -> int:
     env["DAST_PUERTO_API"] = PUERTO_API
 
     base = args.objetivo.rstrip("/") if sin_docker else f"http://127.0.0.1:{PUERTO_API}"
-    objetivo_zap = base if sin_docker else "http://api:8000"
+    objetivo_zap = base if sin_docker else "http://backend:8000"
     inicio = time.monotonic()
     cod_zap = 1
     try:
         if not sin_docker:
-            log("Construyendo y levantando el ambiente aislado (db + api)...")
-            compose("up", "-d", "--build", "--wait", "db", "api", env=env)
+            log("Construyendo y levantando el ambiente aislado (db + backend)...")
+            compose("up", "-d", "--build", "--wait", "db", "backend", env=env)
         esperar_api(base)
         crear_vistas(env, args.base if sin_docker else None)
         env.update(preparar_cuenta(base))
@@ -468,7 +468,7 @@ def main() -> int:
             shutil.copyfile(args.log_api, dir_rep / "api-log.txt")
         if not sin_docker:
             with (dir_rep / "api-log.txt").open("w", encoding="utf-8") as f:
-                compose("logs", "--no-color", "api", env=env, salida=f, check=False)
+                compose("logs", "--no-color", "backend", env=env, salida=f, check=False)
             if not args.conservar:
                 log("Destruyendo el ambiente aislado...")
                 compose("down", "-v", "--remove-orphans", env=env, check=False)
