@@ -1,0 +1,112 @@
+ Container eco-dast-zap-run-66c0a6be72c7 Creating 
+ Container eco-dast-zap-run-66c0a6be72c7 Created 
+Found Java version 17.0.17
+Available memory: 6855 MB
+Using JVM args: -Xmx1713m
+890 [main] INFO  org.parosproxy.paros.Constant - Copying default configuration to /home/zap/.ZAP/config.xml
+1102 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/session
+1104 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/dirbuster
+1106 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/fuzzers
+1107 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/plugin
+Nov 09, 2026 11:38:06 PM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+This ZAP installation is over a year old - its probably very out of date
+Job sesion-autenticada-funciona set user = dast-usuario
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/auth/yo
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/ranking
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/export.csv
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sin-sesion-se-rechaza set url = ${DAST_TARGET}/auth/yo
+Job sin-sesion-se-rechaza set method = GET
+Job sin-sesion-se-rechaza set responseCode = 401
+Job sin-sesion-se-rechaza set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+Job sin-sesion-se-rechaza set method = GET
+Job sin-sesion-se-rechaza set responseCode = 401
+Job importar-openapi set apiUrl = ${DAST_TARGET}/openapi.json
+Job importar-openapi set targetUrl = ${DAST_TARGET}
+Job importar-openapi set context = eco-api
+Job rastreo-publico set context = eco-api
+Job rastreo-publico set url = ${DAST_TARGET}/
+Job rastreo-publico set maxDuration = 2
+Job rastreo-autenticado set context = eco-api
+Job rastreo-autenticado set user = dast-usuario
+Job rastreo-autenticado set url = ${DAST_TARGET}/
+Job rastreo-autenticado set maxDuration = 2
+Job analisis-pasivo set maxDuration = 5
+Job analisis-activo set context = eco-api
+Job analisis-activo set user = dast-usuario
+Job analisis-activo set maxRuleDurationInMins = 2
+Job analisis-activo set maxScanDurationInMins = 20
+Job analisis-activo set threadPerHost = 4
+Job analisis-activo set defaultStrength = medium
+Job analisis-activo set defaultThreshold = medium
+Job analisis-pasivo-final set maxDuration = 5
+Job reporte-html set template = traditional-html
+Job reporte-html set reportDir = ${DAST_REPORTES}
+Job reporte-html set reportFile = zap-reporte.html
+Job reporte-html set reportTitle = DAST Eco-Inversión CR (ítem 4.7)
+Job reporte-json set template = traditional-json
+Job reporte-json set reportDir = ${DAST_REPORTES}
+Job reporte-json set reportFile = zap-reporte.json
+Job rutas-analizadas set context = eco-api
+Job rutas-analizadas set type = URLs
+Job rutas-analizadas set source = History
+Job rutas-analizadas set fileName = ${DAST_REPORTES}/rutas-analizadas.txt
+Job condicion-de-fallo set errorLevel = Medium
+Job condicion-de-fallo set warnLevel = Low
+Job requestor started
+Job sesion-autenticada-funciona requesting URL http://backend:8000/auth/yo with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://backend:8000/escenarios with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://backend:8000/escenarios/1 with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://backend:8000/escenarios/1/ranking with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://backend:8000/escenarios/1/export.csv with user dast-usuario
+Job requestor finished, time taken: 00:00:01
+Job requestor started
+Job sin-sesion-se-rechaza requesting URL http://backend:8000/auth/yo
+Job sin-sesion-se-rechaza requesting URL http://backend:8000/escenarios/1
+Job requestor finished, time taken: 00:00:00
+Job openapi started
+Job importar-openapi added 42 URLs
+Job openapi finished, time taken: 00:00:01
+Job spider started
+Job rastreo-publico requesting URL http://backend:8000
+Job rastreo-publico found 47 URLs
+Job spider finished, time taken: 00:00:03
+Job spider started
+Job rastreo-autenticado requesting URL http://backend:8000
+Job rastreo-autenticado found 47 URLs
+Job spider finished, time taken: 00:00:08
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:03
+Job activeScan started
+Job analisis-activo set default strength to MEDIUM
+Job analisis-activo set default threshold to MEDIUM
+Job activeScan finished, time taken: 00:08:37
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:00
+Job report started
+Job reporte-html generated report /zap/reportes/zap-reporte.html
+Job report finished, time taken: 00:00:00
+Job report started
+Job reporte-json generated report /zap/reportes/zap-reporte.json
+Job report finished, time taken: 00:00:00
+Job export started
+Job rutas-analizadas: Exported 2,739 message(s) / node(s) to /zap/reportes/rutas-analizadas.txt.
+Job export finished, time taken: 00:00:00
+Job exitStatus started
+An alert has been raised with a risk of at least: Low
+Job exitStatus finished, time taken: 00:00:00
+Automation plan warnings:
+	An alert has been raised with a risk of at least: Low
+

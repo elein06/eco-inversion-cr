@@ -1,0 +1,1957 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.16.1",
+	"@generated": "Mon, 9 Nov 2026 15:09:52",
+	"site":[ 
+		{
+			"@name": "http://127.0.0.1:8000",
+			"@host": "127.0.0.1",
+			"@port": "8000",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "10021",
+					"alertRef": "10021",
+					"alert": "X-Content-Type-Options Header Missing",
+					"name": "X-Content-Type-Options Header Missing",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+					"instances":[ 
+						{
+							"id": "49",
+							"uri": "http://127.0.0.1:8000",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "46",
+							"uri": "http://127.0.0.1:8000/",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "53",
+							"uri": "http://127.0.0.1:8000/ambiental/capas",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "40",
+							"uri": "http://127.0.0.1:8000/ambiental/capas/resumen",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "41",
+							"uri": "http://127.0.0.1:8000/ambiental/factor",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "42",
+							"uri": "http://127.0.0.1:8000/ambiental/factor?canton=&provincia=",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "3",
+							"uri": "http://127.0.0.1:8000/auth/yo",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "4",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "9",
+							"uri": "http://127.0.0.1:8000/escenarios/1",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "15",
+							"uri": "http://127.0.0.1:8000/escenarios/1/export.csv",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "10",
+							"uri": "http://127.0.0.1:8000/escenarios/1/ranking",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "48",
+							"uri": "http://127.0.0.1:8000/health",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "47",
+							"uri": "http://127.0.0.1:8000/health/listo",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "39",
+							"uri": "http://127.0.0.1:8000/indice-viabilidad",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "59",
+							"uri": "http://127.0.0.1:8000/infraestructura",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "35",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "33",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor?canton=&provincia=&solo_con_pois=false",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "34",
+							"uri": "http://127.0.0.1:8000/infraestructura/resumen",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "45",
+							"uri": "http://127.0.0.1:8000/inversion/factor",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "43",
+							"uri": "http://127.0.0.1:8000/inversion/factor?canton=&provincia=&solo_con_contratos=false",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "44",
+							"uri": "http://127.0.0.1:8000/inversion/resumen",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "30",
+							"uri": "http://127.0.0.1:8000/openapi.json",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "65",
+							"uri": "http://127.0.0.1:8000/seguridad",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "38",
+							"uri": "http://127.0.0.1:8000/seguridad/factor",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "36",
+							"uri": "http://127.0.0.1:8000/seguridad/factor?canton=&provincia=&solo_con_datos=false",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "37",
+							"uri": "http://127.0.0.1:8000/seguridad/resumen",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "31",
+							"uri": "http://127.0.0.1:8000/zonas",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "14",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						}
+					],
+					"count": "28",
+					"solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+					"otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+					"reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "85"
+				},
+				{
+					"pluginid": "10111",
+					"alertRef": "10111",
+					"alert": "Authentication Request Identified",
+					"name": "Authentication Request Identified",
+					"riskcode": "0",
+					"confidence": "1",
+					"riskdesc": "Informational (Low)",
+					"desc": "<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.</p>",
+					"instances":[ 
+						{
+							"id": "28",
+							"uri": "http://127.0.0.1:8000/auth/registro",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=zaproxy@example.com\npasswordParam=password"
+						},
+						{
+							"id": "1",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=dast-735d4253@prueba.cr\npasswordParam=password"
+						},
+						{
+							"id": "29",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "email",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=email\nuserValue=zaproxy@example.com\npasswordParam=password"
+						}
+					],
+					"count": "3",
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>userParam=email</p><p>userValue=zaproxy@example.com</p><p>passwordParam=password</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/auth-req-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "31"
+				},
+				{
+					"pluginid": "10112",
+					"alertRef": "10112",
+					"alert": "Session Management Response Identified",
+					"name": "Session Management Response Identified",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to \"Auto-Detect\" then this rule will change the session management to use the tokens identified.</p>",
+					"instances":[ 
+						{
+							"id": "275",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "DELETE",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "253",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "DELETE",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "100",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "98",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "95",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "126",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "101",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "125",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "109",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "135",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "143",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "142",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "130",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "178",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "154",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "148",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "160",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "5",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "6",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "12",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "19",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "11",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "287",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "284",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "281",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "291",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "278",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "289",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "298",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "295",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "297",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "324",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "340",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "326",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "329",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "331",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "334",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "337",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "371",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "345",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "349",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "343",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "388",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "383",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "387",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "378",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "376",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "380",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "392",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "394",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "199",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "188",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "205",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "192",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "213",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "207",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "225",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "246",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "239",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "242",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "249",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "277",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "GET",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "341",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "210",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "235",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "244",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "POST",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "254",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "PUT",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						},
+						{
+							"id": "250",
+							"uri": "http://127.0.0.1:8000/auth/login",
+							"method": "PUT",
+							"param": "access_token",
+							"attack": "",
+							"evidence": "[JWT-REDACTADO]",
+							"otherinfo": "\njson:access_token"
+						}
+					],
+					"count": "68",
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p></p><p>json:access_token</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "418"
+				},
+				{
+					"pluginid": "10104",
+					"alertRef": "10104",
+					"alert": "User Agent Fuzzer",
+					"name": "User Agent Fuzzer",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.</p>",
+					"instances":[ 
+						{
+							"id": "7539",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7537",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7535",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7541",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7566",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7634",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7631",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7569",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7589",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7605",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7602",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7572",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "DELETE",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7774",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7745",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7744",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7775",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7776",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7847",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7846",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7777",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7810",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7845",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7811",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7809",
+							"uri": "http://127.0.0.1:8000/ambiental/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7914",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7882",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7881",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7915",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7916",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7977",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7955",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7917",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7946",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7948",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7947",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7945",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8075",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8074",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8040",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8076",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8077",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8145",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8144",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8110",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8112",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8143",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8113",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8111",
+							"uri": "http://127.0.0.1:8000/infraestructura/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8179",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8178",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8146",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8180",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8212",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8279",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8250",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8213",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8215",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8249",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8248",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8214",
+							"uri": "http://127.0.0.1:8000/inversion/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8284",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8283",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8282",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8318",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8319",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8382",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8381",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8320",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8351",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8353",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8352",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8336",
+							"uri": "http://127.0.0.1:8000/seguridad/factor/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8414",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8413",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8412",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8447",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8448",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8485",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8484",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8449",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8465",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8483",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8482",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8450",
+							"uri": "http://127.0.0.1:8000/zonas/",
+							"method": "GET",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7571",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7568",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7565",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7574",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7599",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7660",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7638",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7601",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7606",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7636",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7633",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7603",
+							"uri": "http://127.0.0.1:8000/escenarios",
+							"method": "POST",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7540",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7538",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7536",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7564",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7567",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3739.0 Safari/537.36 Edg/75.0.109.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7637",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7635",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/91.0",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7570",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7600",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7632",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12A366 Safari/600.1.4",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7604",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "7573",
+							"uri": "http://127.0.0.1:8000/escenarios/",
+							"method": "PUT",
+							"param": "Header User-Agent",
+							"attack": "msnbot/1.1 (+http://search.msn.com/msnbot.htm)",
+							"evidence": "",
+							"otherinfo": ""
+						}
+					],
+					"count": "108",
+					"solution": "",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/wstg</p>",
+					"cweid": "0",
+					"wascid": "0",
+					"sourceid": "13587"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}
