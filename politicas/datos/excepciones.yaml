@@ -1,0 +1,22 @@
+# Excepciones a las políticas de contenedores (ítem 3.4).
+#
+# Cada excepción la aprueban el responsable del archivo y otro integrante en
+# el PR que la agrega, y se enlaza con el registro único de hallazgos. Al
+# vencer deja de aplicarse sola y la política vuelve a fallar.
+excepciones:
+  - id: EXC-01
+    regla: U2
+    archivo: docker-compose.seguridad.yml
+    servicio: "*"
+    justificacion: >-
+      Semgrep y Gitleaks necesitan escribir sus reportes en la carpeta montada
+      reportes/seguridad, cuyo dueño cambia entre Windows, Linux y el runner de
+      GitHub. Son contenedores de un solo uso, montan el código en solo
+      lectura, no publican puertos y no se despliegan.
+    tratamiento: >-
+      Correr los escáneres con el UID del usuario que ejecuta (por ejemplo
+      user "${UID}:${GID}") y crear la carpeta de reportes antes.
+    responsable: Orlando
+    aprobado_por: Elein
+    vence: "2026-12-15"
+    registro: "[completar: issue del registro único]"

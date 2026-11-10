@@ -297,6 +297,17 @@ docker compose -f docker-compose.seguridad.yml run --rm gitleaks-historial
 docker compose -f docker-compose.seguridad.yml run --rm osv
 ```
 
+## Políticas de contenedores
+
+Conftest y OPA/Rego impiden contenedores privilegiados y exigen un usuario no
+root explícito en los Dockerfile y archivos de Compose (ítem 3.4). Reglas,
+alcance y excepciones en [docs/politicas.md](docs/politicas.md).
+
+```bash
+python politicas/verificar.py
+python politicas/verificar.py --demo
+```
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.
