@@ -1,0 +1,75 @@
+# Ambiente aislado para el análisis DAST (ítem 4.7, ver docs/dast.md).
+#
+# No usar a mano: lo levanta y lo destruye dast/ejecutar_dast.py con el
+# nombre de proyecto "eco-dast", así que no comparte contenedores, red ni
+# volúmenes con el docker-compose.yml de desarrollo.
+#
+# - La base vive en tmpfs: se crea vacía en cada corrida y desaparece al
+#   terminar. No publica puertos.
+# - La API usa la imagen construida desde backend/ (sin montar el código).
+# - ZAP solo alcanza la red interna "dast".
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: eco_inversion_dast
+      POSTGRES_USER: eco_dast
+      # Base desechable, sin datos reales y sin puertos publicados.
+      POSTGRES_PASSWORD: solo-para-dast
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ../db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ../db/02_usuarios_escenarios.sql:/docker-entrypoint-initdb.d/02_usuarios_escenarios.sql:ro
+      - ./datos_ficticios.sql:/docker-entrypoint-initdb.d/03_datos_ficticios.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eco_dast -d eco_inversion_dast"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    networks: [dast]
+
+  # Se llama "backend" y no "api": con "api:8000/..." en las URL, la regla
+  # generic-api-key de Gitleaks marca como secreto cada ruta de los reportes.
+  backend:
+    build: ../backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://eco_dast:solo-para-dast@db:5432/eco_inversion_dast
+      CORS_ORIGINS: http://localhost:5173
+      # Lo genera ejecutar_dast.py en cada corrida; si falta, la API no arranca.
+      JWT_SECRET: ${JWT_SECRET:?ejecutar con dast/ejecutar_dast.py}
+      # El análisis activo prueba contraseñas inválidas contra /auth/login con
+      # la cuenta de ZAP; con el límite normal (5) la cuenta se bloquearía y el
+      # resto del análisis correría sin sesión. El bloqueo lo cubren las
+      # pruebas de API (F1). Solo en este ambiente.
+      LOGIN_MAX_INTENTOS: "100000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/listo', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    ports:
+      # Solo para que el script cree la cuenta de prueba desde el equipo.
+      - "127.0.0.1:${DAST_PUERTO_API:-18000}:8000"
+    networks: [dast]
+
+  zap:
+    image: zaproxy/zap-stable:2.16.1
+    profiles: [zap]   # no arranca con "up"; el script lo ejecuta con "run"
+    command: ["zap.sh", "-cmd", "-autorun", "/zap/wrk/zap-plan.yaml"]
+    environment:
+      DAST_TARGET: http://backend:8000
+      DAST_EMAIL: ${DAST_EMAIL:-}
+      DAST_PASSWORD: ${DAST_PASSWORD:-}
+      DAST_ESCENARIO_ID: ${DAST_ESCENARIO_ID:-}
+      DAST_REPORTES: /zap/reportes
+    volumes:
+      - ./zap-plan.yaml:/zap/wrk/zap-plan.yaml:ro
+      - ${DAST_DIR_REPORTES:?}:/zap/reportes
+    networks: [dast]
+
+networks:
+  dast:

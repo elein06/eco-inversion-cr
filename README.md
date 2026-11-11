@@ -255,6 +255,12 @@ omitida no cuenta como aprobada.
 **Resiliencia (Toxiproxy, ítem 4.10):** experimento con la base lenta, caída
 o congelada, más carga con Artillery. Pasos y resultados en
 [docs/resiliencia.md](docs/resiliencia.md).
+
+**DAST (ZAP, ítem 4.7):** análisis dinámico de la API en un ambiente aislado
+con datos ficticios, con rutas públicas y autenticadas. Requiere Docker:
+`python dast/ejecutar_dast.py`. Plan, condiciones de fallo, resultados y
+hallazgos en [docs/dast.md](docs/dast.md).
+
 ## Integración continua
 
 Cada PR hacia `development` o `main` ejecuta
@@ -290,6 +296,25 @@ docker compose -f docker-compose.seguridad.yml run --rm gitleaks-archivos
 docker compose -f docker-compose.seguridad.yml run --rm gitleaks-historial
 docker compose -f docker-compose.seguridad.yml run --rm osv
 ```
+
+## Políticas de contenedores
+
+Conftest y OPA/Rego impiden contenedores privilegiados y exigen un usuario no
+root explícito en los Dockerfile y archivos de Compose (ítem 3.4). Reglas,
+alcance y excepciones en [docs/politicas.md](docs/politicas.md).
+
+```bash
+python politicas/verificar.py
+python politicas/verificar.py --demo
+```
+
+## Publicación y despliegue
+
+Al fusionar en `development`,
+[.github/workflows/publicacion.yml](.github/workflows/publicacion.yml) repite
+CI y las políticas, publica en Docker Hub las imágenes aprobadas con etiqueta
+`sha-<commit>` y las despliega en Render por digest (ítems 5.5 y 6.1). Ambiente,
+secretos y cómo reproducirlo en [docs/despliegue.md](docs/despliegue.md).
 
 ## Variables de entorno
 

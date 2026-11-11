@@ -1,0 +1,12 @@
+# Excepciones a las políticas de contenedores (ítem 3.4).
+#
+# Cada excepción la aprueban el responsable del archivo y otro integrante en
+# el PR que la agrega, y se enlaza con el registro único de hallazgos.
+#   servicios: lista explícita, sin comodín. "-" = regla de archivo completo
+#              (U1 en un Dockerfile, P1 en un workflow).
+#   vence:     último día válido, hasta las 23:59:59 hora de Costa Rica. Al
+#              vencer deja de aplicarse sola y la política vuelve a fallar.
+# Sin excepciones vigentes. EXC-01 (escáneres de seguridad como root) se
+# retiró cuando el PR #24 corrigió el problema; historial en el issue #23 y en
+# docs/politicas.md.
+excepciones: []

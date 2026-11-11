@@ -1,0 +1,56 @@
+# Ítem 4.7: análisis dinámico (DAST) con ZAP Automation Framework.
+# Ejecuta dast/zap-plan.yaml contra la API candidata del commit, levantada en
+# un ambiente aislado (dast/docker-compose.yml: base desechable con datos
+# ficticios). El runner destruye todo al terminar. Ver docs/dast.md.
+name: DAST
+
+on:
+  pull_request:
+    branches: [development, main]
+    paths:
+      - "backend/**"
+      - "db/**"
+      - "dast/**"
+      - ".github/workflows/dast.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dast-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zap:
+    name: ZAP (DAST)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Levanta db + api, crea la cuenta de prueba, corre ZAP y evalúa las
+      # condiciones de fallo. Sale con 1 si hay hallazgos Medio/Alto sin
+      # excepción o si el análisis quedó incompleto (sesión inválida, API caída).
+      - name: Análisis DAST
+        run: python3 dast/ejecutar_dast.py
+
+      - name: Resumen en la ejecución
+        if: always()
+        run: |
+          if [ -f dast/resultados/ultimo-resumen.md ]; then
+            cat dast/resultados/ultimo-resumen.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "El análisis no generó resumen: comprobación INCOMPLETA." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Conservar reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dast-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dast/resultados/
+          if-no-files-found: error
+          retention-days: 30

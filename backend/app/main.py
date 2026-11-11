@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import uuid
 from contextlib import asynccontextmanager
@@ -131,8 +132,12 @@ def raiz():
 
 @app.get("/health")
 def health():
-    """Vivo: el proceso responde. No toca la base."""
-    return {"status": "ok"}
+    """Vivo: el proceso responde. No toca la base.
+
+    version es el commit de la imagen (APP_VERSION, ver backend/Dockerfile): el
+    despliegue lo usa para confirmar que quedó corriendo la imagen aprobada.
+    """
+    return {"status": "ok", "version": os.environ.get("APP_VERSION", "local")}
 
 
 @app.get("/health/listo")

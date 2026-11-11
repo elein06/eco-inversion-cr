@@ -62,6 +62,8 @@ def comprobar(nombre: str, codigo: int, detectado: bool) -> bool:
 
 def main() -> int:
     ESCANEO.mkdir(parents=True, exist_ok=True)
+    # Los escáneres escriben aquí con el UID 1001 (docker-compose.seguridad.yml).
+    REPORTES.chmod(0o777)
     try:
         (ESCANEO / "api_con_defecto.py").write_text(DEFECTO, encoding="utf-8")
         (ESCANEO / "config_con_secreto.txt").write_text(

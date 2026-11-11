@@ -1,0 +1,116 @@
+Found Java version 21.0.12.1
+Available memory: 8022 MB
+Using JVM args: -Xmx2005m
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=42153 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+This ZAP installation is over a year old - its probably very out of date
+Job authentication set method = json
+Job authentication set parameters = {loginRequestUrl=${DAST_TARGET}/auth/login, loginRequestBody={"email":"{%username%}","password":"{%password%}"}, loginPageUrl=${DAST_TARGET}/auth/login}
+Job verification set method = poll
+Job verification set loggedInRegex = "usuario_id"
+Job verification set loggedOutRegex = Se requiere iniciar
+Job verification set pollFrequency = 30
+Job verification set pollUnits = requests
+Job verification set pollUrl = ${DAST_TARGET}/auth/yo
+Job verification set pollPostData = 
+Job sessionManagement set method = headers
+Job sessionManagement set parameters = {Authorization=Bearer {%json:access_token%}}
+Job users set name = dast-usuario
+Job users set credentials = {password=${DAST_PASSWORD}, username=${DAST_EMAIL}}
+Job sesion-autenticada-funciona set user = dast-usuario
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/auth/yo
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/ranking
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sesion-autenticada-funciona set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}/export.csv
+Job sesion-autenticada-funciona set method = GET
+Job sesion-autenticada-funciona set responseCode = 200
+Job sin-sesion-se-rechaza set url = ${DAST_TARGET}/auth/yo
+Job sin-sesion-se-rechaza set method = GET
+Job sin-sesion-se-rechaza set responseCode = 401
+Job sin-sesion-se-rechaza set url = ${DAST_TARGET}/escenarios/${DAST_ESCENARIO_ID}
+Job sin-sesion-se-rechaza set method = GET
+Job sin-sesion-se-rechaza set responseCode = 401
+Job importar-openapi set apiUrl = ${DAST_TARGET}/openapi.json
+Job importar-openapi set targetUrl = ${DAST_TARGET}
+Job importar-openapi set context = eco-api
+Job rastreo-publico set context = eco-api
+Job rastreo-publico set url = ${DAST_TARGET}/
+Job rastreo-publico set maxDuration = 2
+Job rastreo-autenticado set context = eco-api
+Job rastreo-autenticado set user = dast-usuario
+Job rastreo-autenticado set url = ${DAST_TARGET}/
+Job rastreo-autenticado set maxDuration = 2
+Job analisis-pasivo set maxDuration = 5
+Job analisis-activo set context = eco-api
+Job analisis-activo set user = dast-usuario
+Job analisis-activo set maxRuleDurationInMins = 2
+Job analisis-activo set maxScanDurationInMins = 20
+Job analisis-activo set threadPerHost = 4
+Job analisis-activo set defaultStrength = medium
+Job analisis-activo set defaultThreshold = medium
+Job analisis-pasivo-final set maxDuration = 5
+Job reporte-html set template = traditional-html
+Job reporte-html set reportDir = ${DAST_REPORTES}
+Job reporte-html set reportFile = zap-reporte.html
+Job reporte-html set reportTitle = DAST Eco-Inversión CR (ítem 4.7)
+Job reporte-json set template = traditional-json
+Job reporte-json set reportDir = ${DAST_REPORTES}
+Job reporte-json set reportFile = zap-reporte.json
+Job rutas-analizadas set context = eco-api
+Job rutas-analizadas set type = URLs
+Job rutas-analizadas set source = History
+Job rutas-analizadas set fileName = ${DAST_REPORTES}/rutas-analizadas.txt
+Job condicion-de-fallo set errorLevel = Medium
+Job condicion-de-fallo set warnLevel = Low
+Job requestor started
+Job sesion-autenticada-funciona requesting URL http://127.0.0.1:8000/auth/yo with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://127.0.0.1:8000/escenarios with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://127.0.0.1:8000/escenarios/1 with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://127.0.0.1:8000/escenarios/1/ranking with user dast-usuario
+Job sesion-autenticada-funciona requesting URL http://127.0.0.1:8000/escenarios/1/export.csv with user dast-usuario
+Job requestor finished, time taken: 00:00:01
+Job requestor started
+Job sin-sesion-se-rechaza requesting URL http://127.0.0.1:8000/auth/yo
+Job sin-sesion-se-rechaza requesting URL http://127.0.0.1:8000/escenarios/1
+Job requestor finished, time taken: 00:00:00
+Job openapi started
+Job importar-openapi added 42 URLs
+Job openapi finished, time taken: 00:00:01
+Job spider started
+Job rastreo-publico requesting URL http://127.0.0.1:8000
+Job rastreo-publico found 47 URLs
+Job spider finished, time taken: 00:00:02
+Job spider started
+Job rastreo-autenticado requesting URL http://127.0.0.1:8000
+Job rastreo-autenticado found 47 URLs
+Job spider finished, time taken: 00:00:14
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:02
+Job activeScan started
+Job analisis-activo set default strength to MEDIUM
+Job analisis-activo set default threshold to MEDIUM
+Job activeScan finished, time taken: 00:10:28
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:02
+Job report started
+Job reporte-html generated report /home/claude/repo/dast/resultados/20261109-145853/zap-reporte.html
+Job report finished, time taken: 00:00:00
+Job report started
+Job reporte-json generated report /home/claude/repo/dast/resultados/20261109-145853/zap-reporte.json
+Job report finished, time taken: 00:00:00
+Job export started
+Job rutas-analizadas: Exported 2,786 message(s) / node(s) to /home/claude/repo/dast/resultados/20261109-145853/rutas-analizadas.txt.
+Job export finished, time taken: 00:00:00
+Job exitStatus started
+An alert has been raised with a risk of at least: Low
+Job exitStatus finished, time taken: 00:00:00
+Automation plan warnings:
+	An alert has been raised with a risk of at least: Low
