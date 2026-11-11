@@ -1,0 +1,8 @@
+# Caso rechazado (ítem 3.4): un servicio privilegiado y otro forzado a root.
+services:
+  api:
+    build: .
+    privileged: true
+  worker:
+    build: .
+    user: root

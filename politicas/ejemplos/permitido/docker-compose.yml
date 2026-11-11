@@ -1,0 +1,8 @@
+# Caso permitido (ítem 3.4): sin modo privilegiado y sin forzar root.
+services:
+  api:
+    build: .
+    user: "1000:1000"
+    cap_drop: [ALL]
+  db:
+    image: postgis/postgis:16-3.4

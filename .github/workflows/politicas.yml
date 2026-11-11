@@ -1,0 +1,51 @@
+# Ítem 3.4: políticas de contenedores con Conftest y OPA/Rego (docs/politicas.md).
+# P1 impide el modo privilegiado; U1 y U2 exigen un usuario no root explícito.
+# También se llama desde el workflow de publicación (workflow_call), para que
+# ninguna imagen se publique sin pasar las políticas.
+name: Políticas
+
+on:
+  pull_request:
+    branches: [development, main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  politicas:
+    name: Políticas (Conftest)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      CONFTEST_VERSION: "0.71.0"
+      # SHA-256 publicado en checksums.txt de la versión.
+      CONFTEST_SHA256: 765dfefdf0730693d7541ea0147e10d530a54ed257bbfec055ff34c837ffdf72
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Instalar Conftest (versión fijada y verificada)
+        run: |
+          curl -sSfL -o /tmp/conftest.tgz \
+            "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz"
+          echo "${CONFTEST_SHA256}  /tmp/conftest.tgz" | sha256sum -c -
+          tar -xzf /tmp/conftest.tgz -C /tmp conftest
+          sudo install -m 0755 /tmp/conftest /usr/local/bin/conftest
+          conftest --version
+
+      - name: Demostración (caso permitido y caso rechazado)
+        run: python3 politicas/verificar.py --demo
+
+      - name: Pruebas de las reglas y políticas sobre el repositorio
+        if: ${{ !cancelled() }}
+        run: python3 politicas/verificar.py
+
+      - name: Conservar reportes de políticas
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: politicas-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reportes/politicas/
+          if-no-files-found: error
