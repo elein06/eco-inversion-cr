@@ -6,3 +6,5 @@ __pycache__/
 reportes/
 backend/tests/
 resiliencia/
+# Casos de demostración del ítem 3.4: el rechazado es inseguro a propósito.
+politicas/ejemplos/
