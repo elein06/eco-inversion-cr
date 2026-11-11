@@ -36,6 +36,16 @@ Antes de hacer commit, `gitleaks-archivos` es el que importa: encuentra el
 secreto antes de que entre al historial. Los reportes quedan en
 `reportes/seguridad/`, ignorada por Git.
 
+Los contenedores corren con el UID fijo `1001:1001`, sin privilegios: las
+imágenes de Semgrep, Gitleaks y OSV-Scanner usan root si no se les indica otro
+usuario. En Windows y macOS, Docker Desktop permite escribir en la carpeta
+montada con cualquier UID. En Linux, si tu usuario no es el 1001, prepará la
+carpeta una vez:
+
+```bash
+mkdir -p reportes/seguridad && chmod a+rwx reportes/seguridad
+```
+
 ## Qué bloquea la integración
 
 El job **Seguridad** de `.github/workflows/ci.yml` corre en cada PR hacia
@@ -86,6 +96,7 @@ CI lo ejecuta como autoprueba. Los reportes quedan en `reportes/seguridad-demo/`
 |---|---|---|
 | Semgrep | `backend/Dockerfile` corría como root | Corregido: usuario `app` sin privilegios |
 | Semgrep | `xml.etree` en `verificar_junit.py` | Falso positivo: el XML lo genera pytest en el mismo job |
+| Conftest, U2 (ítem 3.4) | Los escáneres corrían como root (EXC-01, issue #23) | Corregido: UID `1001:1001` en los cinco servicios, incluido OSV-Scanner, que U2 no detectaba por no declarar `user` |
 | Semgrep | `urllib` dinámico en `resiliencia/experimento_carga.py` | Fuera del alcance: herramienta de pruebas |
 | Gitleaks | Ninguno en historial ni en archivos | No aplica |
 | OSV-Scanner | `vite` 5.4.21 y `esbuild` 0.21.5 | Corregido: `vite` 6.4.5 y `esbuild` 0.25.12 |

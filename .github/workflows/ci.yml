@@ -115,6 +115,8 @@ jobs:
           fetch-depth: 0 # Gitleaks revisa todo el historial.
           persist-credentials: false
 
+      # Los escáneres corren con el UID 1001, que en el runner es el dueño del
+      # checkout: puede escribir en estas carpetas sin cambiar permisos.
       - name: Preparar carpetas de reportes
         run: mkdir -p reportes/seguridad reportes/seguridad-demo
 
