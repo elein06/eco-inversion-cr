@@ -6,12 +6,15 @@ name: CI
 on:
   pull_request:
     branches: [development, main]
+  # El workflow de publicación (5.5) repite estas comprobaciones sobre el
+  # commit fusionado antes de publicar la imagen.
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -69,7 +72,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: pytest-${{ github.event.pull_request.head.sha }}
+          name: pytest-${{ github.event.pull_request.head.sha || github.sha }}
           path: backend/reportes/
           if-no-files-found: error
 
@@ -149,6 +152,6 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: seguridad-${{ github.event.pull_request.head.sha }}
+          name: seguridad-${{ github.event.pull_request.head.sha || github.sha }}
           path: reportes/
           if-no-files-found: error

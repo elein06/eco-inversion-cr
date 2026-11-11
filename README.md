@@ -308,6 +308,14 @@ python politicas/verificar.py
 python politicas/verificar.py --demo
 ```
 
+## Publicación y despliegue
+
+Al fusionar en `development`,
+[.github/workflows/publicacion.yml](.github/workflows/publicacion.yml) repite
+CI y las políticas, publica en Docker Hub las imágenes aprobadas con etiqueta
+`sha-<commit>` y las despliega en Render por digest (ítems 5.5 y 6.1). Ambiente,
+secretos y cómo reproducirlo en [docs/despliegue.md](docs/despliegue.md).
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.

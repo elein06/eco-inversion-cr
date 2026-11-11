@@ -1,0 +1,303 @@
+# Ítems 5.5 y 6.1: publicación en Docker Hub y despliegue en Render
+# (docs/despliegue.md).
+#
+# Al fusionar en development:
+#   1. Repite sobre el commit fusionado las comprobaciones de CI (ci.yml) y
+#      las políticas de contenedores (politicas.yml). Si alguna falla, se omite
+#      o no termina, no se publica ni se despliega nada.
+#   2. Construye cada imagen una sola vez, comprueba esa imagen y la guarda
+#      como artefacto (job candidata, sin secretos).
+#   3. Carga exactamente esas imágenes y las publica en Docker Hub con
+#      etiqueta sha-<commit> (job publicar, environment development).
+#   4. Despliega en Render por digest, sin reconstruir, y espera a que el
+#      ambiente informe ese commit.
+#
+# En ramas demo/** solo corren los pasos 1 y 2: nunca se publica ni se
+# despliega. El token de Docker Hub y los deploy hooks son secretos del
+# environment development, que solo acepta la rama development.
+name: Publicación y despliegue
+
+on:
+  push:
+    # demo/** sirve para demostrar que un check fallido detiene el proceso:
+    # esas ramas construyen y comprueban, pero nunca publican ni despliegan.
+    branches: [development, "demo/**"]
+
+permissions:
+  contents: read
+
+# Dos fusiones seguidas no se despliegan en paralelo; la segunda espera.
+concurrency:
+  group: publicacion-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: Comprobaciones de CI
+    uses: ./.github/workflows/ci.yml
+
+  politicas:
+    name: Políticas de contenedores
+    uses: ./.github/workflows/politicas.yml
+
+  candidata:
+    name: Construir y comprobar imágenes
+    needs: [ci, politicas]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SHA: ${{ github.sha }}
+      IMAGEN_BACKEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-backend
+      IMAGEN_FRONTEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-frontend
+      # URL pública de la API en Render: Vite la incrusta al compilar.
+      API_URL: ${{ vars.URL_BACKEND }}
+    outputs:
+      backend_id: ${{ steps.guardar.outputs.backend_id }}
+      frontend_id: ${{ steps.guardar.outputs.frontend_id }}
+    services:
+      # Solo para el arranque de prueba de la imagen; GitHub lo elimina al final.
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: eco_inversion_test
+          POSTGRES_USER: eco_ci
+          POSTGRES_PASSWORD: solo-para-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eco_ci -d eco_inversion_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validar configuración
+        run: |
+          faltan=0
+          for v in DOCKERHUB_USUARIO URL_BACKEND; do
+            if [ -z "${!v}" ]; then echo "::error::Falta la variable de Actions $v"; faltan=1; fi
+          done
+          exit $faltan
+        env:
+          DOCKERHUB_USUARIO: ${{ vars.DOCKERHUB_USUARIO }}
+          URL_BACKEND: ${{ vars.URL_BACKEND }}
+
+      - name: Construir imágenes candidatas
+        run: |
+          docker build --pull --build-arg APP_VERSION="$SHA" \
+            -t "$IMAGEN_BACKEND:sha-$SHA" backend
+          docker build --pull --build-arg APP_VERSION="$SHA" \
+            --build-arg VITE_API_BASE_URL="$API_URL" \
+            -t "$IMAGEN_FRONTEND:sha-$SHA" frontend
+
+      - name: Comprobar imágenes candidatas
+        run: |
+          # Usuario efectivo de cada imagen ya construida (complementa U1).
+          for img in "$IMAGEN_BACKEND:sha-$SHA" "$IMAGEN_FRONTEND:sha-$SHA"; do
+            usuario=$(docker image inspect -f '{{.Config.User}}' "$img")
+            echo "$img -> usuario '$usuario'"
+            case "${usuario%%:*}" in ""|root|0) echo "::error::$img corre como root"; exit 1;; esac
+          done
+
+          # Arranque de la API contra la base temporal: debe responder listo
+          # e informar el commit con el que se construyó.
+          docker run -d --name api --network host \
+            -e DATABASE_URL=postgresql://eco_ci:solo-para-ci@localhost:5432/eco_inversion_test \
+            -e JWT_SECRET="$(openssl rand -hex 32)" \
+            "$IMAGEN_BACKEND:sha-$SHA"
+          docker run -d --name web -p 8080:8080 "$IMAGEN_FRONTEND:sha-$SHA"
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8000/health/listo >/dev/null 2>&1 && break
+            sleep 2
+          done
+          curl -fsS http://localhost:8000/health/listo
+          test "$(curl -fsS http://localhost:8000/health | jq -r .version)" = "$SHA"
+          curl -fsS http://localhost:8080/salud
+          test "$(curl -fsS http://localhost:8080/version.txt)" = "$SHA"
+          echo "Imágenes comprobadas: arrancan, no corren como root e informan $SHA"
+
+      - name: Registros de los contenedores de prueba
+        if: ${{ always() }}
+        run: |
+          docker logs api 2>&1 | tail -n 50 || true
+          docker logs web 2>&1 | tail -n 20 || true
+          docker rm -f api web || true
+
+      - name: Guardar las imágenes comprobadas
+        id: guardar
+        run: |
+          # El ID identifica el contenido exacto de cada imagen: publicar
+          # comprueba que carga estas mismas antes de subirlas.
+          echo "backend_id=$(docker image inspect -f '{{.Id}}' "$IMAGEN_BACKEND:sha-$SHA")" >> "$GITHUB_OUTPUT"
+          echo "frontend_id=$(docker image inspect -f '{{.Id}}' "$IMAGEN_FRONTEND:sha-$SHA")" >> "$GITHUB_OUTPUT"
+          mkdir -p imagenes
+          docker save "$IMAGEN_BACKEND:sha-$SHA" "$IMAGEN_FRONTEND:sha-$SHA" | gzip -1 > imagenes/candidatas.tar.gz
+          ls -lh imagenes/
+
+      - name: Conservar las imágenes comprobadas
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: imagenes-${{ github.sha }}
+          path: imagenes/
+          retention-days: 7
+          if-no-files-found: error
+
+  publicar:
+    name: Publicar en Docker Hub
+    needs: candidata
+    # Solo development publica. Además, el environment development solo
+    # acepta esa rama: el token no llega a ninguna otra aunque se edite esto.
+    if: ${{ github.ref == 'refs/heads/development' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: development
+    env:
+      SHA: ${{ github.sha }}
+      IMAGEN_BACKEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-backend
+      IMAGEN_FRONTEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-frontend
+    outputs:
+      backend: ${{ steps.publicar.outputs.backend }}
+      frontend: ${{ steps.publicar.outputs.frontend }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: imagenes-${{ github.sha }}
+          path: imagenes
+
+      - name: Cargar las imágenes comprobadas
+        env:
+          BACKEND_ID: ${{ needs.candidata.outputs.backend_id }}
+          FRONTEND_ID: ${{ needs.candidata.outputs.frontend_id }}
+        run: |
+          gunzip -c imagenes/candidatas.tar.gz | docker load
+          # Si el contenido no es idéntico al comprobado, no se publica.
+          test "$(docker image inspect -f '{{.Id}}' "$IMAGEN_BACKEND:sha-$SHA")" = "$BACKEND_ID"
+          test "$(docker image inspect -f '{{.Id}}' "$IMAGEN_FRONTEND:sha-$SHA")" = "$FRONTEND_ID"
+          echo "Imágenes cargadas: mismo contenido que se comprobó en candidata"
+
+      - name: Publicar en Docker Hub
+        id: publicar
+        env:
+          DOCKERHUB_USUARIO: ${{ vars.DOCKERHUB_USUARIO }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "$DOCKERHUB_TOKEN" | docker login docker.io -u "$DOCKERHUB_USUARIO" --password-stdin
+          trap 'docker logout docker.io' EXIT
+          for nombre in backend frontend; do
+            [ "$nombre" = backend ] && imagen="$IMAGEN_BACKEND" || imagen="$IMAGEN_FRONTEND"
+            # Se publica la misma imagen que se comprobó: no se reconstruye.
+            salida=$(docker push "$imagen:sha-$SHA")
+            echo "$salida"
+            digest=$(echo "$salida" | grep -oE 'digest: sha256:[0-9a-f]{64}' | tail -n1 | cut -d' ' -f2)
+            # Respaldo: el digest que informa el propio registro.
+            [ -n "$digest" ] || digest=$(docker buildx imagetools inspect "$imagen:sha-$SHA" \
+              --format '{{json .Manifest}}' | jq -r .digest)
+            test -n "$digest" || { echo "::error::No se obtuvo el digest de $imagen"; exit 1; }
+            # development apunta al último candidato aprobado.
+            docker tag "$imagen:sha-$SHA" "$imagen:development"
+            docker push "$imagen:development"
+            echo "$nombre=$imagen@$digest" >> "$GITHUB_OUTPUT"
+            echo "$nombre: $imagen@$digest"
+          done
+
+      - name: Registro de la versión candidata
+        env:
+          BACKEND: ${{ steps.publicar.outputs.backend }}
+          FRONTEND: ${{ steps.publicar.outputs.frontend }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir -p reportes/version
+          cat > reportes/version/version.md <<FIN
+          # Versión candidata sha-$SHA
+
+          | Campo | Valor |
+          |---|---|
+          | Commit | \`$SHA\` |
+          | Imagen backend | \`$BACKEND\` |
+          | Imagen frontend | \`$FRONTEND\` |
+          | Ejecución | $RUN_URL |
+          | Reportes | artefactos pytest-$SHA, seguridad-$SHA y politicas-$SHA de esta ejecución |
+          FIN
+          jq -n --arg sha "$SHA" --arg backend "$BACKEND" --arg frontend "$FRONTEND" --arg run "$RUN_URL" \
+            '{commit: $sha, backend: $backend, frontend: $frontend, ejecucion: $run}' \
+            > reportes/version/version.json
+          cat reportes/version/version.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Conservar registro de la versión
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: version-${{ github.sha }}
+          path: reportes/version/
+          if-no-files-found: error
+
+  desplegar:
+    name: Desplegar en Render
+    needs: publicar
+    if: ${{ github.ref == 'refs/heads/development' }}
+    runs-on: ubuntu-24.04
+    # Cada servicio espera hasta 10 min (40 x 15 s) y se esperan uno tras
+    # otro: el límite del job deja margen para que falle con su mensaje.
+    timeout-minutes: 30
+    environment:
+      name: development
+      url: ${{ vars.URL_FRONTEND }}
+    env:
+      SHA: ${{ github.sha }}
+      BACKEND: ${{ needs.publicar.outputs.backend }}
+      FRONTEND: ${{ needs.publicar.outputs.frontend }}
+      URL_BACKEND: ${{ vars.URL_BACKEND }}
+      URL_FRONTEND: ${{ vars.URL_FRONTEND }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Desplegar por digest
+        env:
+          HOOK_BACKEND: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+          HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+        run: |
+          test -n "$HOOK_BACKEND" && test -n "$HOOK_FRONTEND" && test -n "$URL_FRONTEND" \
+            || { echo "::error::Faltan los deploy hooks o URL_FRONTEND"; exit 1; }
+          # Render despliega la imagen indicada en imgURL (codificada para URL).
+          desplegar() {
+            local hook="$1" imagen="$2"
+            local codificada; codificada=$(jq -rn --arg v "$imagen" '$v|@uri')
+            curl -fsS -o /dev/null -X POST "$hook&imgURL=$codificada"
+            echo "Despliegue solicitado: $imagen"
+          }
+          desplegar "$HOOK_BACKEND" "$BACKEND"
+          desplegar "$HOOK_FRONTEND" "$FRONTEND"
+
+      - name: Verificar que el ambiente corre la versión aprobada
+        run: |
+          # Render tarda en descargar la imagen y el plan gratuito arranca en frío.
+          version_backend()  { curl -fsS --max-time 20 "$URL_BACKEND/health" | jq -r .version; }
+          version_frontend() { curl -fsS --max-time 20 "$URL_FRONTEND/version.txt"; }
+          esperar() {
+            local nombre="$1" actual
+            for i in $(seq 1 40); do
+              actual=$("version_$nombre" 2>/dev/null || true)
+              if [ "$actual" = "$SHA" ]; then echo "$nombre corre $SHA"; return 0; fi
+              echo "[$i] $nombre informa '${actual:-sin respuesta}', se espera $SHA"
+              sleep 15
+            done
+            echo "::error::$nombre no llegó a la versión $SHA"; return 1
+          }
+          esperar backend
+          esperar frontend
+          curl -fsS "$URL_BACKEND/health/listo"
+          {
+            echo "## Despliegue en Render"
+            echo "- Backend: \`$BACKEND\` en $URL_BACKEND"
+            echo "- Frontend: \`$FRONTEND\` en $URL_FRONTEND"
+          } >> "$GITHUB_STEP_SUMMARY"
