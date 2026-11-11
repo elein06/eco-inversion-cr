@@ -1,0 +1,98 @@
+// Ítem 7.6: actualizaciones automáticas con Renovate (docs/actualizaciones.md).
+//
+// Renovate abre PR hacia development. Esos PR no tienen ningún privilegio:
+// pasan por los mismos checks (CI, Seguridad, Políticas y DAST si tocan el
+// backend) y necesitan la aprobación de un revisor, como cualquier otro PR.
+// Nunca se fusionan solos.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":dependencyDashboard"],
+
+  baseBranchPatterns: ["development"],
+  timezone: "America/Costa_Rica",
+  labels: ["dependencias"],
+  dependencyDashboardTitle: "Panel de dependencias (Renovate)",
+
+  // Mismo control que cualquier cambio: sin automerge.
+  automerge: false,
+  prConcurrentLimit: 5,
+  prHourlyLimit: 2,
+
+  // Una versión recién publicada espera 3 días antes de proponerse: si era
+  // maliciosa o defectuosa, normalmente ya la retiraron. Las correcciones de
+  // vulnerabilidades no esperan (ver vulnerabilityAlerts).
+  minimumReleaseAge: "3 days",
+  internalChecksFilter: "strict",
+
+  // Vulnerabilidades conocidas (base de OSV, la misma que usa OSV-Scanner en
+  // CI): PR inmediato, sin esperar y con etiqueta de seguridad.
+  osvVulnerabilityAlerts: true,
+  vulnerabilityAlerts: {
+    enabled: true,
+    labels: ["dependencias", "seguridad"],
+    minimumReleaseAge: null,
+  },
+
+  // Lockfiles de Python con hashes, generados con "uv pip compile" (su
+  // encabezado tiene el comando). Renovate los regenera con el mismo comando.
+  "pip-compile": {
+    managerFilePatterns: ["/(^|/)backend/requirements(-dev)?\\.lock$/"],
+  },
+
+  // Renovación semanal de lockfiles (Python y npm) dentro de los rangos
+  // declarados: mantiene al día las dependencias transitivas.
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["before 6am on monday"],
+  },
+
+  // El ETL no se despliega y sus requirements.txt no fijan versiones. Los
+  // ejemplos de políticas (3.4) son casos de prueba fijos, no dependencias.
+  ignorePaths: ["**/node_modules/**", "etl/**", "politicas/ejemplos/**"],
+
+  packageRules: [
+    {
+      // package.json declara rangos (^): se suben junto con el lockfile para
+      // que el PR muestre la versión nueva.
+      matchManagers: ["npm"],
+      rangeStrategy: "bump",
+    },
+    {
+      // CI, uv y el Dockerfile usan Python 3.12: cambiar de versión de Python
+      // es una decisión del equipo, no una actualización automática.
+      matchDatasources: ["docker"],
+      matchDepNames: ["python"],
+      allowedVersions: "/^3\\.12(\\.|-|$)/",
+    },
+    {
+      // Una versión mayor de PostgreSQL requiere migrar los datos.
+      matchDatasources: ["docker"],
+      matchDepNames: ["postgis/postgis"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
+    {
+      // Acciones de GitHub fijadas por SHA: un solo PR para las que no cambian
+      // de versión mayor.
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor", "patch", "digest", "pin", "pinDigest"],
+      groupName: "acciones de GitHub",
+    },
+    {
+      // Imágenes de las herramientas de análisis (Semgrep, Gitleaks,
+      // OSV-Scanner, ZAP, Toxiproxy): un PR conjunto.
+      matchManagers: ["docker-compose"],
+      matchFileNames: [
+        "docker-compose.seguridad.yml",
+        "docker-compose.resiliencia.yml",
+        "dast/docker-compose.yml",
+      ],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "herramientas de análisis",
+    },
+  ],
+
+  prBodyNotes: [
+    "Ítem 7.6: PR de Renovate. Pasa por los mismos checks que cualquier PR y necesita la aprobación de un revisor antes de fusionarse.",
+  ],
+}
