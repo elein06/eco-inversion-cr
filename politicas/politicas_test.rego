@@ -171,3 +171,27 @@ test_excepcion_vencida_al_dia_siguiente_en_costa_rica if {
 		with data.excepciones as excepcion("2026-12-15")
 		with time.now_ns as ahora
 }
+
+# --- U3 (aviso): imágenes de terceros sin user ---
+
+avisos_u3(entrada) := [msg | some msg in warn with input as entrada with data.excepciones as sin_excepciones; startswith(msg, "[U3]")]
+
+test_u3_avisa_imagen_de_terceros_sin_user if {
+	avisos := avisos_u3(compose({"osv": {"image": "ghcr.io/google/osv-scanner:v2.7.0@sha256:abc"}}))
+	count(avisos) == 1
+	contains(avisos[0], "'osv'")
+	not contains(avisos[0], "sha256")
+}
+
+test_u3_no_avisa_con_user_o_imagen_propia if {
+	entrada := compose({
+		"escaner": {"image": "semgrep/semgrep", "user": "1001:1001"},
+		"api": {"build": ".", "image": "eco/api"},
+	})
+	count(avisos_u3(entrada)) == 0
+}
+
+test_u3_no_bloquea if {
+	count(deny) == 0 with input as compose({"db": {"image": "postgis/postgis:16-3.4"}})
+		with data.excepciones as sin_excepciones
+}

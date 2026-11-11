@@ -14,16 +14,27 @@ en `politicas/datos/excepciones.yaml`.
 | P1 | Contenedores en modo privilegiado | Compose (`privileged: true`) y workflows (`--privileged`) | Es donde se decide cómo se ejecuta un contenedor; un Dockerfile no puede pedir modo privilegiado |
 | U1 | Imágenes propias sin usuario no root explícito | `backend/Dockerfile` y `frontend/Dockerfile`: la etapa final debe declarar `USER` y el último no puede ser `root` ni `0` | La etapa final es la imagen que se publica en Docker Hub y se despliega |
 | U2 | Forzar root al ejecutar | Compose: `user: root`, `user: 0` o un `user` con variables, como `${USUARIO:-root}`, que no se puede comprobar | Sobrescribe el `USER` del Dockerfile y anularía U1 |
+| U3 (aviso) | No bloquea: señala imágenes de terceros sin `user` | Compose: servicio con `image`, sin `build` y sin `user` | Esas imágenes pueden correr como root por defecto sin declararlo, y U2 no lo ve |
 
 Archivos analizados: todo archivo versionado que se llame `Dockerfile*`,
 `docker-compose*.yml` / `compose*.yml` o esté en `.github/workflows/`, salvo
 `politicas/ejemplos/`. La lista sale de `git ls-files`, así que un archivo
 nuevo de ese tipo queda cubierto sin cambiar la configuración.
 
-Fuera del alcance: las imágenes de terceros que se usan sin `user` en Compose
-(PostGIS, ZAP, Toxiproxy) conservan el usuario que define su proveedor. PostGIS
-arranca como root y baja a `postgres` por diseño. No se despliegan junto a la
-aplicación.
+Imágenes de terceros: las que se usan sin `user` en Compose conservan el
+usuario que define su proveedor, que puede ser root. U3 las muestra como aviso
+(`WARN`) en cada ejecución para que alguien las revise, pero no bloquea:
+algunas necesitan arrancar como root y bajan de privilegios solas (PostGIS
+arranca como root y pasa a `postgres`). No se despliegan junto a la aplicación.
+
+### U3: aviso que salió de la revisión
+
+Al corregir EXC-01 en el PR #24, Orlando encontró que OSV-Scanner también
+corría como root aunque U2 no lo marcaba: sus servicios no declaraban `user`.
+Era un punto ciego de U2. En lugar de dejarlo solo como limitación, se agregó
+U3, con 3 pruebas (25 en total). Hoy avisa por PostGIS (`docker-compose.yml` y
+`dast/`), ZAP y Toxiproxy; OSV-Scanner deja de aparecer cuando se fusiona el
+PR #24, que le declara `user: "1001:1001"`.
 
 ## Cómo ejecutarlo
 
@@ -108,3 +119,6 @@ corrigieron así:
   construida. Un `USER` con variables se rechaza porque no se puede verificar.
 - Render ejecuta las imágenes publicadas sin Compose, así que en el ambiente
   desplegado la garantía viene de U1.
+- U3 solo avisa: no sabe con qué usuario arranca cada imagen de terceros (eso
+  depende de la imagen, no del archivo), así que una persona tiene que revisar
+  cada aviso.
