@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.lock
 COPY . .
 
 RUN useradd --system --no-create-home app
-USER app
+USER root
 
 # Commit del que sale la imagen; /health lo informa para verificar el despliegue.
 ARG APP_VERSION=local
