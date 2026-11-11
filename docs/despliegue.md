@@ -26,8 +26,16 @@ Seguridad), Políticas y la construcción y comprobación de las imágenes. El
 DAST de ZAP (4.7) no es condición de publicación: corre como check en los PR
 que tocan `backend/`, `db/` o `dast/`, y repetirlo sobre el commit fusionado
 sumaría unos 10 minutos a cada publicación. Ejecutarlo contra la versión
-desplegada corresponde a 6.5, que el equipo no eligió. La decisión se
-discutió con Karina (responsable de 4.7) en el hilo H-02 del PR #26.
+desplegada corresponde a 6.5, que el equipo no eligió. Karina (responsable
+de 4.7) estuvo de acuerdo en el hilo H-02 del PR #26. En los PR,
+`actions/checkout` analiza el commit de fusión (`refs/pull/N/merge`), así que
+el DAST ya evalúa cómo quedaría `development` con el cambio.
+
+El DAST no es un check obligatorio en la protección de `development`:
+`dast.yml` solo corre cuando cambian `backend/`, `db/` o `dast/`, y si fuera
+obligatorio los PR que no tocan esas carpetas quedarían esperándolo. Por eso,
+cuando el DAST corre en un PR, quien revisa comprueba que esté en verde antes
+de aprobar.
 
 ## Identidad de las imágenes (5.5)
 
