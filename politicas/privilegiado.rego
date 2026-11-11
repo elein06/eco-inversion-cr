@@ -27,6 +27,6 @@ deny contains msg if {
 	walk(archivo.contents, [ruta, valor])
 	is_string(valor)
 	contains(valor, "--privileged")
-	not exceptuado("P1", archivo.path, "*")
+	not exceptuado("P1", archivo.path, "-")
 	msg := sprintf("[P1] %s: '--privileged' en %s. Los workflows no ejecutan contenedores privilegiados.", [archivo.path, concat(".", [sprintf("%v", [p]) | some p in ruta])])
 }

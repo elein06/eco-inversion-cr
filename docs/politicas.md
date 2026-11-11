@@ -1,7 +1,9 @@
 # Políticas de contenedores (ítem 3.4)
 
 Conftest evalúa con OPA/Rego los archivos que construyen o ejecutan
-contenedores y bloquea el PR si alguno incumple. Las reglas están en
+contenedores. Si alguno incumple, el check "Políticas (Conftest)" falla, y como
+es obligatorio en la protección de `development` y `main`, el PR no se puede
+fusionar. Las reglas están en
 `politicas/`, sus pruebas en `politicas/politicas_test.rego` y las excepciones
 en `politicas/datos/excepciones.yaml`.
 
@@ -11,7 +13,7 @@ en `politicas/datos/excepciones.yaml`.
 |---|---|---|---|
 | P1 | Contenedores en modo privilegiado | Compose (`privileged: true`) y workflows (`--privileged`) | Es donde se decide cómo se ejecuta un contenedor; un Dockerfile no puede pedir modo privilegiado |
 | U1 | Imágenes propias sin usuario no root explícito | `backend/Dockerfile` y `frontend/Dockerfile`: la etapa final debe declarar `USER` y el último no puede ser `root` ni `0` | La etapa final es la imagen que se publica en Docker Hub y se despliega |
-| U2 | Forzar root al ejecutar | Compose (`user: root`, `user: 0`) | Sobrescribe el `USER` del Dockerfile y anularía U1 |
+| U2 | Forzar root al ejecutar | Compose: `user: root`, `user: 0` o un `user` con variables, como `${USUARIO:-root}`, que no se puede comprobar | Sobrescribe el `USER` del Dockerfile y anularía U1 |
 
 Archivos analizados: todo archivo versionado que se llame `Dockerfile*`,
 `docker-compose*.yml` / `compose*.yml` o esté en `.github/workflows/`, salvo
@@ -68,15 +70,35 @@ cambiar la configuración de 2.3 y 3.2 al final de la entrega:
 
 - Contenedores de un solo uso, código montado en solo lectura, sin puertos y
   sin despliegue.
-- Responsable: Orlando. Aprobada por: Elein. Vence: 2026-12-15.
-- Tratamiento previsto: ejecutar los escáneres con el UID del usuario que los
-  lanza.
+- Cubre solo los servicios `semgrep`, `gitleaks-historial` y
+  `gitleaks-archivos`. Un servicio nuevo con root en el mismo archivo falla.
+- Responsable: Orlando. Vence: 2026-12-15 (hasta las 23:59 de Costa Rica).
+- Tratamiento previsto: ejecutar los escáneres con un UID fijo no root y
+  preparar la carpeta de reportes con permisos para ese usuario.
 
-Cada excepción indica regla, archivo, servicio, justificación, responsable,
-aprobación, vencimiento y enlace al registro único. Solo cubre esa regla en
-ese archivo y servicio. Al vencer deja de aplicarse y la política vuelve a
+Cada excepción indica regla, archivo, servicios, justificación, responsable,
+aprobación, vencimiento y enlace al registro único. Solo cubre esa regla, en
+ese archivo, para los servicios que nombra uno por uno: no hay comodín. `-`
+indica una regla de archivo completo (U1 en un Dockerfile, P1 en un
+workflow). `vence` es el último día válido, hasta las 23:59:59 hora de Costa
+Rica. Al vencer deja de aplicarse y la política vuelve a
 fallar. Conftest la muestra como aviso (`WARN`) en cada ejecución. Con
 `--sin-excepciones` se ve el rechazo original.
+
+## Revisión del PR #22
+
+La revisión asistida por IA de Diana (ítem 2.6) encontró siete puntos. Se
+corrigieron así:
+
+| Hallazgo | Cambio |
+|---|---|
+| H-01 `servicio: "*"` cubría cualquier servicio del archivo | Lista explícita `servicios`, sin comodín. Prueba con un servicio nuevo `prueba-h01` |
+| H-02 U2 aceptaba `user: "${USUARIO:-root}"` | U2 rechaza un `user` con variables, igual que U1. El tratamiento de EXC-01 ya no propone variables |
+| H-03 EXC-01 sin enlace al registro | Enlazada con el issue #23 |
+| H-04 `vence` se leía como 00:00 UTC | Vigente hasta las 23:59:59 de Costa Rica, con pruebas del límite |
+| H-05 Pruebas faltantes | 6 pruebas nuevas: 22 en total |
+| H-06 ¿El check bloquea? | "Políticas (Conftest)" agregado como check obligatorio en `development` y `main` |
+| H-07 ¿Quién aprueba EXC-01? | La aprueban Orlando, responsable del archivo, y la revisora del PR |
 
 ## Limitaciones
 

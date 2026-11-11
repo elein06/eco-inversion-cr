@@ -21,15 +21,23 @@ es_root(usuario) if {
 no_verificable(usuario) if contains(sprintf("%v", [usuario]), "$")
 
 # Excepción vigente y registrada en politicas/datos/excepciones.yaml.
+# Cada excepción nombra sus servicios uno por uno: no hay comodín, para que
+# un servicio nuevo del mismo archivo no quede cubierto sin revisión (H-01).
+# Las reglas de archivo completo (U1 en Dockerfile, P1 en workflows) usan "-".
 exceptuado(regla, ruta, servicio) if {
 	some e in data.excepciones
 	e.regla == regla
 	e.archivo == ruta
-	e.servicio in {servicio, "*"}
+	servicio in e.servicios
 	vigente(e)
 }
 
-vigente(e) if time.parse_ns("2006-01-02", e.vence) >= time.now_ns()
+# "vence" es el último día válido, hasta las 23:59:59 hora de Costa Rica
+# (UTC-6, sin horario de verano). Sin la hora, "2026-12-15" se leería como
+# 00:00 UTC y vencería la tarde anterior en Costa Rica (H-04).
+fin_de_vigencia(e) := time.parse_rfc3339_ns(sprintf("%sT23:59:59-06:00", [e.vence]))
+
+vigente(e) if time.now_ns() <= fin_de_vigencia(e)
 
 # Avisos: deja a la vista cada excepción usada y las que ya vencieron.
 warn contains msg if {
@@ -37,7 +45,7 @@ warn contains msg if {
 	some archivo in input
 	archivo.path == e.archivo
 	vigente(e)
-	msg := sprintf("[%s] excepción %s vigente hasta %s para %s (%s). Registro: %s", [e.regla, e.id, e.vence, e.archivo, e.servicio, e.registro])
+	msg := sprintf("[%s] excepción %s vigente hasta %s (hora de Costa Rica) para %s, servicios %s. Registro: %s", [e.regla, e.id, e.vence, e.archivo, concat(", ", e.servicios), e.registro])
 }
 
 warn contains msg if {
