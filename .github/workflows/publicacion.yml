@@ -1,20 +1,26 @@
 # Ítems 5.5 y 6.1: publicación en Docker Hub y despliegue en Render
 # (docs/despliegue.md).
 #
-# Al fusionar en development (en ramas demo/** solo los pasos 1 y 2):
+# Al fusionar en development:
 #   1. Repite sobre el commit fusionado las comprobaciones de CI (ci.yml) y
 #      las políticas de contenedores (politicas.yml). Si alguna falla, se omite
 #      o no termina, no se publica ni se despliega nada.
-#   2. Construye cada imagen una sola vez, comprueba esa imagen y publica en
-#      Docker Hub exactamente la que se comprobó, con etiqueta sha-<commit>.
-#   3. Despliega en Render por digest, sin reconstruir, y espera a que el
+#   2. Construye cada imagen una sola vez, comprueba esa imagen y la guarda
+#      como artefacto (job candidata, sin secretos).
+#   3. Carga exactamente esas imágenes y las publica en Docker Hub con
+#      etiqueta sha-<commit> (job publicar, environment development).
+#   4. Despliega en Render por digest, sin reconstruir, y espera a que el
 #      ambiente informe ese commit.
+#
+# En ramas demo/** solo corren los pasos 1 y 2: nunca se publica ni se
+# despliega. El token de Docker Hub y los deploy hooks son secretos del
+# environment development, que solo acepta la rama development.
 name: Publicación y despliegue
 
 on:
   push:
-    # demo/** sirve para demostrar que un check fallido impide publicar:
-    # esas ramas nunca reciben la etiqueta development ni se despliegan.
+    # demo/** sirve para demostrar que un check fallido detiene el proceso:
+    # esas ramas construyen y comprueban, pero nunca publican ni despliegan.
     branches: [development, "demo/**"]
 
 permissions:
@@ -34,8 +40,8 @@ jobs:
     name: Políticas de contenedores
     uses: ./.github/workflows/politicas.yml
 
-  publicar:
-    name: Publicar en Docker Hub
+  candidata:
+    name: Construir y comprobar imágenes
     needs: [ci, politicas]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -46,8 +52,8 @@ jobs:
       # URL pública de la API en Render: Vite la incrusta al compilar.
       API_URL: ${{ vars.URL_BACKEND }}
     outputs:
-      backend: ${{ steps.publicar.outputs.backend }}
-      frontend: ${{ steps.publicar.outputs.frontend }}
+      backend_id: ${{ steps.guardar.outputs.backend_id }}
+      frontend_id: ${{ steps.guardar.outputs.frontend_id }}
     services:
       # Solo para el arranque de prueba de la imagen; GitHub lo elimina al final.
       postgres:
@@ -123,6 +129,62 @@ jobs:
           docker logs web 2>&1 | tail -n 20 || true
           docker rm -f api web || true
 
+      - name: Guardar las imágenes comprobadas
+        id: guardar
+        run: |
+          # El ID identifica el contenido exacto de cada imagen: publicar
+          # comprueba que carga estas mismas antes de subirlas.
+          echo "backend_id=$(docker image inspect -f '{{.Id}}' "$IMAGEN_BACKEND:sha-$SHA")" >> "$GITHUB_OUTPUT"
+          echo "frontend_id=$(docker image inspect -f '{{.Id}}' "$IMAGEN_FRONTEND:sha-$SHA")" >> "$GITHUB_OUTPUT"
+          mkdir -p imagenes
+          docker save "$IMAGEN_BACKEND:sha-$SHA" "$IMAGEN_FRONTEND:sha-$SHA" | gzip -1 > imagenes/candidatas.tar.gz
+          ls -lh imagenes/
+
+      - name: Conservar las imágenes comprobadas
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: imagenes-${{ github.sha }}
+          path: imagenes/
+          retention-days: 7
+          if-no-files-found: error
+
+  publicar:
+    name: Publicar en Docker Hub
+    needs: candidata
+    # Solo development publica. Además, el environment development solo
+    # acepta esa rama: el token no llega a ninguna otra aunque se edite esto.
+    if: ${{ github.ref == 'refs/heads/development' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: development
+    env:
+      SHA: ${{ github.sha }}
+      IMAGEN_BACKEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-backend
+      IMAGEN_FRONTEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-frontend
+    outputs:
+      backend: ${{ steps.publicar.outputs.backend }}
+      frontend: ${{ steps.publicar.outputs.frontend }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: imagenes-${{ github.sha }}
+          path: imagenes
+
+      - name: Cargar las imágenes comprobadas
+        env:
+          BACKEND_ID: ${{ needs.candidata.outputs.backend_id }}
+          FRONTEND_ID: ${{ needs.candidata.outputs.frontend_id }}
+        run: |
+          gunzip -c imagenes/candidatas.tar.gz | docker load
+          # Si el contenido no es idéntico al comprobado, no se publica.
+          test "$(docker image inspect -f '{{.Id}}' "$IMAGEN_BACKEND:sha-$SHA")" = "$BACKEND_ID"
+          test "$(docker image inspect -f '{{.Id}}' "$IMAGEN_FRONTEND:sha-$SHA")" = "$FRONTEND_ID"
+          echo "Imágenes cargadas: mismo contenido que se comprobó en candidata"
+
       - name: Publicar en Docker Hub
         id: publicar
         env:
@@ -141,11 +203,9 @@ jobs:
             [ -n "$digest" ] || digest=$(docker buildx imagetools inspect "$imagen:sha-$SHA" \
               --format '{{json .Manifest}}' | jq -r .digest)
             test -n "$digest" || { echo "::error::No se obtuvo el digest de $imagen"; exit 1; }
-            # development apunta al último candidato aprobado de esa rama.
-            if [ "$GITHUB_REF" = "refs/heads/development" ]; then
-              docker tag "$imagen:sha-$SHA" "$imagen:development"
-              docker push "$imagen:development"
-            fi
+            # development apunta al último candidato aprobado.
+            docker tag "$imagen:sha-$SHA" "$imagen:development"
+            docker push "$imagen:development"
             echo "$nombre=$imagen@$digest" >> "$GITHUB_OUTPUT"
             echo "$nombre: $imagen@$digest"
           done
@@ -185,7 +245,9 @@ jobs:
     needs: publicar
     if: ${{ github.ref == 'refs/heads/development' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Cada servicio espera hasta 10 min (40 x 15 s) y se esperan uno tras
+    # otro: el límite del job deja margen para que falle con su mensaje.
+    timeout-minutes: 30
     environment:
       name: development
       url: ${{ vars.URL_FRONTEND }}
@@ -223,7 +285,7 @@ jobs:
           version_frontend() { curl -fsS --max-time 20 "$URL_FRONTEND/version.txt"; }
           esperar() {
             local nombre="$1" actual
-            for i in $(seq 1 60); do
+            for i in $(seq 1 40); do
               actual=$("version_$nombre" 2>/dev/null || true)
               if [ "$actual" = "$SHA" ]; then echo "$nombre corre $SHA"; return 0; fi
               echo "[$i] $nombre informa '${actual:-sin respuesta}', se espera $SHA"

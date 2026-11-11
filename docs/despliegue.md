@@ -12,11 +12,22 @@ Se inicia al fusionar un PR en `development`:
 |---|---|---|
 | Comprobaciones de CI | Reutiliza `ci.yml` sobre el commit fusionado: backend (ruff, compilación, pytest), frontend (ESLint, compilación) y Seguridad (Semgrep, Gitleaks, OSV-Scanner) | No se publica ni se despliega |
 | Políticas de contenedores | Reutiliza `politicas.yml` (ítem 3.4) | No se publica ni se despliega |
-| Publicar en Docker Hub | Construye cada imagen **una vez**, comprueba esa imagen y publica exactamente la misma | No se despliega |
+| Construir y comprobar imágenes | Construye cada imagen **una vez**, la comprueba y la guarda como artefacto `imagenes-<commit>`. No usa secretos | No se publica ni se despliega |
+| Publicar en Docker Hub | Solo en `development`, con el environment `development`. Carga las imágenes guardadas, verifica que su ID coincide con el comprobado y las publica sin reconstruir | No se despliega |
 | Desplegar en Render | Despliega cada servicio **por digest** y espera a que informe el commit | El despliegue no se marca como satisfactorio |
 
 Los jobs dependen entre sí con `needs`: uno fallido, cancelado u omitido
 detiene todo lo que sigue. Ningún paso usa `continue-on-error`.
+
+### Condiciones de publicación
+
+Publicar exige que el commit fusionado pase CI (backend, frontend y
+Seguridad), Políticas y la construcción y comprobación de las imágenes. El
+DAST de ZAP (4.7) no es condición de publicación: corre como check en los PR
+que tocan `backend/`, `db/` o `dast/`, y repetirlo sobre el commit fusionado
+sumaría unos 10 minutos a cada publicación. Ejecutarlo contra la versión
+desplegada corresponde a 6.5, que el equipo no eligió. La decisión se
+discutió con Karina (responsable de 4.7) en el hilo H-02 del PR #26.
 
 ## Identidad de las imágenes (5.5)
 
@@ -34,16 +45,19 @@ detiene todo lo que sigue. Ningún paso usa `continue-on-error`.
 - Cada imagen lleva el commit en `APP_VERSION`: el backend lo informa en
   `GET /health` y el frontend en `/version.txt`.
 
-Antes de publicar, el job comprueba la imagen ya construida: que su usuario
-no sea root, que la API arranque contra un PostGIS temporal y responda
+Antes de publicar, el job candidata comprueba la imagen ya construida: que su
+usuario no sea root, que la API arranque contra un PostGIS temporal y responda
 `/health/listo`, que el frontend responda `/salud`, y que las dos informen el
-commit esperado. Después se publica esa misma imagen con `docker push`, sin
-reconstruirla. Si una imagen se reconstruye o modifica, debe pasar de nuevo
-por todo el workflow.
+commit esperado. Guarda las imágenes con `docker save` y anota su ID. El job
+publicar las carga con `docker load`, comprueba que el ID es el mismo y las
+sube con `docker push`, sin reconstruirlas. Si una imagen se reconstruye o
+modifica, debe pasar de nuevo por todo el workflow.
 
-El token de Docker Hub (`DOCKERHUB_TOKEN`) es un secreto del repositorio con
-permisos de lectura y escritura solo sobre Docker Hub. Se usa con
-`--password-stdin` y se cierra la sesión al terminar el paso.
+El token de Docker Hub (`DOCKERHUB_TOKEN`) es un secreto del environment
+`development`, que solo acepta la rama `development`: ninguna otra rama puede
+usarlo, aunque se modifique el workflow en ella. Tiene permisos de lectura y
+escritura solo sobre Docker Hub, se usa con `--password-stdin` y se cierra la
+sesión al terminar el paso.
 
 ## Despliegue (6.1)
 
@@ -52,10 +66,17 @@ hooks de Render con el parámetro `imgURL`, que indica la imagen por digest
 (`docker.io/<usuario>/eco-inversion-backend@sha256:...`). Render descarga esa
 imagen exacta; no compila nada.
 
-Después espera hasta 15 minutos a que `URL_BACKEND/health` y
+Después espera hasta 10 minutos por servicio a que `URL_BACKEND/health` y
 `URL_FRONTEND/version.txt` informen el commit desplegado, y comprueba
-`/health/listo`. Si no llega a esa versión, el job falla y el despliegue no se
-marca como satisfactorio.
+`/health/listo`. Si no llega a esa versión, el job falla con un mensaje y el
+despliegue no se marca como satisfactorio. El límite del job (30 min) deja
+margen para que las dos esperas terminen antes de que GitHub lo corte.
+
+`/health` y `/version.txt` son públicos e informan el commit. Es un riesgo de
+divulgación de información (STRIDE: I) aceptado como bajo: el repositorio y
+las imágenes de Docker Hub son públicos, así que el commit no revela nada que
+no esté ya publicado, y es lo que permite verificar qué versión quedó
+desplegada.
 
 Los deploy hooks son secretos del environment `development` de GitHub: solo
 los ven los jobs que declaran ese environment. Cada hook solo permite
@@ -79,8 +100,8 @@ No hay valores secretos en Git, en las imágenes ni en los logs.
 
 | Nombre | Dónde se guarda | Lo usa | Quién puede verlo o cambiarlo |
 |---|---|---|---|
-| `DOCKERHUB_TOKEN` | Secreto del repositorio en GitHub | Job Publicar | Administradores del repositorio |
-| `RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND` | Secretos del environment `development` | Job Desplegar | Administradores del repositorio |
+| `DOCKERHUB_TOKEN` | Secreto del environment `development` (solo la rama `development`) | Job Publicar | Administradores del repositorio |
+| `RENDER_DEPLOY_HOOK_BACKEND`, `RENDER_DEPLOY_HOOK_FRONTEND` | Secretos del environment `development` (solo la rama `development`) | Job Desplegar | Administradores del repositorio |
 | `DOCKERHUB_USUARIO`, `URL_BACKEND`, `URL_FRONTEND` | Variables de Actions (no son secretos) | Publicar y Desplegar | Colaboradores del repositorio |
 | `DATABASE_URL` | Variable de entorno del servicio API en Render | API | Miembros del workspace de Render |
 | `JWT_SECRET` | Variable de entorno del servicio API en Render | API | Miembros del workspace de Render |
@@ -96,28 +117,32 @@ compilar. No es un secreto: es la URL pública de la API.
 
 ### Reproducir el ambiente (una vez)
 
-1. Docker Hub: crear un token de lectura y escritura y guardarlo en GitHub
-   como `DOCKERHUB_TOKEN`. Guardar el usuario como variable `DOCKERHUB_USUARIO`.
-2. Render: crear el Postgres `eco-inversion-db` y cargar el esquema con su
+1. GitHub: crear el environment `development` y en *Deployment branches and
+   tags* limitarlo a la rama `development`.
+2. Docker Hub: crear un token de lectura y escritura y guardarlo como secreto
+   `DOCKERHUB_TOKEN` del environment `development`. Guardar el usuario como
+   variable del repositorio `DOCKERHUB_USUARIO`.
+3. Render: crear el Postgres `eco-inversion-db` y cargar el esquema con su
    URL externa (no queda guardada en ningún archivo):
    ```bash
    docker run --rm -v "${PWD}/db:/db:ro" postgis/postgis:16-3.4 \
      psql "<URL externa>" -f /db/schema.sql -f /db/02_usuarios_escenarios.sql
    ```
-3. GitHub: variables `URL_BACKEND` y `URL_FRONTEND`, y el environment
-   `development`.
-4. Fusionar en `development`. La primera ejecución publica las imágenes; el
+4. GitHub: variables `URL_BACKEND` y `URL_FRONTEND`.
+5. Fusionar en `development`. La primera ejecución publica las imágenes; el
    job Desplegar falla porque todavía no hay hooks.
-5. Render: crear los dos Web Services desde **Existing Image** con la etiqueta
+6. Render: crear los dos Web Services desde **Existing Image** con la etiqueta
    `:development`, con los nombres de la tabla, y cargar las variables de la
    API. Copiar el Deploy Hook de cada uno a los secretos del environment.
-6. En la ejecución del paso 4: **Re-run failed jobs**. Desplegar usa los
+7. En la ejecución del paso 5: **Re-run failed jobs**. Desplegar usa los
    digests ya publicados, sin reconstruir.
 
 ## Demostración: un check fallido impide publicar
 
-Las ramas `demo/**` ejecutan el mismo workflow, pero nunca etiquetan
-`development` ni despliegan. Con un defecto controlado:
+Las ramas `demo/**` ejecutan CI, Políticas y la construcción y comprobación
+de las imágenes, pero nunca publican ni despliegan: el job Publicar solo
+corre en `development` y el token está en un environment que solo acepta esa
+rama. Con un defecto controlado:
 
 ```bash
 git checkout -b demo/publicacion-bloqueada origin/development
@@ -126,8 +151,9 @@ git commit -am "Demo 5.5: defecto controlado (USER root)"
 git push -u origin demo/publicacion-bloqueada
 ```
 
-Resultado esperado: Políticas falla con `[U1]` y Publicar y Desplegar quedan
-omitidos, sin imagen nueva en Docker Hub. Después se borra la rama.
+Resultado esperado: Políticas falla con `[U1]` y Construir, Publicar y
+Desplegar quedan omitidos. Sin el defecto, la rama demo construye y comprueba
+las imágenes, pero Publicar y Desplegar quedan omitidos igual.
 
 ## Limitaciones
 
@@ -141,8 +167,12 @@ omitidos, sin imagen nueva en Docker Hub. Después se borra la rama.
   los datos de respaldo del frontend.
 - Plan gratuito: los servicios se apagan sin tráfico y tardan en arrancar, y
   el Postgres gratuito vence a los 30 días.
-- El job no ejecuta el DAST (4.7) ni E2E contra la versión desplegada; eso
-  corresponde a 6.5.
+- El workflow no ejecuta el DAST (4.7) ni E2E contra la versión desplegada;
+  eso corresponde a 6.5 (ver Condiciones de publicación).
+- Antes de la revisión del PR #26, las ramas `demo/**` podían publicar: la
+  etiqueta `sha-3604caf…` salió de `demo/prueba-publicacion` (con CI y
+  Políticas aprobados, pero sin PR). Se usó para crear los servicios de
+  Render y queda reemplazada por la primera publicación desde `development`.
 - La comprobación de identidad usa el commit que informa la aplicación. Que
   Render corre exactamente ese digest se ve en su panel (Events), no lo
   consulta el workflow.
