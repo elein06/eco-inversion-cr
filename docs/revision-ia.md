@@ -1,45 +1,49 @@
 # Revisión de código asistida por IA (ítem 2.6)
 
-En este ítem usé un asistente de IA (Claude) para revisar un Pull Request y buscar
+En este ítem usé un asistente de IA (Claude) para revisar Pull Requests y buscar
 defectos, problemas de seguridad y pruebas que faltan. **La IA no decide nada:** cada
 hallazgo se deja como comentario en la línea exacta del código y la persona dueña
-del código decide si lo corrige, si no aplica o si se deja en un Issue.
+del código decide si lo corrige, si no aplica o si se deja para después.
 
-La IA tampoco aprueba el PR. Eso lo siguen haciendo el CI (checks *Backend* y
-*Frontend*) y la revisión de otro integrante del equipo.
+La IA tampoco aprueba el PR. Eso lo siguen haciendo los checks obligatorios del CI
+(Backend, Frontend, Seguridad y Políticas, y el DAST cuando corre) y la revisión de
+otro integrante del equipo.
 
-## Qué PR reviso
+## Qué PR revisé
 
-| Revisión | PR | Autor/a | Estado |
-|---|---|---|---|
-| **Principal** (asignada por el equipo) | PR de Elein | @elein06 | Pendiente: Elein todavía no abre su PR |
-| Extra (práctica del proceso) | [#10 Autenticación, roles y escenarios privados](https://github.com/elein06/eco-inversion-cr/pull/10) | @KarinaMD16 | Hecha: 7 hallazgos |
+| Revisión | PR | Autor/a | Hallazgos | Resultado |
+|---|---|---|---|---|
+| **Principal** | [#22 Ítem 3.4: políticas de contenedores](https://github.com/elein06/eco-inversion-cr/pull/22) | @elein06 | 7 | Todos decididos. Aprobado y fusionado |
+| **Principal** | [#26 Ítems 5.5 y 6.1: Docker Hub y Render](https://github.com/elein06/eco-inversion-cr/pull/26) | @elein06 | 5 | Todos decididos. Aprobado |
+| Práctica | [#10 Autenticación, roles y escenarios privados](https://github.com/elein06/eco-inversion-cr/pull/10) | @KarinaMD16 | 7 | Pendiente de respuesta |
 
-El equipo decidió que a mí me toca revisar el PR de Elein. Mientras ella lo abre,
-probé el proceso completo con el PR #10 de Karina, porque tiene el código de los
-flujos críticos F1 y F3 (login y escenarios privados).
+En el equipo acordamos que yo reviso los PR de Elein. Antes de que ella abriera los
+suyos, probé el proceso con el PR #10 de Karina, porque tiene el código de los flujos
+críticos de mi modelo de amenazas (login y escenarios privados).
 
 ## Cómo lo hice (el proceso)
 
 1. **Darle contexto a la IA.** No le pedí solo "revisa este código". Le di el PR, los
-   requisitos (`docs/autenticacion.md`) y los riesgos (`docs/amenazas.md`, ítem 1.3),
-   para que revisara contra lo que el sistema **debe** hacer.
-2. **Revisar lo que propuso la IA.** Leí cada hallazgo contra el código. Si algo
-   dependía de una regla del equipo (por ejemplo, permisos), no se asumió la
-   respuesta: quedó como **DUDA**.
-3. **Comprobar en la API.** Levanté el proyecto con Docker y probé en Swagger el
-   hallazgo más importante (H-01) para ver si era real.
-4. **Comentar en el PR.** Cada hallazgo quedó como comentario en la línea exacta
-   (pestaña *Files changed*), con ubicación, justificación, comprobación sugerida y
-   la persona que tiene que decidir.
-5. **Otra persona decide.** El autor del PR responde en el mismo hilo:
-   ✅ lo corrige, ❌ no aplica (con la razón) o 📌 se deja en un Issue.
-6. **Resumen.** Las decisiones se pasan a la tabla de este documento.
+   requisitos (los ítems o documentos que el PR dice cumplir) y los riesgos
+   ([amenazas.md](amenazas.md), ítem 1.3), para que revisara contra lo que el sistema
+   **debe** hacer.
+2. **Revisar lo que propuso la IA.** Leí cada hallazgo contra el código antes de
+   publicarlo. Si algo dependía de una decisión del equipo (por ejemplo, permisos),
+   no se asumió la respuesta: quedó como **DUDA**.
+3. **Comentar en el PR.** Cada hallazgo quedó como comentario en su línea (pestaña
+   *Files changed*), con ubicación, justificación, comprobación sugerida y severidad.
+   Al terminar elegí **Request changes**, nunca *Approve*.
+4. **Otra persona decide.** El autor del PR responde en el mismo hilo:
+   ✅ lo corrige, ❌ no aplica (con la razón) o 📌 se deja para después.
+5. **Verificar.** Revisé en el código que las correcciones fueran reales y esperé a que
+   el CI terminara en verde.
+6. **Aprobar.** Solo entonces aprobé, con un comentario que resume qué verifiqué. El
+   merge lo hace el autor.
 
 ### Prompt que se usa
 
-Este es el prompt que le di a la IA. Para otro PR solo cambian las partes de
-"CAMBIO A REVISAR", "REQUISITOS" y "RIESGOS".
+Para cada PR solo cambian las partes de "CAMBIO A REVISAR", "REQUISITOS" y "RIESGOS".
+Este es el del PR #10:
 
 ```text
 Actúa como revisor de código de seguridad para el repositorio eco-inversion-cr.
@@ -72,24 +76,75 @@ REGLAS
 - No apruebes el cambio. Tu revisión no reemplaza el CI ni la revisión humana; la decisión sobre cada hallazgo la toma otro integrante.
 ```
 
----
-
-## Revisión principal: PR de Elein
-
-*Pendiente.* Cuando Elein abra su PR se sigue el mismo proceso y se llena esta parte.
-
-| ID | Hallazgo | Tipo | Ubicación | Severidad | Comentario | Decisión de Elein |
-|---|---|---|---|---|---|---|
-| | | | | | | |
+En el #22 los requisitos fueron los ítems 3.4 y 2.5, y en el #26 los ítems 5.5, 6.1,
+5.2 y 2.5. Los riesgos siempre fueron las amenazas de [amenazas.md](amenazas.md).
 
 ---
 
-## Revisión extra: PR #10 (Karina)
+## Revisión principal 1: PR #22 (políticas de contenedores)
+
+- **PR:** [#22](https://github.com/elein06/eco-inversion-cr/pull/22), revisado contra
+  los ítems 3.4 y 2.5 (los cambios en reglas y scripts de verificación los revisa otro
+  integrante).
+- **Quién decide:** @elein06, autora del PR. En H-07 también decidió @Orlando0409,
+  responsable de `docker-compose.seguridad.yml`.
+
+| ID | Hallazgo | Tipo | Severidad | Comentario | Decisión |
+|---|---|---|---|---|---|
+| H-01 | Las excepciones usaban el comodín `"*"` y cubrían cualquier servicio del archivo | Seguridad | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532480116) | ✅ Elein: lista explícita de servicios (`a436327`) |
+| H-02 | La regla U2 aceptaba un `user` con variables, que puede terminar en root | Seguridad | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532485244) | ✅ Elein: U2 rechaza `user` con variables |
+| H-03 | EXC-01 no estaba enlazada al registro de hallazgos | Defecto | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532495386) | ✅ Elein: creó el Issue #23 y lo enlazó |
+| H-04 | La fecha de vencimiento se leía como 00:00 UTC y vencía un día antes en Costa Rica | Defecto | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532499847) | ✅ Elein: vence a las 23:59:59 hora de Costa Rica |
+| H-05 | Faltaban pruebas de las reglas | Prueba faltante | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532503386) | ✅ Elein: 6 pruebas nuevas |
+| H-06 | DUDA: ¿el check de Políticas bloquea el merge? | Duda | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532506751) | ✅ Elein: es obligatorio en `development` y `main` |
+| H-07 | DUDA: la autora aprobaba su propia excepción EXC-01 | Duda | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/22#discussion_r4532513626) | 📌 Orlando no la aprobó y la corrigió en el #24; se retiró en el #25 |
+
+### Cómo se cerró H-07
+
+EXC-01 dejaba correr los escáneres de seguridad como root, y la había aprobado la
+misma autora. Elein dejó la aprobación pendiente y Orlando, responsable del archivo,
+no la aprobó: corrigió el problema de fondo en el
+[PR #24](https://github.com/elein06/eco-inversion-cr/pull/24) (los escáneres corren con
+el usuario 1001).
+
+El #24 no podía fusionarse sin el check de Políticas, y ese workflow venía en el #22.
+Por eso aprobé el #22 con EXC-01 **solo como excepción temporal** y lo dejé escrito en
+mi aprobación. Después Elein abrió el
+[PR #25 "Retira EXC-01"](https://github.com/elein06/eco-inversion-cr/pull/25), que borra
+la excepción y corrige la documentación. Lo aprobé cuando el check de Políticas
+confirmó que, sin la excepción, no falla nada.
+
+---
+
+## Revisión principal 2: PR #26 (Docker Hub y Render)
+
+- **PR:** [#26](https://github.com/elein06/eco-inversion-cr/pull/26), revisado contra
+  los ítems 5.5, 6.1, 5.2 y 2.5.
+- **Quién decide:** @elein06, autora del PR. En H-02 también decidió @KarinaMD16,
+  responsable del DAST (ítem 4.7).
+
+| ID | Hallazgo | Tipo | Severidad | Comentario | Decisión |
+|---|---|---|---|---|---|
+| H-01 | Las ramas `demo/**` podían publicar imágenes en Docker Hub sin revisión | Seguridad | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/26#discussion_r4542821896) | ✅ Elein: solo publica `development`, con el token en un environment restringido (`490ddff`) |
+| H-02 | DUDA: ¿el DAST debe correr antes de publicar? | Duda | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/26#discussion_r4542827125) | 📌 Elein y Karina: queda como check de PR y quien revisa comprueba que esté en verde |
+| H-03 | El tiempo máximo del job no alcanzaba para esperar los dos servicios | Defecto | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/26#discussion_r4542830196) | ✅ Elein: 10 min por servicio y timeout de 30 |
+| H-04 | `/health` muestra en público el commit exacto | Seguridad | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/26#discussion_r4542834380) | ❌ Elein: riesgo aceptado y documentado (STRIDE I) |
+| H-05 | La imagen final no se escanea por vulnerabilidades | Prueba faltante | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/26#discussion_r4542836171) | ❌ Elein: corresponde al ítem 3.3, que el equipo no eligió |
+
+Antes de aprobar verifiqué en el código las correcciones (`490ddff`) y esperé el CI
+completo. Los checks se quedaron trabados por un incidente de GitHub Actions y Elein
+los relanzó. Como en H-02 se acordó que quien revisa comprueba que el DAST esté en
+verde, esperé a que ZAP (DAST) terminara y aprobé el 11 de noviembre sobre el commit
+`99f541b`, con Backend, Frontend, Seguridad, Políticas y DAST en verde.
+
+---
+
+## Revisión de práctica: PR #10 (Karina)
 
 - **PR:** [#10](https://github.com/elein06/eco-inversion-cr/pull/10), commit `da38b30`.
 - **Quién decide:** @KarinaMD16, autora del PR y dueña del requisito.
-- **Nota:** el PR #10 ya estaba aceptado (merge) cuando lo revisé. Por eso lo que se
-  decida corregir va en un PR nuevo o en un Issue, no en el mismo PR.
+- **Nota:** el PR #10 ya estaba fusionado cuando lo revisé. Por eso lo que se decida
+  corregir va en un PR nuevo o en un Issue.
 
 | ID | Hallazgo | Tipo | Ubicación | Severidad | Comentario | Decisión de Karina |
 |---|---|---|---|---|---|---|
@@ -122,6 +177,18 @@ de seguridad del backend quedaron en [h01-logs.txt](revision-ia/h01-logs.txt)
 (request-id `7fc55b72…` para el 429 y `cfdba2ed…` para el 401). En el log no
 aparecen contraseñas ni tokens, y el correo de la cuenta inexistente sale como hash.
 
+---
+
+## Por qué la IA no sustituye la revisión humana
+
+- En el #22 la IA no sabía que el #24 dependía del check que traía el #22. Esa
+  dependencia la detectó Elein, y por eso cambiamos el plan para EXC-01.
+- No todo hallazgo se corrige. En el #26 Elein rechazó H-04 y H-05 con razones
+  válidas; esa decisión le corresponde a ella, no a la IA ni a mí.
+- Nunca aprobé con el CI incompleto: en el #26 esperé a que terminara el DAST.
+- Las dudas (H-06 y H-07 del #22, H-02 del #26) las resolvieron personas: Elein,
+  Orlando y Karina.
+
 ## Qué hizo la IA y qué hice yo
 
 | La IA | Yo |
@@ -129,6 +196,6 @@ aparecen contraseñas ni tokens, y el correo de la cuenta inexistente sale como 
 | Propuso los hallazgos a partir del prompt | Escribí el prompt con los requisitos y las amenazas |
 | Sugirió la ubicación, la justificación y cómo comprobarlos | Revisé cada hallazgo contra el código antes de publicarlo |
 | Ayudó a redactar los comentarios | Hice la prueba de H-01 en Swagger y guardé la evidencia |
-| — | Publiqué los comentarios en el PR y le asigné la decisión a la persona responsable |
+| — | Publiqué los comentarios, verifiqué las correcciones y el CI, y decidí cuándo aprobar |
 
 La decisión final de cada hallazgo **no** es mía ni de la IA: es del autor del PR.
