@@ -6,22 +6,7 @@
 #              (U1 en un Dockerfile, P1 en un workflow).
 #   vence:     último día válido, hasta las 23:59:59 hora de Costa Rica. Al
 #              vencer deja de aplicarse sola y la política vuelve a fallar.
-excepciones:
-  - id: EXC-01
-    regla: U2
-    archivo: docker-compose.seguridad.yml
-    servicios: [semgrep, gitleaks-historial, gitleaks-archivos]
-    justificacion: >-
-      Semgrep y Gitleaks necesitan escribir sus reportes en la carpeta montada
-      reportes/seguridad, cuyo dueño cambia entre Windows, Linux y el runner de
-      GitHub. Son contenedores de un solo uso, montan el código en solo
-      lectura, no publican puertos y no se despliegan.
-    tratamiento: >-
-      Correr los escáneres con un UID fijo no root (por ejemplo "1001:1001")
-      y crear antes la carpeta de reportes con permisos para ese usuario.
-      Un user con variables no sirve: U2 lo rechaza porque no se puede
-      comprobar.
-    responsable: Orlando
-    aprobado_por: "[completar: Orlando (responsable) y revisora del PR]"
-    vence: "2026-12-15"
-    registro: "https://github.com/elein06/eco-inversion-cr/issues/23"
+# Sin excepciones vigentes. EXC-01 (escáneres de seguridad como root) se
+# retiró cuando el PR #24 corrigió el problema; historial en el issue #23 y en
+# docs/politicas.md.
+excepciones: []

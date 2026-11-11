@@ -72,20 +72,27 @@ FAIL - [U2] politicas/ejemplos/rechazado/docker-compose.yml: el servicio 'worker
 Los ejemplos están en `.semgrepignore` porque el rechazado es inseguro a
 propósito y haría fallar el análisis de Semgrep.
 
-## Hallazgo real y excepción
+## Hallazgo real: de excepción a corrección
 
 La primera ejecución sobre el repositorio rechazó `docker-compose.seguridad.yml`
-(U2): los servicios de Semgrep y Gitleaks usan `user: root` para escribir sus
-reportes en la carpeta montada. Se registró la excepción EXC-01 en lugar de
-cambiar la configuración de 2.3 y 3.2 al final de la entrega:
+(U2): los servicios de Semgrep y Gitleaks usaban `user: root` para escribir sus
+reportes en la carpeta montada. El hallazgo siguió este camino:
 
-- Contenedores de un solo uso, código montado en solo lectura, sin puertos y
-  sin despliegue.
-- Cubre solo los servicios `semgrep`, `gitleaks-historial` y
-  `gitleaks-archivos`. Un servicio nuevo con root en el mismo archivo falla.
-- Responsable: Orlando. Vence: 2026-12-15 (hasta las 23:59 de Costa Rica).
-- Tratamiento previsto: ejecutar los escáneres con un UID fijo no root y
-  preparar la carpeta de reportes con permisos para ese usuario.
+1. **Excepción temporal EXC-01** (PR #22, issue #23): cubría solo `semgrep`,
+   `gitleaks-historial` y `gitleaks-archivos`, con vencimiento el 2026-12-15.
+   Se justificó porque son contenedores de un solo uso, con el código en solo
+   lectura, sin puertos y sin despliegue. Orlando, responsable del archivo, no
+   la aprobó como solución: prefirió corregir el problema.
+2. **Corrección** (PR #24, Orlando): los cinco servicios de escaneo corren con
+   el UID fijo `1001:1001`, incluido OSV-Scanner, que corría como root sin
+   declararlo (de ahí salió el aviso U3).
+3. **Retiro de la excepción** (este PR): `excepciones: []`. El check de
+   Políticas de este PR confirma que, sin la excepción, el repositorio no
+   tiene ningún FAIL. El issue #23 queda cerrado.
+
+El #22 se fusionó con EXC-01 todavía vigente porque el #24 no podía fusionarse
+sin el check obligatorio de Políticas, y ese workflow venía en el #22. Diana la
+aprobó solo como excepción temporal con este plan de retiro.
 
 Cada excepción indica regla, archivo, servicios, justificación, responsable,
 aprobación, vencimiento y enlace al registro único. Solo cubre esa regla, en
@@ -105,11 +112,11 @@ corrigieron así:
 |---|---|
 | H-01 `servicio: "*"` cubría cualquier servicio del archivo | Lista explícita `servicios`, sin comodín. Prueba con un servicio nuevo `prueba-h01` |
 | H-02 U2 aceptaba `user: "${USUARIO:-root}"` | U2 rechaza un `user` con variables, igual que U1. El tratamiento de EXC-01 ya no propone variables |
-| H-03 EXC-01 sin enlace al registro | Enlazada con el issue #23 |
+| H-03 EXC-01 sin enlace al registro | Enlazada con el issue #23 (cerrado al retirarla) |
 | H-04 `vence` se leía como 00:00 UTC | Vigente hasta las 23:59:59 de Costa Rica, con pruebas del límite |
 | H-05 Pruebas faltantes | 6 pruebas nuevas: 22 en total |
 | H-06 ¿El check bloquea? | "Políticas (Conftest)" agregado como check obligatorio en `development` y `main` |
-| H-07 ¿Quién aprueba EXC-01? | La aprueban Orlando, responsable del archivo, y la revisora del PR |
+| H-07 ¿Quién aprueba EXC-01? | Orlando no la aprobó: corrigió los escáneres en el #24. Diana la aprobó solo como temporal para destrabar el orden de los PR, y se eliminó en el PR "Retira EXC-01" |
 
 ## Limitaciones
 
