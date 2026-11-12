@@ -316,6 +316,16 @@ CI y las políticas, publica en Docker Hub las imágenes aprobadas con etiqueta
 `sha-<commit>` y las despliega en Render por digest (ítems 5.5 y 6.1). Ambiente,
 secretos y cómo reproducirlo en [docs/despliegue.md](docs/despliegue.md).
 
+## Actualizaciones y reescaneos
+
+Renovate propone por PR hacia `development` las versiones nuevas de
+dependencias, imágenes base y acciones; esos PR pasan por los mismos checks y
+revisión que cualquier otro. Todos los días,
+[.github/workflows/reescaneo.yml](.github/workflows/reescaneo.yml) reescanea
+las dependencias y las imágenes **desplegadas** (por digest) y registra los
+resultados como issues (ítem 7.6). Detalle en
+[docs/actualizaciones.md](docs/actualizaciones.md).
+
 ## Variables de entorno
 
 Ver [.env.example](.env.example) (raíz, usado por Docker Compose/backend/ETL) y [frontend/.env.example](frontend/.env.example) (usado por Vite). Nunca commitear un archivo `.env` real.

@@ -1,0 +1,264 @@
+# Ítem 7.6: reescaneo programado de la versión desplegada
+# (docs/actualizaciones.md).
+#
+# Todos los días:
+#   1. Pregunta a Render qué commit corre (backend /health y frontend
+#      /version.txt) y resuelve en Docker Hub el digest de la imagen sha-<commit>
+#      que publicó el workflow de publicación (5.5).
+#   2. Reescanea con OSV-Scanner las dependencias de producción de ese commit
+#      (lockfiles) y las dos imágenes desplegadas, identificadas por digest.
+#   3. Pasa los resultados al registro único de hallazgos (issues de GitHub):
+#      crea los nuevos, actualiza los existentes, reabre los que reaparecen y
+#      marca los que ya no se detectan (.github/scripts/hallazgos_reescaneo.py).
+#
+# Una vulnerabilidad no hace fallar el workflow: se registra como hallazgo. Lo
+# que sí lo hace fallar es un análisis incompleto (no se supo qué versión está
+# desplegada, no se pudo descargar la imagen, OSV-Scanner terminó con error o
+# el registro no se pudo actualizar): eso no cuenta como un reescaneo aprobado.
+name: Reescaneo de seguridad
+
+on:
+  schedule:
+    # Todos los días a las 6:17 a. m. de Costa Rica (12:17 UTC). GitHub solo
+    # ejecuta el cron desde la rama por defecto del repositorio.
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+  # Al fusionar un cambio del reescaneo en development corre una vez completo:
+  # demuestra el registro sin esperar al cron.
+  push:
+    branches: [development]
+    paths:
+      - ".github/workflows/reescaneo.yml"
+      - ".github/scripts/hallazgos_reescaneo.py"
+      - "docker-compose.seguridad.yml"
+  # En los PR que lo modifican corre en simulación: analiza igual, pero no
+  # escribe en el registro de hallazgos.
+  pull_request:
+    branches: [development, main]
+    paths:
+      - ".github/workflows/reescaneo.yml"
+      - ".github/scripts/hallazgos_reescaneo.py"
+      - ".github/scripts/test_hallazgos_reescaneo.py"
+      - "docker-compose.seguridad.yml"
+
+permissions:
+  contents: read
+
+# Dos reescaneos no actualizan el registro al mismo tiempo.
+concurrency:
+  group: reescaneo
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Versión desplegada
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      URL_BACKEND: ${{ vars.URL_BACKEND }}
+      URL_FRONTEND: ${{ vars.URL_FRONTEND }}
+      IMAGEN_BACKEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-backend
+      IMAGEN_FRONTEND: docker.io/${{ vars.DOCKERHUB_USUARIO }}/eco-inversion-frontend
+    outputs:
+      commit: ${{ steps.version.outputs.backend_commit }}
+      corto: ${{ steps.version.outputs.corto }}
+      backend: ${{ steps.digest.outputs.backend }}
+      frontend: ${{ steps.digest.outputs.frontend }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Consultar el commit que corre en Render
+        id: version
+        run: |
+          test -n "$URL_BACKEND" || { echo "::error::Falta la variable de Actions URL_BACKEND"; exit 1; }
+          # Plan gratuito: el servicio puede estar dormido y tardar en arrancar.
+          leer_backend()  { curl -fsS --max-time 30 "$URL_BACKEND/health" | jq -r '.version // empty'; }
+          leer_frontend() { curl -fsS --max-time 30 "$URL_FRONTEND/version.txt" | tr -d '[:space:]'; }
+          esperar() {
+            local nombre="$1" valor=""
+            for i in $(seq 1 20); do
+              valor=$("leer_$nombre" 2>/dev/null || true)
+              [[ "$valor" =~ ^[0-9a-f]{40}$ ]] && { echo "$valor"; return 0; }
+              echo "[$i] $nombre no informa un commit todavía" >&2
+              sleep 15
+            done
+            echo "::error::$nombre no informó un commit válido ('$valor')" >&2
+            return 1
+          }
+          backend=$(esperar backend)
+          if [ -n "$URL_FRONTEND" ]; then
+            frontend=$(esperar frontend)
+          else
+            echo "::warning::Sin URL_FRONTEND: se asume que el frontend corre el mismo commit"
+            frontend="$backend"
+          fi
+          if [ "$backend" != "$frontend" ]; then
+            echo "::warning::Backend ($backend) y frontend ($frontend) corren commits distintos; las dependencias se analizan en el del backend"
+          fi
+          {
+            echo "backend_commit=$backend"
+            echo "frontend_commit=$frontend"
+            echo "corto=${backend:0:12}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Backend: $backend · Frontend: $frontend"
+
+      - name: Resolver los digests publicados
+        id: digest
+        env:
+          BACKEND_COMMIT: ${{ steps.version.outputs.backend_commit }}
+          FRONTEND_COMMIT: ${{ steps.version.outputs.frontend_commit }}
+        run: |
+          # La etiqueta sha-<commit> la crea el workflow de publicación (5.5) con
+          # la misma imagen que despliega por digest.
+          resolver() {
+            local imagen="$1" digest
+            digest=$(docker buildx imagetools inspect "$imagen" --format '{{json .Manifest}}' | jq -r .digest)
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "::error::No se encontró $imagen en Docker Hub" >&2; return 1; }
+            echo "$digest"
+          }
+          backend=$(resolver "$IMAGEN_BACKEND:sha-$BACKEND_COMMIT")
+          frontend=$(resolver "$IMAGEN_FRONTEND:sha-$FRONTEND_COMMIT")
+          echo "backend=$IMAGEN_BACKEND@$backend" >> "$GITHUB_OUTPUT"
+          echo "frontend=$IMAGEN_FRONTEND@$frontend" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Versión desplegada"
+            echo "- Commit: \`$BACKEND_COMMIT\`"
+            echo "- Backend: \`$IMAGEN_BACKEND@$backend\`"
+            echo "- Frontend: \`$IMAGEN_FRONTEND@$frontend\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  dependencias:
+    name: Dependencias del commit desplegado
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # Configuración del análisis: la de esta rama.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Código analizado: el commit que corre en Render.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.version.outputs.commit }}
+          path: desplegado
+          persist-credentials: false
+
+      - name: OSV-Scanner (lockfiles de producción)
+        env:
+          ESCANEO_DIR: ./desplegado
+          REPORTES_DIR: ./reportes/reescaneo
+        run: |
+          mkdir -p "$REPORTES_DIR"
+          codigo=0
+          docker compose -f docker-compose.seguridad.yml run --rm osv-reescaneo || codigo=$?
+          # 0: sin vulnerabilidades · 1: hay vulnerabilidades (se registran)
+          # otro: el análisis no terminó.
+          test "$codigo" -le 1 || { echo "::error::OSV-Scanner terminó con $codigo: análisis incompleto"; exit 1; }
+          test -s "$REPORTES_DIR/osv-dependencias.json"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: osv-dependencias
+          path: reportes/reescaneo/
+          if-no-files-found: error
+
+  imagen:
+    name: Imagen desplegada (${{ matrix.componente }})
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        componente: [backend, frontend]
+    env:
+      COMPONENTE: ${{ matrix.componente }}
+      IMAGEN: ${{ needs.version.outputs[matrix.componente] }}
+      REPORTES_DIR: ./reportes/reescaneo
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Descargar la imagen por digest
+        run: |
+          mkdir -p "$REPORTES_DIR"
+          docker pull "$IMAGEN"
+          docker save -o "$REPORTES_DIR/imagen-$COMPONENTE.tar" "$IMAGEN"
+
+      - name: OSV-Scanner (paquetes del sistema y de la aplicación)
+        run: |
+          codigo=0
+          IMAGEN_TAR="imagen-$COMPONENTE.tar" IMAGEN_REPORTE="osv-imagen-$COMPONENTE.json" \
+            docker compose -f docker-compose.seguridad.yml run --rm osv-imagen || codigo=$?
+          rm -f "$REPORTES_DIR/imagen-$COMPONENTE.tar"
+          test "$codigo" -le 1 || { echo "::error::OSV-Scanner terminó con $codigo: análisis incompleto"; exit 1; }
+          test -s "$REPORTES_DIR/osv-imagen-$COMPONENTE.json"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: osv-imagen-${{ matrix.componente }}
+          path: reportes/reescaneo/
+          if-no-files-found: error
+
+  registrar:
+    name: Registro de hallazgos
+    needs: [version, dependencias, imagen]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      COMMIT: ${{ needs.version.outputs.commit }}
+      BACKEND: ${{ needs.version.outputs.backend }}
+      FRONTEND: ${{ needs.version.outputs.frontend }}
+      EVENTO: ${{ github.event_name }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: osv-*
+          path: reportes/reescaneo
+          merge-multiple: true
+
+      - name: Autoprueba del registro
+        run: python3 .github/scripts/test_hallazgos_reescaneo.py -v
+
+      - name: Actualizar el registro único (issues)
+        run: |
+          # En un PR solo se simula: el registro cambia al fusionar o en el cron.
+          simular=()
+          [ "$EVENTO" = pull_request ] && simular=(--simular)
+          python3 .github/scripts/hallazgos_reescaneo.py "${simular[@]}" \
+            --reporte dependencias=reportes/reescaneo/osv-dependencias.json \
+            --reporte imagen-backend=reportes/reescaneo/osv-imagen-backend.json \
+            --reporte imagen-frontend=reportes/reescaneo/osv-imagen-frontend.json \
+            --imagen imagen-backend="$BACKEND" \
+            --imagen imagen-frontend="$FRONTEND" \
+            --version-desplegada "$COMMIT" \
+            --ejecucion "$RUN_URL" | tee reportes/reescaneo/registro.txt
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: reescaneo-${{ needs.version.outputs.corto }}
+          path: reportes/reescaneo/
+          if-no-files-found: error

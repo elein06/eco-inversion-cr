@@ -81,6 +81,30 @@ services:
       -L requirements.txt:/src/backend/requirements-dev.lock
       -L /src/frontend/package-lock.json
 
+  # Reescaneo programado (ítem 7.6, docs/actualizaciones.md). ESCANEO_DIR es el
+  # checkout del commit desplegado; se analizan solo las dependencias que van
+  # a producción. Código 1 = hay vulnerabilidades (se registran como hallazgos).
+  osv-reescaneo:
+    <<: *escaneo
+    image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+    environment:
+      HOME: /tmp
+    command: >-
+      scan source --format json --output-file /reportes/osv-dependencias.json
+      -L requirements.txt:/src/backend/requirements.lock
+      -L /src/frontend/package-lock.json
+
+  # Imagen desplegada, exportada con "docker save" a IMAGEN_TAR dentro de la
+  # carpeta de reportes: paquetes del sistema y de la aplicación.
+  osv-imagen:
+    <<: *escaneo
+    image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+    environment:
+      HOME: /tmp
+    command: >-
+      scan image --archive /reportes/${IMAGEN_TAR:-imagen.tar}
+      --format json --output-file /reportes/${IMAGEN_REPORTE:-osv-imagen.json}
+
   # Artillery solo se usa en el ambiente de pruebas: resultado informativo.
   osv-herramientas:
     image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
