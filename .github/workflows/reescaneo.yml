@@ -214,7 +214,8 @@ jobs:
     name: Registro de hallazgos
     needs: [version, dependencias, imagen]
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # Las escrituras van espaciadas por el límite de GitHub (ver el script).
+    timeout-minutes: 20
     permissions:
       contents: read
       issues: write

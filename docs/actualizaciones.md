@@ -130,24 +130,29 @@ defecto. Mientras esa rama sea `main`, ver el paso 2 de «Activarlo».
 El registro único son los issues de GitHub, igual que el issue #23 del 3.4.
 Lo hace `.github/scripts/hallazgos_reescaneo.py`.
 
-- **Identidad del hallazgo:** origen + ecosistema + paquete + vulnerabilidad.
-  Los alias de una misma vulnerabilidad (GHSA, PYSEC, CVE) son un solo
-  hallazgo, con el CVE como identificador si existe. La clave queda en un
-  comentario oculto del issue: así una corrida siguiente encuentra el mismo
-  issue sin duplicarlo.
-- **Qué se registra:** una vulnerabilidad nueva se registra si tiene versión
-  corregida publicada o si su CVSS es de 7.0 o más. El resto, sobre todo
-  paquetes del sistema de la imagen sin corrección y de severidad baja, queda
-  como informativo en el resumen de la ejecución. Cuando salga la corrección,
-  el reescaneo la registra.
+- **Un hallazgo por paquete vulnerable**, con todas sus vulnerabilidades en
+  una tabla dentro del issue. La identidad es origen + ecosistema + paquete, y
+  queda en un comentario oculto del issue para que la corrida siguiente lo
+  encuentre sin duplicarlo. Los alias de una misma vulnerabilidad (GHSA, PYSEC,
+  CVE) son una sola fila. Se agrupa por paquete porque así se corrige:
+  actualizar `curl` corrige todos sus CVE a la vez. La primera versión abría un
+  issue por CVE y creó unos 80 en la primera corrida; la siguiente corrida los
+  cierra como *not planned* con un enlace al issue agrupado que los reemplaza.
+- **Qué se registra:** un paquete se registra si alguna de sus
+  vulnerabilidades tiene versión corregida publicada o CVSS de 7.0 o más. El
+  resto (sobre todo paquetes del sistema sin corrección y de severidad baja)
+  queda como informativo en el resumen de la ejecución.
+- **Ritmo:** GitHub limita la creación rápida de issues y comentarios. Las
+  escrituras van espaciadas 1 s y, si GitHub responde con ese límite, se
+  espera 60 s y se reintenta.
 
 | Situación | Qué hace |
 |---|---|
-| Nueva y registrable | Crea un issue con etiquetas `hallazgo`, `reescaneo`, `pendiente-investigacion` y `severidad:<nivel>` |
-| Ya registrada y abierta | Actualiza la sección «Última detección» del issue (fecha, commit, digest, ejecución), sin un comentario por día |
-| Cerrada y reaparece | La reabre con un comentario: la corrección no se sostuvo |
-| Cerrada como `falso-positivo` o `riesgo-aceptado` y sigue apareciendo | Solo comenta: la decisión registrada se respeta |
-| Abierta y ya no aparece | Comenta una vez y agrega `no-detectado`. **No la cierra:** cerrarla requiere enlazar el PR correctivo y esta ejecución como comprobación (7.7) |
+| Paquete nuevo y registrable | Crea un issue con etiquetas `hallazgo`, `reescaneo`, `pendiente-investigacion` y `severidad:<nivel>` |
+| Ya registrado y abierto | Actualiza la descripción (tabla, versión, última detección) y la severidad. Solo comenta si cambió el conjunto de vulnerabilidades |
+| Cerrado y reaparece | Lo reabre con un comentario: la corrección no se sostuvo |
+| Cerrado como `falso-positivo` o `riesgo-aceptado` y sigue apareciendo | No lo toca; solo comenta si aparecen vulnerabilidades nuevas |
+| Abierto y ya no aparece | Comenta una vez y agrega `no-detectado`. **No lo cierra:** cerrarlo requiere enlazar el PR correctivo y esta ejecución como comprobación (7.7) |
 
 Cada issue trae los campos del registro único (7.5): origen, versión
 afectada (commit y digest), evidencia (ejecución y artefacto), severidad
