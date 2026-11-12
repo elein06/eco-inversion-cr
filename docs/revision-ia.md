@@ -14,8 +14,8 @@ otro integrante del equipo.
 | Revisión | PR | Autor/a | Hallazgos | Resultado |
 |---|---|---|---|---|
 | **Principal** | [#22 Ítem 3.4: políticas de contenedores](https://github.com/elein06/eco-inversion-cr/pull/22) | @elein06 | 7 | Todos decididos. Aprobado y fusionado |
-| **Principal** | [#26 Ítems 5.5 y 6.1: Docker Hub y Render](https://github.com/elein06/eco-inversion-cr/pull/26) | @elein06 | 5 | Todos decididos. Aprobado |
-| Práctica | [#10 Autenticación, roles y escenarios privados](https://github.com/elein06/eco-inversion-cr/pull/10) | @KarinaMD16 | 7 | Pendiente de respuesta |
+| **Principal** | [#26 Ítems 5.5 y 6.1: Docker Hub y Render](https://github.com/elein06/eco-inversion-cr/pull/26) | @elein06 | 5 | Todos decididos. Aprobado y fusionado |
+| Práctica | [#10 Autenticación, roles y escenarios privados](https://github.com/elein06/eco-inversion-cr/pull/10) | @KarinaMD16 | 7 | Todos respondidos por Karina |
 
 En el equipo acordamos que yo reviso los PR de Elein. Antes de que ella abriera los
 suyos, probé el proceso con el PR #10 de Karina, porque tiene el código de los flujos
@@ -148,13 +148,13 @@ verde, esperé a que ZAP (DAST) terminara y aprobé el 11 de noviembre sobre el 
 
 | ID | Hallazgo | Tipo | Ubicación | Severidad | Comentario | Decisión de Karina |
 |---|---|---|---|---|---|---|
-| H-01 | El login revela si una cuenta existe: la que existe se bloquea (429) y la que no existe siempre da 401 | Seguridad | `backend/app/routers/auth.py:116` | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515852342) | Pendiente |
-| H-02 | No hay pruebas de que el contador de fallos se reinicie ni de que el bloqueo venza | Prueba faltante | `backend/app/routers/auth.py:121` | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515860051) | Pendiente |
-| H-03 | DUDA: ¿el admin puede ver escenarios de otros usuarios? | Duda (permisos) | `docs/autenticacion.md:38` | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515932306) · Issue [#15](https://github.com/elein06/eco-inversion-cr/issues/15) | Pendiente |
-| H-04 | DUDA: volver a correr `crear_usuario` cambia el rol y reactiva la cuenta | Duda (permisos) | `backend/app/crear_usuario.py:45` | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515956167) · Issue [#16](https://github.com/elein06/eco-inversion-cr/issues/16) | Pendiente |
-| H-05 | DUDA: no hay límite de escenarios por usuario | Duda / seguridad | `backend/app/routers/escenarios.py:167` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515964046) · Issue [#20](https://github.com/elein06/eco-inversion-cr/issues/20) | Pendiente |
-| H-06 | Si el escenario se borra a mitad de una actualización, responde 500 en vez de 404 | Defecto | `backend/app/routers/escenarios.py:231` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515969014) | Pendiente |
-| H-07 | Detrás de un proxy, todos los eventos de seguridad guardarían la IP del proxy | Seguridad | `backend/app/eventos.py:52` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4516008970) | Pendiente |
+| H-01 | El login revela si una cuenta existe: la que existe se bloquea (429) y la que no existe siempre da 401 | Seguridad | `backend/app/routers/auth.py:116` | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515852342) | 📌 Aceptado como limitación: es real, pero corregirlo no da tiempo; la misma fuga ya existe en el registro (T-10). Hay que corregir `docs/autenticacion.md` |
+| H-02 | No hay pruebas de que el contador de fallos se reinicie ni de que el bloqueo venza | Prueba faltante | `backend/app/routers/auth.py:121` | Media | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515860051) | 📌 Pendiente: faltan las dos pruebas; el bloqueo en sí ya está probado |
+| H-03 | DUDA: ¿el admin puede ver escenarios de otros usuarios? | Duda (permisos) | `docs/autenticacion.md:38` | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515932306) · Issue [#15](https://github.com/elein06/eco-inversion-cr/issues/15) | Decidido en #15: se mantiene, el admin recibe 404 |
+| H-04 | DUDA: volver a correr `crear_usuario` cambia el rol y reactiva la cuenta | Duda (permisos) | `backend/app/crear_usuario.py:45` | — | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515956167) · Issue [#16](https://github.com/elein06/eco-inversion-cr/issues/16) | Decidido en #16: es intencional (promover o restablecer cuentas) |
+| H-05 | DUDA: no hay límite de escenarios por usuario | Duda / seguridad | `backend/app/routers/escenarios.py:167` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515964046) · Issue [#20](https://github.com/elein06/eco-inversion-cr/issues/20) | Decidido en #20: riesgo aceptado, se retoma con T-06 |
+| H-06 | Si el escenario se borra a mitad de una actualización, responde 500 en vez de 404 | Defecto | `backend/app/routers/escenarios.py:231` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4515969014) | 📌 Pendiente: es real pero poco probable y no expone datos; falta responder 404 |
+| H-07 | Detrás de un proxy, todos los eventos de seguridad guardarían la IP del proxy | Seguridad | `backend/app/eventos.py:52` | Baja | [ver](https://github.com/elein06/eco-inversion-cr/pull/10#discussion_r4516008970) | 📌 Ahora aplica porque el backend está en Render detrás de su proxy; se corrige con `--forwarded-allow-ips` y lo coordina con Elein |
 
 H-03, H-04 y H-05 también salieron en el ítem 1.6 (casos de abuso), por eso tienen
 su Issue. Son la misma duda vista desde el código y desde las reglas.
