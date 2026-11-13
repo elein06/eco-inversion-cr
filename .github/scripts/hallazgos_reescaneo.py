@@ -1,29 +1,39 @@
 """Convierte los reportes del reescaneo en hallazgos del registro único (ítem 7.6).
 
-El registro único del proyecto son los issues de GitHub. Cada vulnerabilidad
-de cada origen (dependencias, imagen del backend, imagen del frontend) es un
-hallazgo, identificado por una marca oculta en el cuerpo del issue:
+El registro único del proyecto son los issues de GitHub. Un hallazgo es un
+paquete vulnerable de un origen (dependencias, imagen del backend, imagen del
+frontend), con todas sus vulnerabilidades en una tabla. Se identifica por una
+marca oculta en el cuerpo del issue:
 
-    <!-- reescaneo:<origen>|<ecosistema>|<paquete>|<vulnerabilidad> -->
+    <!-- reescaneo-paquete:<origen>|<ecosistema>|<paquete> -->
 
-Qué se registra: una vulnerabilidad nueva se registra si tiene versión
-corregida publicada o CVSS de 7.0 o más (UMBRAL_CVSS). Las demás (típicamente
-paquetes del sistema operativo de la imagen sin corrección y de severidad
-baja) quedan como informativas en el resumen y en el artefacto: no hay nada
-que hacer con ellas hasta que se publique una corrección, y en ese momento el
-reescaneo las registra.
+Se agrupa por paquete porque así se corrige: actualizar curl corrige sus 24
+CVE a la vez. Un issue por CVE produjo 80 issues en la primera corrida, sin
+nada distinto que hacer en cada uno.
+
+Qué se registra: un paquete se registra si alguna de sus vulnerabilidades
+tiene versión corregida publicada o CVSS de 7.0 o más (UMBRAL_CVSS). Los demás
+quedan como informativos en el resumen y en el artefacto.
 
 En cada ejecución:
-  - Hallazgo nuevo registrable: se crea un issue con origen, versión afectada (commit y
-    digest), evidencia, severidad justificada, responsable, estado y
-    tratamiento propuesto.
-  - Ya registrado y abierto: se actualiza la sección "Última detección" del
-    issue (sin comentarios repetidos cada día).
+  - Paquete nuevo registrable: se crea un issue con origen, versión afectada
+    (commit y digest), evidencia, severidad justificada, responsable, estado,
+    tratamiento y la tabla de vulnerabilidades.
+  - Ya registrado y abierto: se actualiza la descripción (tabla, versión,
+    última detección) y la etiqueta de severidad. Solo se comenta si cambió el
+    conjunto de vulnerabilidades.
   - Ya registrado y cerrado: si se cerró como falso positivo o riesgo aceptado
-    solo se comenta; si no, se reabre porque la corrección no se sostuvo.
+    solo se comenta cuando aparecen vulnerabilidades nuevas; si no, se reabre
+    porque la corrección no se sostuvo.
   - Abierto pero ausente en este reescaneo: se comenta una vez y se etiqueta
     "no-detectado". Cerrarlo es una decisión humana: se enlaza el PR correctivo
     y esta ejecución como comprobación (ítem 7.7).
+  - Issues del formato anterior (uno por CVE, marca "reescaneo:"): se cierran
+    como "not planned" con un enlace al issue agrupado que los reemplaza.
+
+Las escrituras van espaciadas (PAUSA_S) porque GitHub limita la creación
+rápida de contenido; si aun así responde con ese límite, se espera y se
+reintenta.
 
 Uso (en el workflow .github/workflows/reescaneo.yml):
 
@@ -48,6 +58,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -65,8 +76,12 @@ ETIQUETAS = {
 }
 # Severidad a partir de la cual se registra aunque no haya corrección publicada.
 UMBRAL_CVSS = 7.0
-# Cierres que no se reabren si la vulnerabilidad sigue apareciendo.
+# Cierres que no se reabren si el paquete sigue apareciendo.
 CIERRES_ACEPTADOS = {"falso-positivo", "riesgo-aceptado"}
+# Segundos entre escrituras, y espera ante el límite de GitHub.
+PAUSA_S = 1.0
+ESPERA_LIMITE_S = 60
+REINTENTOS = 3
 
 ORIGENES = {
     "dependencias": "Reescaneo de dependencias (lockfiles del commit desplegado)",
@@ -74,8 +89,9 @@ ORIGENES = {
     "imagen-frontend": "Reescaneo de la imagen desplegada del frontend",
 }
 
-MARCA = re.compile(r"<!-- reescaneo:(?P<clave>[^>]+?) -->")
-ULTIMA = re.compile(r"<!-- ultima-deteccion -->.*?<!-- /ultima-deteccion -->", re.S)
+MARCA = re.compile(r"<!-- reescaneo-paquete:(?P<clave>[^>]+?) -->")
+MARCA_ANTERIOR = re.compile(r"<!-- reescaneo:(?P<clave>[^>]+?) -->")
+MARCA_VULNS = re.compile(r"<!-- vulns:(?P<ids>[^>]*?) -->")
 
 
 class ErrorRegistro(Exception):
@@ -83,21 +99,41 @@ class ErrorRegistro(Exception):
 
 
 @dataclass
-class Hallazgo:
-    origen: str
-    ecosistema: str
-    paquete: str
-    version: str
-    archivo: str
+class Vulnerabilidad:
     vuln_id: str
     alias: list[str]
     resumen: str
     cvss: float | None
     corregida_en: list[str] = field(default_factory=list)
 
+
+@dataclass
+class Hallazgo:
+    """Un paquete vulnerable de un origen, con todas sus vulnerabilidades."""
+
+    origen: str
+    ecosistema: str
+    paquete: str
+    version: str
+    archivo: str
+    vulns: list[Vulnerabilidad] = field(default_factory=list)
+
     @property
     def clave(self) -> str:
-        return f"{self.origen}|{self.ecosistema}|{self.paquete}|{self.vuln_id}"
+        return f"{self.origen}|{self.ecosistema}|{self.paquete}"
+
+    @property
+    def ids(self) -> list[str]:
+        return sorted(v.vuln_id for v in self.vulns)
+
+    @property
+    def cvss(self) -> float | None:
+        puntajes = [v.cvss for v in self.vulns if v.cvss is not None]
+        return max(puntajes) if puntajes else None
+
+    @property
+    def corregida_en(self) -> list[str]:
+        return sorted({c for v in self.vulns for c in v.corregida_en})
 
     @property
     def registrable(self) -> bool:
@@ -105,13 +141,14 @@ class Hallazgo:
 
     @property
     def severidad(self) -> str:
-        if self.cvss is None:
+        cvss = self.cvss
+        if cvss is None:
             return "sin-puntaje"
-        if self.cvss >= 9.0:
+        if cvss >= 9.0:
             return "critica"
-        if self.cvss >= 7.0:
+        if cvss >= 7.0:
             return "alta"
-        if self.cvss >= 4.0:
+        if cvss >= 4.0:
             return "media"
         return "baja"
 
@@ -147,58 +184,74 @@ def leer_reporte(origen: str, ruta: Path) -> list[Hallazgo]:
     if not isinstance(datos, dict) or "results" not in datos:
         raise ErrorRegistro(f"{ruta} no tiene el formato de OSV-Scanner (falta 'results')")
 
-    hallazgos: list[Hallazgo] = []
+    paquetes: dict[str, Hallazgo] = {}
     for resultado in datos.get("results") or []:
         archivo = resultado.get("source", {}).get("path", "")
         for item in resultado.get("packages") or []:
             paquete = item.get("package", {})
             nombre = paquete.get("name", "?")
+            h = Hallazgo(
+                origen=origen,
+                ecosistema=paquete.get("ecosystem", "?"),
+                paquete=nombre,
+                version=paquete.get("version", "?"),
+                archivo=archivo,
+            )
+            # Un mismo paquete puede aparecer en varias capas o archivos.
+            h = paquetes.setdefault(h.clave, h)
+            conocidas = {v.vuln_id for v in h.vulns}
             vulns = {v["id"]: v for v in item.get("vulnerabilities") or []}
             # Cada grupo reúne los alias de una misma vulnerabilidad
-            # (p. ej. GHSA-... y PYSEC-...): un hallazgo por grupo.
+            # (p. ej. GHSA-... y PYSEC-...): una fila por grupo.
             grupos = item.get("groups") or [{"ids": [i]} for i in vulns]
             for grupo in grupos:
                 ids = list(grupo.get("ids") or [])
                 alias = sorted(set(ids) | set(grupo.get("aliases") or []))
-                if not alias:
+                if not alias or _identificador(alias) in conocidas:
                     continue
                 miembros = [vulns[i] for i in ids if i in vulns]
-                resumen = next((v.get("summary") for v in miembros if v.get("summary")), "")
                 try:
                     cvss = float(grupo.get("max_severity") or "")
                 except ValueError:
                     cvss = None
-                hallazgos.append(Hallazgo(
-                    origen=origen,
-                    ecosistema=paquete.get("ecosystem", "?"),
-                    paquete=nombre,
-                    version=paquete.get("version", "?"),
-                    archivo=archivo,
+                h.vulns.append(Vulnerabilidad(
                     vuln_id=_identificador(alias),
                     alias=alias,
-                    resumen=resumen,
+                    resumen=next((v.get("summary") for v in miembros if v.get("summary")), ""),
                     cvss=cvss,
                     corregida_en=_corregida_en(miembros, nombre),
                 ))
-    # Un mismo paquete puede aparecer en varias capas o archivos.
-    unicos: dict[str, Hallazgo] = {}
-    for h in hallazgos:
-        unicos.setdefault(h.clave, h)
-    return list(unicos.values())
+                conocidas.add(_identificador(alias))
+    return [h for h in paquetes.values() if h.vulns]
 
 
 # ---------------------------------------------------------------- textos
 
 
-def seccion_ultima(h: Hallazgo, contexto: dict) -> str:
-    imagen = contexto["imagenes"].get(h.origen)
-    imagen = f" · `{imagen}`" if imagen else ""
+def _celda(texto: str) -> str:
+    return texto.replace("|", "/").replace("\n", " ")
+
+
+def tratamiento(h: Hallazgo) -> str:
+    if h.origen.startswith("imagen-") and not h.ecosistema.startswith(("PyPI", "npm")):
+        return (
+            "Paquete del sistema de la imagen base: se corrige actualizando la imagen "
+            "(PR de Renovate que cambia su digest, o reconstruir sobre la misma etiqueta) "
+            "y reescaneando. Las versiones corregidas que publica OSV pueden ser de otra "
+            "versión de la distribución (p. ej. Debian inestable) y no estar disponibles "
+            "todavía para la imagen base: en ese caso se mantiene abierto hasta que la "
+            "distribución publique la actualización, o se acepta el riesgo con "
+            "justificación, responsable y fecha de revisión."
+        )
+    if h.corregida_en:
+        return (
+            f"Actualizar `{h.paquete}` a una versión corregida ({', '.join(h.corregida_en)}). "
+            "Si Renovate ya abrió el PR, enlazarlo aquí."
+        )
     return (
-        "<!-- ultima-deteccion -->\n"
-        f"**Última detección:** {contexto['fecha']} · commit `{contexto['commit']}`"
-        f"{imagen}"
-        f" · [ejecución]({contexto['ejecucion']})\n"
-        "<!-- /ultima-deteccion -->"
+        "Sin versión corregida publicada. Evaluar mitigación o excepción temporal con "
+        "justificación, responsable y fecha de revisión (docs/seguridad.md, "
+        "«Qué hacer con un hallazgo»)."
     )
 
 
@@ -207,91 +260,98 @@ def cuerpo_issue(h: Hallazgo, contexto: dict) -> str:
     afectada = f"commit desplegado `{contexto['commit']}`"
     if imagen:
         afectada += f"<br>imagen `{imagen}`"
-    afectada += f"<br>`{h.paquete}` {h.version}"
+    afectada += f"<br>`{h.paquete}` {h.version} ({h.ecosistema})"
     if h.archivo:
-        afectada += f" (`{h.archivo}`)"
+        afectada += f", `{h.archivo}`"
 
     if h.cvss is None:
-        justificacion = (
-            "OSV no publica puntaje CVSS para esta vulnerabilidad. Se asigna al "
-            "investigarla según el uso real del paquete."
-        )
+        justificacion = "OSV no publica puntaje CVSS; se asigna al investigar."
     else:
         justificacion = (
-            f"CVSS máximo {h.cvss:.1f} según OSV (peor caso entre sus alias). "
-            "Es la severidad inicial: se ajusta al investigar si la ruta "
-            "vulnerable se usa en la aplicación."
+            f"CVSS máximo {h.cvss:.1f} entre sus {len(h.vulns)} vulnerabilidades, según OSV. "
+            "Es la severidad inicial: se ajusta al investigar si la ruta vulnerable se usa."
         )
-
-    if h.corregida_en:
-        tratamiento = (
-            f"Corregir: actualizar `{h.paquete}` a {', '.join(h.corregida_en)} o "
-            "superior. Si Renovate ya abrió el PR, enlazarlo aquí."
-        )
-    else:
-        tratamiento = (
-            "Sin versión corregida publicada. Evaluar mitigación o excepción "
-            "temporal con justificación, responsable y fecha de revisión "
-            "(docs/seguridad.md, «Qué hacer con un hallazgo»)."
-        )
-
-    enlaces = ", ".join(f"[{a}](https://osv.dev/vulnerability/{a})" for a in h.alias)
     filas = [
         ("Origen", ORIGENES.get(h.origen, h.origen)),
         ("Versión afectada", afectada),
-        ("Vulnerabilidad", f"{enlaces}<br>{h.resumen}" if h.resumen else enlaces),
         ("Evidencia", f"[Ejecución del reescaneo]({contexto['ejecucion']}), "
                       f"artefacto `reescaneo-{contexto['commit'][:12]}`"),
         ("Severidad", f"**{h.severidad}** — {justificacion}"),
-        ("Corrección disponible", ", ".join(h.corregida_en) or "No publicada"),
         ("Responsable", "Por asignar en la revisión de hallazgos (asignar el issue)"),
-        ("Estado", "Pendiente de investigación: puede ser un falso positivo"),
-        ("Tratamiento propuesto", tratamiento),
+        ("Estado", "Pendiente de investigación: puede incluir falsos positivos"),
+        ("Tratamiento propuesto", tratamiento(h)),
+        ("Última detección", f"{contexto['fecha']} · [ejecución]({contexto['ejecucion']})"),
     ]
     tabla = "| Campo | Valor |\n|---|---|\n" + "\n".join(
-        f"| {k} | {v.replace('|', '/')} |" for k, v in filas
+        f"| {k} | {_celda(v)} |" for k, v in filas
+    )
+    vulns = "| Vulnerabilidad | CVSS | Corregida en | Resumen |\n|---|---|---|---|\n" + "\n".join(
+        "| {} | {} | {} | {} |".format(
+            ", ".join(f"[{a}](https://osv.dev/vulnerability/{a})" for a in v.alias),
+            f"{v.cvss:.1f}" if v.cvss is not None else "—",
+            _celda(", ".join(v.corregida_en) or "No publicada"),
+            _celda(v.resumen[:140]),
+        )
+        for v in sorted(h.vulns, key=lambda v: (-(v.cvss or 0), v.vuln_id))
     )
     return (
-        f"<!-- reescaneo:{h.clave} -->\n"
-        "Hallazgo registrado automáticamente por el reescaneo programado "
-        "(ítem 7.6, `docs/actualizaciones.md`).\n\n"
+        f"<!-- reescaneo-paquete:{h.clave} -->\n"
+        f"<!-- vulns:{','.join(h.ids)} -->\n"
+        "Hallazgo registrado por el reescaneo programado (ítem 7.6, "
+        "`docs/actualizaciones.md`). El reescaneo mantiene esta descripción al día; "
+        "las decisiones van en comentarios.\n\n"
         f"{tabla}\n\n"
-        "Al investigarlo: confirmar o descartar, ajustar la severidad y quitar "
-        "la etiqueta `pendiente-investigacion`. Un falso positivo o un riesgo "
-        "aceptado se cierran con la etiqueta `falso-positivo` o `riesgo-aceptado` "
-        "y su justificación en un comentario.\n\n"
-        f"{seccion_ultima(h, contexto)}\n"
+        f"### Vulnerabilidades ({len(h.vulns)})\n\n{vulns}\n\n"
+        "Al investigarlo: confirmar o descartar, ajustar la severidad y quitar la "
+        "etiqueta `pendiente-investigacion`. Un falso positivo o un riesgo aceptado se "
+        "cierran con la etiqueta `falso-positivo` o `riesgo-aceptado` y su "
+        "justificación en un comentario.\n"
     )
 
 
 def titulo_issue(h: Hallazgo) -> str:
-    return f"[Reescaneo] {h.vuln_id} en {h.paquete} {h.version} ({h.origen})"
+    cantidad = f"{len(h.vulns)} vulnerabilidad" + ("es" if len(h.vulns) != 1 else "")
+    return f"[Reescaneo] {h.paquete} {h.version}: {cantidad} ({h.origen})"
 
 
 # ---------------------------------------------------------------- GitHub
 
 
 class GitHub:
-    def __init__(self, repo: str, simular: bool):
+    def __init__(self, repo: str, simular: bool, pausa: float = PAUSA_S):
         self.repo = repo
         self.simular = simular
+        self.pausa = pausa
 
     def _gh(self, *args: str, entrada: dict | None = None) -> str:
         # Lista de argumentos sin shell; el ejecutable es fijo (gh) y los datos
         # van por stdin en JSON, no en la línea de comandos.
-        resultado = subprocess.run(  # noqa: S603  # nosemgrep: dangerous-subprocess-use-audit
-            ["gh", *args],  # noqa: S607 - gh viene preinstalado en el runner
-            input=json.dumps(entrada) if entrada is not None else None,
-            capture_output=True, text=True, encoding="utf-8",
-        )
-        if resultado.returncode != 0:
-            raise ErrorRegistro(f"gh {' '.join(args[:3])}: {resultado.stderr.strip()}")
-        return resultado.stdout
+        for intento in range(REINTENTOS + 1):
+            resultado = subprocess.run(  # noqa: S603  # nosemgrep: dangerous-subprocess-use-audit
+                ["gh", *args],  # noqa: S607 - gh viene preinstalado en el runner
+                input=json.dumps(entrada) if entrada is not None else None,
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            if resultado.returncode == 0:
+                return resultado.stdout
+            error = resultado.stderr.strip()
+            limite = "rate limit" in error.lower() or "HTTP 429" in error
+            if not limite or intento == REINTENTOS:
+                break
+            print(f"Límite de GitHub; se reintenta en {ESPERA_LIMITE_S} s", flush=True)
+            time.sleep(ESPERA_LIMITE_S)
+        raise ErrorRegistro(f"gh {' '.join(args[:3])}: {error}")
 
-    def escribir(self, descripcion: str, *args: str, entrada: dict | None = None) -> None:
+    def escribir(self, descripcion: str, *args: str, entrada: dict | None = None) -> dict:
         print(("[simulación] " if self.simular else "") + descripcion, flush=True)
-        if not self.simular:
-            self._gh(*args, entrada=entrada)
+        if self.simular:
+            return {"number": 0}
+        salida = self._gh(*args, entrada=entrada)
+        time.sleep(self.pausa)
+        try:
+            return json.loads(salida) if salida.strip() else {}
+        except ValueError:
+            return {}
 
     def issues_reescaneo(self) -> list[dict]:
         if self.simular and not os.environ.get("GH_TOKEN"):
@@ -322,86 +382,114 @@ class GitHub:
 # ---------------------------------------------------------------- registro
 
 
+def _etiquetas(issue: dict) -> set[str]:
+    return {e["name"] for e in issue.get("labels", [])}
+
+
+def _ids_registrados(issue: dict) -> set[str]:
+    marca = MARCA_VULNS.search(issue.get("body") or "")
+    return set(filter(None, marca.group("ids").split(","))) if marca else set()
+
+
+def _cambios(antes: set[str], ahora: set[str]) -> str:
+    partes = []
+    if ahora - antes:
+        partes.append("nuevas: " + ", ".join(sorted(ahora - antes)))
+    if antes - ahora:
+        partes.append("ya no aparecen: " + ", ".join(sorted(antes - ahora)))
+    return "; ".join(partes)
+
+
 def sincronizar(hallazgos: list[Hallazgo], origenes: set[str], contexto: dict, gh: GitHub) -> dict:
     existentes: dict[str, dict] = {}
+    anteriores: list[tuple[str, dict]] = []
     for issue in gh.issues_reescaneo():
-        marca = MARCA.search(issue.get("body") or "")
-        if marca:
+        cuerpo = issue.get("body") or ""
+        if marca := MARCA.search(cuerpo):
             existentes[marca.group("clave")] = issue
+        elif marca := MARCA_ANTERIOR.search(cuerpo):
+            anteriores.append((marca.group("clave"), issue))
 
     gh.asegurar_etiquetas()
     resumen = dict.fromkeys(
         ("nuevos", "actualizados", "reabiertos", "ya_aceptados", "no_detectados",
-         "informativos"), 0
+         "informativos", "reemplazados"), 0
     )
     presentes = {h.clave for h in hallazgos}
+    numeros: dict[str, int] = {}
     api = f"repos/{gh.repo}/issues"
+    ejecucion = f"([ejecución]({contexto['ejecucion']}))"
 
     for h in sorted(hallazgos, key=lambda x: x.clave):
         issue = existentes.get(h.clave)
         if issue is None and not h.registrable:
-            print(f"Informativo: {h.vuln_id} en {h.paquete} {h.version} ({h.origen}), "
-                  "sin corrección y CVSS bajo el umbral")
+            print(f"Informativo: {h.paquete} {h.version} ({h.origen}), {len(h.vulns)} "
+                  "vulnerabilidades sin corrección y con CVSS bajo el umbral")
             resumen["informativos"] += 1
             continue
         if issue is None:
-            etiquetas = ["hallazgo", "reescaneo", "pendiente-investigacion",
-                         f"severidad:{h.severidad}"]
-            gh.escribir(
+            creado = gh.escribir(
                 f"Nuevo: {titulo_issue(h)}",
                 "api", api, "--method", "POST", "--input", "-",
                 entrada={"title": titulo_issue(h), "body": cuerpo_issue(h, contexto),
-                         "labels": etiquetas},
+                         "labels": ["hallazgo", "reescaneo", "pendiente-investigacion",
+                                    f"severidad:{h.severidad}"]},
             )
+            numeros[h.clave] = creado.get("number", 0)
             resumen["nuevos"] += 1
             continue
 
         numero = issue["number"]
-        etiquetas = {e["name"] for e in issue.get("labels", [])}
-        # lambda: el texto nuevo no se interpreta como plantilla de re.sub.
-        nueva = seccion_ultima(h, contexto)
-        cuerpo = ULTIMA.sub(lambda _, texto=nueva: texto, issue.get("body") or "")
-        cambios: dict = {"body": cuerpo}
-        ejecucion = f"([ejecución]({contexto['ejecucion']}))"
+        numeros[h.clave] = numero
+        etiquetas = _etiquetas(issue)
+        cambios = _cambios(_ids_registrados(issue), set(h.ids))
+        nuevas = {e for e in etiquetas if not e.startswith("severidad:")} - {"no-detectado"}
+        nuevas.add(f"severidad:{h.severidad}")
+        parche: dict = {"title": titulo_issue(h), "body": cuerpo_issue(h, contexto),
+                        "labels": sorted(nuevas)}
+        comentario = None
         if issue["state"] == "closed":
             aceptado = ", ".join(sorted(etiquetas & CIERRES_ACEPTADOS))
             if aceptado:
-                gh.escribir(
-                    f"#{numero}: sigue presente, cerrado como {aceptado}",
-                    "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
-                    entrada={"body": (
-                        f"Sigue presente en el reescaneo del {contexto['fecha']} {ejecucion}. "
-                        "Se mantiene cerrado por la decisión registrada; revisar si la "
-                        "fecha de revisión ya venció."
-                    )},
-                )
                 resumen["ya_aceptados"] += 1
+                # Respeta la decisión: solo avisa si aparecieron vulnerabilidades nuevas.
+                if set(h.ids) - _ids_registrados(issue):
+                    gh.escribir(
+                        f"#{numero}: cerrado como {aceptado}, con vulnerabilidades nuevas",
+                        "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
+                        entrada={"body": (
+                            f"El reescaneo del {contexto['fecha']} {ejecucion} encontró "
+                            f"vulnerabilidades nuevas en este paquete ({cambios}). Se mantiene "
+                            f"cerrado como {aceptado}; revisar si la decisión sigue vigente."
+                        )},
+                    )
                 continue
-            cambios["state"] = "open"
-            gh.escribir(
-                f"#{numero}: reaparece, se reabre",
-                "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
-                entrada={"body": (
-                    f"Reapareció en el reescaneo del {contexto['fecha']} sobre el commit "
-                    f"`{contexto['commit']}` {ejecucion}. La corrección no se sostuvo: "
-                    "se reabre."
-                )},
+            parche["state"] = "open"
+            comentario = (
+                f"Reapareció en el reescaneo del {contexto['fecha']} sobre el commit "
+                f"`{contexto['commit']}` {ejecucion}. La corrección no se sostuvo: se reabre."
             )
             resumen["reabiertos"] += 1
         else:
             resumen["actualizados"] += 1
-        if "no-detectado" in etiquetas:
-            gh.escribir(f"#{numero}: quitar no-detectado",
-                        "api", f"{api}/{numero}/labels/no-detectado", "--method", "DELETE")
-        gh.escribir(f"#{numero}: actualizar última detección",
-                    "api", f"{api}/{numero}", "--method", "PATCH", "--input", "-", entrada=cambios)
+            if cambios:
+                comentario = (
+                    f"Cambió el conjunto de vulnerabilidades en el reescaneo del "
+                    f"{contexto['fecha']} {ejecucion}: {cambios}."
+                )
+        if comentario:
+            gh.escribir(f"#{numero}: comentario",
+                        "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
+                        entrada={"body": comentario})
+        gh.escribir(f"#{numero}: actualizar ({cambios or 'sin cambios'})",
+                    "api", f"{api}/{numero}", "--method", "PATCH", "--input", "-",
+                    entrada=parche)
 
     # Abiertos que este reescaneo ya no ve (solo de los orígenes analizados).
     for clave, issue in sorted(existentes.items()):
         origen = clave.split("|", 1)[0]
-        etiquetas = {e["name"] for e in issue.get("labels", [])}
         if (issue["state"] != "open" or clave in presentes or origen not in origenes
-                or "no-detectado" in etiquetas):
+                or "no-detectado" in _etiquetas(issue)):
             continue
         numero = issue["number"]
         gh.escribir(
@@ -409,14 +497,36 @@ def sincronizar(hallazgos: list[Hallazgo], origenes: set[str], contexto: dict, g
             "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
             entrada={"body": (
                 f"El reescaneo del {contexto['fecha']} sobre el commit `{contexto['commit']}` "
-                f"ya no lo detecta ([ejecución]({contexto['ejecucion']})). Para cerrarlo: "
-                "enlazar el PR correctivo y esta ejecución como comprobación (ítem 7.7)."
+                f"ya no lo detecta {ejecucion}. Para cerrarlo: enlazar el PR correctivo y "
+                "esta ejecución como comprobación (ítem 7.7)."
             )},
         )
         gh.escribir(f"#{numero}: etiqueta no-detectado",
                     "api", f"{api}/{numero}/labels", "--method", "POST", "--input", "-",
                     entrada={"labels": ["no-detectado"]})
         resumen["no_detectados"] += 1
+
+    # Formato anterior (un issue por CVE): se cierran apuntando al agrupado.
+    for clave, issue in anteriores:
+        if issue["state"] != "open":
+            continue
+        numero = issue["number"]
+        nuevo = numeros.get(clave.rsplit("|", 1)[0])
+        destino = (f"el issue agrupado #{nuevo}" if nuevo else
+                   "el registro agrupado por paquete (este paquete no cumple hoy el "
+                   "criterio de registro o ya no se detecta)")
+        gh.escribir(
+            f"#{numero}: reemplazado por {'#' + str(nuevo) if nuevo else 'registro agrupado'}",
+            "api", f"{api}/{numero}/comments", "--method", "POST", "--input", "-",
+            entrada={"body": (
+                "El registro del reescaneo pasó a un issue por paquete en lugar de uno por "
+                f"vulnerabilidad. Esta vulnerabilidad sigue en {destino}."
+            )},
+        )
+        gh.escribir(f"#{numero}: cerrar como not planned",
+                    "api", f"{api}/{numero}", "--method", "PATCH", "--input", "-",
+                    entrada={"state": "closed", "state_reason": "not_planned"})
+        resumen["reemplazados"] += 1
     return resumen
 
 
@@ -452,7 +562,9 @@ def main(argv: list[str] | None = None) -> int:
         hallazgos = [
             h for origen, ruta in reportes.items() for h in leer_reporte(origen, Path(ruta))
         ]
-        print(f"{len(hallazgos)} vulnerabilidades en {', '.join(sorted(reportes))}")
+        total = sum(len(h.vulns) for h in hallazgos)
+        print(f"{total} vulnerabilidades en {len(hallazgos)} paquetes "
+              f"({', '.join(sorted(reportes))})")
         gh = GitHub(os.environ.get("GITHUB_REPOSITORY", "local/simulacion"), args.simular)
         resumen = sincronizar(hallazgos, set(reportes), contexto, gh)
     except ErrorRegistro as error:
@@ -468,7 +580,13 @@ def main(argv: list[str] | None = None) -> int:
             salida.write(f"- Commit desplegado: `{contexto['commit']}`\n")
             for origen, imagen in sorted(contexto["imagenes"].items()):
                 salida.write(f"- {origen}: `{imagen}`\n")
-            salida.write(f"- Vulnerabilidades encontradas: {len(hallazgos)}\n- {texto}\n")
+            salida.write(f"- {total} vulnerabilidades en {len(hallazgos)} paquetes\n")
+            salida.write("\n| Origen | Paquete | Versión | Vulnerabilidades | Severidad |\n"
+                         "|---|---|---|---|---|\n")
+            for h in sorted(hallazgos, key=lambda x: x.clave):
+                salida.write(f"| {h.origen} | {h.paquete} | {h.version} | {len(h.vulns)} | "
+                             f"{h.severidad}{'' if h.registrable else ' (informativo)'} |\n")
+            salida.write(f"\n{texto}\n")
     return 0
 
 
